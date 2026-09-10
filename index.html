@@ -1310,10 +1310,55 @@
                 </div>
             </div>
 
-            <!-- INFORMACIÓN DE LA APLICACIÓN -->
-            <div class="card p-6 text-center space-y-2 bg-slate-50 border border-slate-100 rounded-3xl">
-                <p class="text-xs font-bold text-slate-700">VespaCare PWA • Homelab Pedro Díaz</p>
-                <p class="text-[10px] text-slate-400 font-mono font-medium">Node: blue (10.0.0.104) • HTTPS Cloudflare Zero-Trust</p>
+            <!-- INFORMACIÓN & TELEMETRÍA DEL SISTEMA (HOMELAB) -->
+            <div class="card p-4 space-y-3 bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/80 rounded-2xl shadow-xs">
+                <div class="flex justify-between items-center pb-2 border-b border-slate-200/60">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center text-xs">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <span class="text-xs font-black text-slate-800 uppercase tracking-wider">Entorno & Sistema</span>
+                    </div>
+                    <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>En línea
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-[11px]">
+                    <!-- URL PÚBLICA -->
+                    <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
+                        <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">URL Producción</span>
+                        <a href="https://vespa.pedrodiaz.eu" target="_blank" class="font-bold text-amber-600 hover:underline flex items-center gap-1 mt-0.5 truncate">
+                            <i class="fas fa-external-link-alt text-[9px]"></i>vespa.pedrodiaz.eu
+                        </a>
+                    </div>
+
+                    <!-- NODO & IP PRIVADA -->
+                    <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
+                        <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Nodo OCI (Red)</span>
+                        <span class="font-bold text-slate-700 font-mono-num mt-0.5">blue (10.0.0.104)</span>
+                    </div>
+
+                    <!-- GITHUB REPO -->
+                    <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
+                        <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Repositorio Git</span>
+                        <a href="https://github.com/xascorro/VespaCare" target="_blank" class="font-bold text-slate-800 hover:text-amber-600 flex items-center gap-1 mt-0.5 truncate">
+                            <i class="fab fa-github text-xs"></i>xascorro/VespaCare
+                        </a>
+                    </div>
+
+                    <!-- VERSIÓN Y SEGURIDAD -->
+                    <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
+                        <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v33 • Zero-Trust R2</span>
+                    </div>
+                </div>
+
+                <!-- DETALLE MOTO Y HOMELAB -->
+                <div class="pt-2 border-t border-slate-200/60 flex justify-between items-center text-[10px] text-slate-400 font-medium">
+                    <span>🛵 Vespa PK 125 S Elestart (1984)</span>
+                    <span class="font-bold text-slate-600">Pedro Díaz Homelab</span>
+                </div>
             </div>
         </section>
     </main>
