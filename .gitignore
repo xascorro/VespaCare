@@ -1,0 +1,11 @@
+# Live data & backups
+data.json
+data.json.bak*
+backups/
+*.bak*
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

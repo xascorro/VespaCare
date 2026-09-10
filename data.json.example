@@ -1,0 +1,79 @@
+{
+    "odometer": 850,
+    "mantenimientos": [
+        {
+            "id": "bujia",
+            "nombre": "Bujía (NGK B7HS)",
+            "intervalo": 2000,
+            "ultimo": 0,
+            "categoria": "Motor",
+            "color": "bg-amber-600"
+        },
+        {
+            "id": "frenos",
+            "nombre": "Zapatas Traseras",
+            "intervalo": 8000,
+            "ultimo": 0,
+            "categoria": "Chasis",
+            "color": "bg-blue-500"
+        },
+        {
+            "id": "m_neumatico_del",
+            "nombre": "Neumático Delantero (3.00-10)",
+            "intervalo": 10000,
+            "ultimo": 0,
+            "categoria": "Chasis",
+            "color": "bg-purple-500"
+        }
+    ],
+    "repostajes": [
+        {
+            "id": "r_sample_1",
+            "logType": "repostaje",
+            "date": "2026-09-01T10:00",
+            "title": "Gasolina (Surtidor)",
+            "price": 7.00,
+            "km": 850,
+            "notes": "Mezcla al 2% (80ml aceite sintetico JASO FD)",
+            "litros": 4.0
+        }
+    ],
+    "inventario": [
+        {
+            "id": "i_sample_1",
+            "logType": "pieza",
+            "date": "2026-09-01T10:00",
+            "title": "Aceite Mezcla 2T Sintético",
+            "price": 12.50,
+            "km": 850,
+            "notes": "Bote 1 Litro Motul 710 JASO FD"
+        }
+    ],
+    "bombillas": [
+        {
+            "id": "bulb_sample_1",
+            "type": "Faro Principal (Larga/Corta) (BA20d 12V 25/25W ⚡ Motor)",
+            "date": "2026-09-01",
+            "km": 850,
+            "price": 3.50,
+            "notes": "Osram Original BA20d"
+        }
+    ],
+    "documentacion": {
+        "itv": {
+            "expiry": "2027-05-15",
+            "price": 21.50,
+            "entity": "ITV Estación",
+            "notes": "Favorable sin defectos",
+            "lastUpdated": "2026-09-01"
+        },
+        "seguro": {
+            "expiry": "2027-04-20",
+            "price": 85.00,
+            "entity": "Aseguradora",
+            "notes": "Terceros + Asistencia en viaje",
+            "lastUpdated": "2026-09-01"
+        }
+    },
+    "homeFuelStock": 5.0
+}

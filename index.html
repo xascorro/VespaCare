@@ -1,0 +1,2613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VespaCare - PK 125 S Elestart</title>
+    
+    <!-- PWA & Mobile Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c19a6b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VespaCare">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --vespa: #c19a6b; /* Camel principal */
+            --vespa-light: #d4b483; /* Camel claro */
+            --vespa-dark: #8b5a2b; /* Cuero oscuro */
+            --cream: #f8f9fa; /* Fondo muy claro */
+            --vespa-body: #ffffff; /* Blanco Vespa */
+            --chrome: #cbd5e1; /* Detalle cromado */
+        }
+        body { 
+            background-color: var(--cream); 
+            font-family: 'Inter', sans-serif; 
+            color: #334155;
+            -webkit-tap-highlight-color: transparent;
+        }
+        h1, h2, h3 { font-family: 'DM Serif Display', serif; }
+        .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-bg { 
+            background: var(--vespa-body);
+            background-image: linear-gradient(135deg, var(--vespa-body) 0%, #f1f5f9 100%);
+            border-bottom: 4px solid var(--vespa);
+        }
+
+        .card { 
+            background: white; 
+            border-radius: 1.15rem; 
+            box-shadow: 0 3px 14px rgba(139, 90, 43, 0.05); 
+            border: 1px solid rgba(193, 154, 107, 0.15); 
+        }
+
+        .odometer-container {
+            background: #18181b;
+            padding: 8px 18px;
+            border-radius: 1.25rem;
+            border: 3px solid #3f3f46;
+            box-shadow: inset 0 3px 8px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .odometer-container:focus-within {
+            background: #ffffff !important;
+            border-color: var(--vespa) !important;
+            box-shadow: 0 0 0 4px rgba(193, 154, 107, 0.3), 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+        .odometer, input.odometer, input#mainOdo { 
+            background: transparent !important; 
+            color: #ffffff !important; 
+            font-family: 'JetBrains Mono', 'Courier New', monospace !important; 
+            font-weight: 800 !important;
+            letter-spacing: 5px; 
+            font-size: 1.85rem !important; 
+            text-align: center; 
+            width: 100%; 
+            max-width: 220px;
+            outline: none !important;
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            transition: color 0.25s ease;
+        }
+        .odometer-container:focus-within .odometer,
+        .odometer:focus, input.odometer:focus, input#mainOdo:focus {
+            background: transparent !important;
+            color: #09090b !important;
+            box-shadow: none !important;
+            outline: none !important;
+            border: none !important;
+        }
+
+        .nav-active { 
+            background: var(--vespa); 
+            color: white !important; 
+            box-shadow: 0 4px 12px rgba(139, 90, 43, 0.3);
+        }
+        
+        input, select, textarea { 
+            border: 1px solid #e2e8f0 !important; 
+            border-radius: 0.75rem !important; 
+            padding: 0.6rem 0.75rem !important; 
+            width: 100%; 
+            outline: none; 
+            transition: all 0.2s; 
+            background: #f8fafc; 
+        }
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--vespa) !important; 
+            background: white; 
+            box-shadow: 0 0 0 4px rgba(193, 154, 107, 0.15); 
+        }
+        
+        .btn-primary { 
+            background: var(--vespa); 
+            color: white; 
+            padding: 0.75rem 1rem; 
+            border-radius: 0.85rem; 
+            font-weight: 800; 
+            width: 100%; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+
+        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: #e2e8f0; z-index: 1000; display: none; }
+        .loading-bar { height: 100%; background: var(--vespa); width: 30%; animation: load 1.5s infinite linear; }
+        @keyframes load { from { left: -30%; } to { left: 100%; } }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(26, 26, 26, 0.75); backdrop-filter: blur(6px); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+        .modal.active { display: flex; }
+
+        .maint-badge { font-size: 9px; padding: 2px 8px; border-radius: 99px; font-weight: 800; text-transform: uppercase; }
+        
+        /* Keypad Styles */
+        .keypad-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.85rem;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #1e293b;
+            padding: 0.65rem;
+            transition: all 0.1s ease;
+            user-select: none;
+        }
+        .keypad-btn:active {
+            background: #e2e8f0;
+            transform: scale(0.95);
+        }
+
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* Toast notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 1rem;
+            padding: 12px 20px;
+            position: fixed;
+            z-index: 150;
+            left: 50%;
+            bottom: 90px;
+            transform: translateX(-50%);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            font-size: 0.85rem;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 105px;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--cream); }
+        ::-webkit-scrollbar-thumb { background: var(--vespa-light); border-radius: 10px; }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- PWA APP FULL-SCREEN LOCK OVERLAY -->
+    <div id="appLockScreen" class="fixed inset-0 z-[100] bg-[#f4f6f9] flex flex-col justify-center items-center p-6 transition-all duration-300">
+        <div class="card p-8 w-full max-w-xs space-y-3.5 text-center shadow-2xl bg-white border border-slate-100 rounded-3xl">
+            <div class="w-16 h-16 rounded-3xl bg-amber-500/10 text-amber-600 mx-auto flex items-center justify-center text-2xl shadow-inner">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Vespa<span style="color:var(--vespa);">Care</span></h2>
+                <p class="text-xs text-slate-400 font-semibold mt-1">Introduce el PIN de seguridad</p>
+            </div>
+            <div class="flex justify-center gap-3.5 py-1">
+                <div id="lockDot0" class="w-4 h-4 rounded-full border-2 border-amber-600 transition-all duration-200"></div>
+                <div id="lockDot1" class="w-4 h-4 rounded-full border-2 border-amber-600 transition-all duration-200"></div>
+                <div id="lockDot2" class="w-4 h-4 rounded-full border-2 border-amber-600 transition-all duration-200"></div>
+                <div id="lockDot3" class="w-4 h-4 rounded-full border-2 border-amber-600 transition-all duration-200"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 pt-2">
+                <button onclick="pressLockPin('1')" class="keypad-btn">1</button>
+                <button onclick="pressLockPin('2')" class="keypad-btn">2</button>
+                <button onclick="pressLockPin('3')" class="keypad-btn">3</button>
+                <button onclick="pressLockPin('4')" class="keypad-btn">4</button>
+                <button onclick="pressLockPin('5')" class="keypad-btn">5</button>
+                <button onclick="pressLockPin('6')" class="keypad-btn">6</button>
+                <button onclick="pressLockPin('7')" class="keypad-btn">7</button>
+                <button onclick="pressLockPin('8')" class="keypad-btn">8</button>
+                <button onclick="pressLockPin('9')" class="keypad-btn">9</button>
+                <button onclick="clearLockPin()" class="keypad-btn text-xs uppercase text-slate-400 font-bold">C</button>
+                <button onclick="pressLockPin('0')" class="keypad-btn">0</button>
+                <button onclick="backspaceLockPin()" class="keypad-btn text-slate-500"><i class="fas fa-backspace text-sm"></i></button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="loader" class="loading"><div class="loading-bar"></div></div>
+    <div id="toast"><i class="fas fa-check-circle mr-2 text-vespa"></i><span id="toastMsg">Mensaje</span></div>
+
+    <!-- MODAL PIN DE SEGURIDAD (PIN: 1960) -->
+    <div id="pinModal" class="modal">
+        <div id="pinBox" class="card p-5 w-full max-w-xs space-y-3.5 text-center shadow-2xl">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-vespa-dark mx-auto flex items-center justify-center text-xl">
+                <i class="fas fa-key"></i>
+            </div>
+            <div>
+                <h3 class="text-xl text-slate-800">Desbloqueo Vespa</h3>
+                <p class="text-[11px] text-slate-400 font-semibold mt-1">Introduce el PIN de sesión</p>
+            </div>
+            <div class="flex justify-center gap-3 py-2">
+                <div id="pinDot0" class="w-4 h-4 rounded-full border-2 border-vespa transition-all duration-200"></div>
+                <div id="pinDot1" class="w-4 h-4 rounded-full border-2 border-vespa transition-all duration-200"></div>
+                <div id="pinDot2" class="w-4 h-4 rounded-full border-2 border-vespa transition-all duration-200"></div>
+                <div id="pinDot3" class="w-4 h-4 rounded-full border-2 border-vespa transition-all duration-200"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-2.5 pt-1">
+                <button onclick="pressPin('1')" class="keypad-btn">1</button>
+                <button onclick="pressPin('2')" class="keypad-btn">2</button>
+                <button onclick="pressPin('3')" class="keypad-btn">3</button>
+                <button onclick="pressPin('4')" class="keypad-btn">4</button>
+                <button onclick="pressPin('5')" class="keypad-btn">5</button>
+                <button onclick="pressPin('6')" class="keypad-btn">6</button>
+                <button onclick="pressPin('7')" class="keypad-btn">7</button>
+                <button onclick="pressPin('8')" class="keypad-btn">8</button>
+                <button onclick="pressPin('9')" class="keypad-btn">9</button>
+                <button onclick="clearPin()" class="keypad-btn text-xs uppercase text-slate-400 font-bold">C</button>
+                <button onclick="pressPin('0')" class="keypad-btn">0</button>
+                <button onclick="backspacePin()" class="keypad-btn text-slate-500"><i class="fas fa-backspace text-sm"></i></button>
+            </div>
+            <button onclick="closePinModal()" class="w-full text-xs font-bold text-slate-400 hover:text-slate-600 py-2">Cancelar</button>
+        </div>
+    </div>
+
+        <!-- MODAL REGISTRO DOCUMENTACIÓN (ITV & SEGURO) -->
+    <div id="docModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3.5">
+            <div class="flex justify-between items-center">
+                <h3 id="docModalTitle" class="text-xl text-slate-800">Renovación ITV / Seguro</h3>
+                <span id="docModalBadge" class="text-[9px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-black uppercase">Documentación</span>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Tipo de Trámite</label>
+                    <select id="docTypeSelect" onchange="onDocTypeChange(this.value)" class="font-bold text-slate-700">
+                        <option value="itv">📋 Inspección Técnica (ITV)</option>
+                        <option value="seguro">🛡️ Seguro de Moto</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Fecha de Vencimiento / Próxima Renovación</label>
+                    <input type="date" id="docExpiryDate" class="font-bold text-slate-800">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Coste (€)</label>
+                        <input type="number" id="docPrice" placeholder="0.00" step="0.01" class="font-mono-num">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Compañía / Estación</label>
+                        <input type="text" id="docEntity" placeholder="Ej: Mapfre, Applus...">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Nº Póliza / Notas</label>
+                    <input type="text" id="docNotes" placeholder="Detalles, cobertura, etc.">
+                </div>
+                <div class="flex items-center gap-2 p-2.5 bg-amber-50 rounded-xl border border-amber-200/60">
+                    <input type="checkbox" id="docAddExpense" checked class="w-4 h-4 text-amber-600 rounded">
+                    <label for="docAddExpense" class="text-[10px] font-bold text-amber-900 cursor-pointer">Registrar automáticamente en Gastos</label>
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeDocModal()" class="flex-1 p-3 bg-slate-100 rounded-xl font-bold text-slate-500 text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button onclick="saveDocRecord()" class="flex-1 btn-primary text-xs shadow-md">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRO BOMBILLA -->
+    <div id="bulbModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3">
+            <div class="flex justify-between items-center">
+                <h3 id="bulbModalTitle" class="text-xl text-slate-800">Cambio / Revisión</h3>
+                <span id="bulbModalBadge" class="text-[9px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-black uppercase">12V PK 125 S</span>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Selecciona Ubicación</label>
+                    <select id="bulbPresetSelect" onchange="onBulbPresetChange(this.value)" class="font-bold text-slate-700">
+                        <option value="Faro Principal (Larga/Corta)|BA20d 12V 25/25W ⚡ Motor">💡 Faro Principal — BA20d 12V 25/25W [⚡ Motor/AC]</option>
+                        <option value="Posición Delantera|Ba9s 12V 4W ⚡ Motor">🔅 Posición Delantera — Ba9s 12V 4W [⚡ Motor/AC]</option>
+                        <option value="Cuentakilómetros|Ba9s 12V 1.2W ⚡ Motor">📟 Cuentakilómetros — Ba9s 12V 1.2W/2W [⚡ Motor/AC]</option>
+                        <option value="Testigo Intermitentes|Ba9s 12V 1.2W 🔋 Batería">🚦 Testigo Intermitentes (Cuadro) — Ba9s 12V 1.2W/2W [🔋 Batería/DC]</option>
+                        <option value="Testigo Luces (Cuadro)|Ba9s 12V 1.2W ⚡ Motor">💡 Testigo Luces Encendidas (Cuadro) — Ba9s 12V 1.2W/2W [⚡ Motor/AC]</option>
+                        <option value="Piloto Trasero|Festoon 12V 5W ⚡ Motor">🔴 Piloto Trasero — Festoon 12V 5W [⚡ Motor/AC]</option>
+                        <option value="Luz de Freno (Stop)|BA15s 12V 10W 🔋 Batería">🛑 Luz de Freno (Stop) — BA15s 12V 10W [🔋 Batería/DC]</option>
+                        <option value="Intermitente Delantero|BA15s 12V 10W 🔋 Batería">🟠 Intermitente Delantero — BA15s 12V 10W [🔋 Batería/DC]</option>
+                        <option value="Intermitente Trasero|BA15s 12V 10W 🔋 Batería">🟠 Intermitente Trasero — BA15s 12V 10W [🔋 Batería/DC]</option>
+                        <option value="Bujía Rosca Corta|NGK B7HS (0.5-0.6mm) ⚙️ Motor">🔌 Bujía — NGK B7HS [⚙️ Motor]</option>
+                        <option value="Batería de Arranque|12V 9Ah YB9-B 🔋 Batería">🔋 Batería de Arranque — 12V 9Ah (YB9-B)</option>
+                        <option value="Regulador de Tensión|Ducati 12V ⚡ Eléctrico">⚡ Regulador de Tensión — Ducati 12V</option>
+                        <option value="Presión Solo|1.25 bar Del / 1.80 bar Tras 🛞 Neumáticos">🛞 Presión Normal Solo — 1.25 bar Del / 1.80 bar Tras</option>
+                        <option value="Presión Con Pasajero|1.25 bar Del / 2.50 bar Tras 🛞 Neumáticos">👥 Presión Con Pasajero / Carga — 1.25 bar Del / 2.50 bar Tras</option>
+                        <option value="personalizado">🔧 Otra / Personalizada...</option>
+                    </select>
+                </div>
+                <div id="bulbCustomContainer" class="hidden space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Descripción / Casquillo</label>
+                    <input type="text" id="bulbCustomType" placeholder="Ej: Halógena HS1 12V 35W">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Kilómetros</label>
+                        <input type="number" id="bulbKm" class="font-mono-num">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Fecha</label>
+                        <input type="date" id="bulbDate">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Coste (€)</label>
+                        <input type="number" id="bulbPrice" placeholder="0.00" step="0.01" class="font-mono-num">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Marca / Notas</label>
+                        <input type="text" id="bulbNotes" placeholder="Ej: Osram, Philips...">
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 p-2.5 bg-amber-50 rounded-xl border border-amber-200/60">
+                    <input type="checkbox" id="bulbAddExpense" checked class="w-4 h-4 text-amber-600 rounded">
+                    <label for="bulbAddExpense" class="text-[10px] font-bold text-amber-900 cursor-pointer">Registrar automáticamente en Gastos</label>
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeBulbModal()" class="flex-1 p-3 bg-slate-100 rounded-xl font-bold text-slate-500 text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button onclick="saveBulbRecord()" class="flex-1 btn-primary text-xs shadow-md">Registrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITOR MANTENIMIENTO -->
+    <div id="maintModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3.5">
+            <h3 id="modalTitle" class="text-2xl text-slate-800">Añadir Pieza</h3>
+            <input type="hidden" id="editId">
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Nombre</label>
+                    <input type="text" id="maintName" placeholder="Ej: Bujía">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Intervalo</label>
+                        <input type="number" id="maintInterval">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Último Km</label>
+                        <input type="number" id="maintLast">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Categoría</label>
+                    <select id="maintCat">
+                        <option value="Motor">⚙️ Motor & Transmisión</option>
+                        <option value="Eléctrico">⚡ Sistema Eléctrico</option>
+                        <option value="Chasis">🛞 Chasis, Ruedas & Frenos</option>
+                        <option value="Carrocería">🛵 Carrocería & Accesorios</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 transition-colors">Cerrar</button>
+                <button onclick="saveMaintItem()" class="flex-1 btn-primary shadow-lg">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER VINTAGE -->
+    <header id="mainHeader" class="header-bg text-slate-800 pt-3 pb-3 px-4 rounded-b-3xl shadow-lg mb-3 relative overflow-hidden transition-all duration-300">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20"></div>
+        <div class="flex justify-between items-center relative z-10 mb-2.5">
+            <div>
+                <h1 class="text-2xl tracking-tight">Vespa<span style="color:var(--vespa);">Care</span></h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="togglePinLock()" id="pinStatusBtn" class="bg-slate-100 px-2.5 py-2 rounded-xl hover:bg-slate-200 transition-all text-sm font-bold text-slate-600 flex items-center gap-1.5" title="Estado de Sesión">
+                    <i id="pinStatusIcon" class="fas fa-lock text-amber-600"></i>
+                </button>
+                <button onclick="loadData()" class="bg-slate-100 p-2 rounded-xl hover:bg-slate-200 transition-all text-slate-600" title="Recargar"><i class="fas fa-redo-alt"></i></button>
+            </div>
+        </div>
+        <div id="headerOdometerSection" class="flex flex-col items-center relative z-10">
+            <div class="odometer-container">
+                <input type="number" id="mainOdo" class="odometer" onchange="updateOdo(this.value)" placeholder="0">
+            </div>
+            <div class="mt-2">
+                <div class="flex items-center gap-1.5 bg-amber-500/15 text-amber-900 px-3 py-1 rounded-xl border border-amber-500/30 shadow-sm">
+                    <i class="fas fa-gas-pump text-sm text-amber-700"></i>
+                    <p class="text-xs font-black uppercase tracking-wider text-amber-950">Límite: <span id="headerOdoLimit" class="font-extrabold text-slate-900 font-mono-num text-sm ml-1">- km</span></p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-3 max-w-lg mx-auto">
+        
+        <!-- PESTAÑA 1: GARAJE -->
+        <section id="tab-garage" class="tab-content active space-y-3.5">
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="card p-4 border-b-4 border-vespa">
+                    <div class="flex items-center gap-2 mb-2 text-amber-700">
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                            <i class="fas fa-vial"></i>
+                        </div>
+                        <h2 class="text-xs font-black uppercase tracking-widest">Mezcla 2%</h2>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <input type="number" id="calcLitros" placeholder="L" class="text-xl font-black bg-slate-50 border-none" oninput="calcMix(this.value)">
+                        <p id="mixResult" class="text-2xl font-black text-amber-800 pb-2">0<span class="text-xs ml-1">ml</span></p>
+                    </div>
+                </div>
+                <div class="card p-4 border-b-4 border-orange-400">
+                    <div class="flex items-center gap-2 mb-2 text-orange-600">
+                        <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+                            <i class="fas fa-bottle-water"></i>
+                        </div>
+                        <h2 class="text-xs font-black uppercase tracking-widest">Stock Casa</h2>
+                    </div>
+                    <p id="homeFuelDisplay" class="text-3xl font-black text-slate-800">0<span class="text-sm ml-1 text-slate-400">L</span></p>
+                </div>
+            </div>
+
+            <!-- Estimated Range Big Card -->
+            <div class="card p-4.5 p-4 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-5">
+                    <i class="fas fa-route text-8xl"></i>
+                </div>
+                <div class="flex justify-between items-end mb-3 relative z-10">
+                    <div>
+                        <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Autonomía Restante</h2>
+                        <p id="estRangeText" class="text-4xl font-black text-slate-800 tracking-tighter">- km</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-black text-slate-300 uppercase mb-1">Último Repostaje</p>
+                        <p id="lastFuelDate" class="text-sm font-bold text-amber-800">-</p>
+                    </div>
+                </div>
+                <div class="space-y-3 relative z-10">
+                    <div class="w-full bg-slate-100 h-4 rounded-full p-1 shadow-inner">
+                        <div id="estRangeBar" class="bg-gradient-to-r from-red-400 to-amber-600 h-full rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <p id="estRangeDetails" class="text-[10px] font-bold text-slate-400 italic">Cargando datos de telemetría...</p>
+                        <span class="text-[10px] font-black text-orange-500 uppercase">Prox. Bujía: <span id="nextSpark">-</span> km</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHECKLIST & AVISOS CRÍTICOS PRE-RODAJE -->
+            <div class="card p-4 space-y-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-800">Checklist Pre-Rodaje</h3>
+                    </div>
+                    <span id="garageOverallBadge" class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-black uppercase">Todo al día</span>
+                </div>
+
+                <!-- LISTADO DE ALERTAS CRÍTICAS DINÁMICAS -->
+                <div id="garageCriticalAlertsList" class="space-y-2"></div>
+            </div>
+        
+        </section>
+
+        <!-- PESTAÑA 2: SALUD & MECÁNICA INTEGRADA -->
+        <section id="tab-health" class="tab-content space-y-3.5">
+            <div class="flex justify-between items-center px-2">
+                <div>
+                    <h2 class="text-xl text-slate-800">Estado de la Moto</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Telemetría de Mantenimiento & Ficha Interactiva</p>
+                </div>
+                <button onclick="openModal()" class="text-[10px] bg-slate-900 text-white px-3.5 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all">
+                    <i class="fas fa-plus mr-1.5"></i>Añadir Pieza
+                </button>
+            </div>
+
+            <!-- 1. MOTOR & TRANSMISIÓN (CON BUJÍA INTEGRADA) -->
+            <div class="card p-4 border-l-4 border-amber-600">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg text-slate-800">Motor & Transmisión</h3>
+                        <p class="text-[10px] font-bold text-amber-700 uppercase tracking-wider mt-0.5">Motor VMX5M • 125 cc 2 Tiempos</p>
+                    </div>
+                    <span class="text-[9px] bg-amber-100 text-amber-900 px-2.5 py-1 rounded-full font-black uppercase tracking-wider">Smallframe</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs mb-4">
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-slate-400 block text-[9px] uppercase font-black tracking-wider">Carburador SHBC 19/19 E</span>
+                        <span class="font-black text-slate-800 text-sm">Chiclé: 76-78 / 42</span>
+                        <span class="text-[9px] text-slate-500 block mt-0.5">Tornillo aire: 1.5 a 2 v.</span>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-slate-400 block text-[9px] uppercase font-black tracking-wider">Aceite Cárter / Caja</span>
+                        <span class="font-black text-slate-800 text-sm font-mono-num">250 <span class="text-[10px] text-slate-400">ml</span></span>
+                        <span class="text-[9px] text-slate-500 block mt-0.5">SAE 30 Mineral</span>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-slate-400 block text-[9px] uppercase font-black tracking-wider">Mezcla Gasolina 2T</span>
+                        <span class="font-black text-slate-800 text-sm font-mono-num">2.0% <span class="text-[10px] text-slate-400">(1:50)</span></span>
+                        <span class="text-[9px] text-slate-500 block mt-0.5">Aceite Sintético JASO FD</span>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-slate-400 block text-[9px] uppercase font-black tracking-wider">Depósito / Reserva</span>
+                        <span class="font-black text-slate-800 text-sm font-mono-num">5.8 <span class="text-[10px] text-slate-400">L</span></span>
+                        <span class="text-[9px] text-amber-700 font-bold block mt-0.5">Reserva manual ~1.2L</span>
+                    </div>
+                </div>
+
+                <!-- MÓDULO INTERACTIVO VIVO: BUJÍA (NGK B7HS) -->
+                <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-200/80 space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-plug text-amber-600 text-sm"></i>
+                                <h4 class="font-bold text-slate-800 text-sm">Bujía Rosca Corta</h4>
+                                <span class="text-[9px] bg-amber-200/60 text-amber-900 px-2 py-0.5 rounded-md font-black">NGK B7HS</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Equivalentes: Bosch W4AC • Champion L82C • Galga: 0.5-0.6mm</p>
+                        </div>
+                        <button onclick="openSparkModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-md active:scale-95 transition-all">
+                            <i class="fas fa-redo-alt mr-1 text-[9px] text-amber-400"></i>Cambiar
+                        </button>
+                    </div>
+
+                    <!-- BARRA VIVA DE DESGASTE DE BUJÍA -->
+                    <div id="sparkWearContainer" class="space-y-1.5 pt-1">
+                        <div class="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                            <span id="sparkRestText" class="text-slate-500 font-bold">Calculando...</span>
+                            <span class="text-slate-400">Intervalo 2.000 km</span>
+                        </div>
+                        <div class="w-full bg-slate-200/70 h-2.5 rounded-full overflow-hidden">
+                            <div id="sparkProgressBar" class="bg-amber-600 h-full transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- DIAGNÓSTICO COLOR DE BUJÍA -->
+                    <div class="pt-2 border-t border-amber-200/60 space-y-1.5">
+                        <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block">Diagnóstico Visual de Carburación:</span>
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div class="p-2 bg-white/90 border border-amber-200/80 rounded-xl flex flex-col items-center space-y-1">
+                                <div class="w-3 h-3 rounded-full bg-amber-700 shadow-sm"></div>
+                                <p class="font-extrabold text-[9px] text-amber-950">Marrón / Café</p>
+                                <p class="text-[8px] text-amber-800 font-medium">Mezcla Perfecta</p>
+                            </div>
+                            <div class="p-2 bg-white/90 border border-slate-200 rounded-xl flex flex-col items-center space-y-1">
+                                <div class="w-3 h-3 rounded-full bg-slate-900 shadow-sm"></div>
+                                <p class="font-extrabold text-[9px] text-slate-900">Negro / Graso</p>
+                                <p class="text-[8px] text-slate-600 font-medium">Rica / Aceite</p>
+                            </div>
+                            <div class="p-2 bg-white/90 border border-red-200 rounded-xl flex flex-col items-center space-y-1">
+                                <div class="w-3 h-3 rounded-full bg-white border border-red-500 shadow-sm"></div>
+                                <p class="font-extrabold text-[9px] text-red-950">Blanco / Seco</p>
+                                <p class="text-[8px] text-red-700 font-bold">Pobre (¡Gripaje!)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COMPONENTES ADICIONALES DE MOTOR -->
+                <div id="motorMaintContainer" class="space-y-2 pt-2 border-t border-amber-200/60 hidden">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block px-1">Otros Componentes de Motor:</span>
+                    <div id="motorMaintList" class="space-y-2.5"></div>
+                </div>
+            </div>
+
+            <!-- 2. SISTEMA ELÉCTRICO ELESTART & BATERÍA -->
+            <div class="card p-4 border-l-4 border-amber-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg text-slate-800">Sistema Eléctrico & Batería</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">12V Ducati • Arranque Eléctrico Elestart</p>
+                    </div>
+                    <span class="text-[9px] bg-amber-50 text-amber-900 px-2.5 py-1 rounded-full font-black uppercase tracking-wider">12V DC/AC</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-slate-400 block text-[9px] uppercase font-black tracking-wider">Batería de Arranque</span>
+                                <span class="text-[9px] font-black text-emerald-800 font-mono-num bg-emerald-50 px-1.5 py-0.5 rounded-md">DC</span>
+                            </div>
+                            <span class="font-black text-slate-800 text-base font-mono-num">12V 9Ah <span class="text-[10px] text-slate-400 font-bold">(YB9-B)</span></span>
+                            <span class="text-[9px] text-slate-500 font-semibold block mt-0.5">Fusible general: 8A / 10A</span>
+                        </div>
+                        <button onclick="openElectricModal('Batería de Arranque (12V 9Ah YB9-B)')" class="w-full py-1.5 bg-white border border-slate-200 hover:border-amber-400 text-slate-700 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all">
+                            <i class="fas fa-plus text-[8px] text-amber-600"></i> Registrar Batería
+                        </button>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-slate-400 block text-[9px] uppercase font-black tracking-wider">Regulador de Tensión</span>
+                                <span class="text-[9px] font-black text-amber-800 font-mono-num bg-amber-50 px-1.5 py-0.5 rounded-md">AC/DC</span>
+                            </div>
+                            <span class="font-black text-slate-800 text-base">Ducati 12V</span>
+                            <span class="text-[9px] text-slate-500 font-semibold block mt-0.5">3 o 5 pines (G|G|+B|C|Masa)</span>
+                        </div>
+                        <button onclick="openElectricModal('Regulador de Tensión (Ducati 12V)')" class="w-full py-1.5 bg-white border border-slate-200 hover:border-amber-400 text-slate-700 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all">
+                            <i class="fas fa-plus text-[8px] text-amber-600"></i> Registrar Regulador
+                        </button>
+                    </div>
+                </div>
+
+                <!-- COMPONENTES ADICIONALES ELÉCTRICOS -->
+                <div id="electricMaintContainer" class="space-y-2 pt-3 border-t border-amber-200/60 hidden">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block px-1">Otros Componentes Eléctricos:</span>
+                    <div id="electricMaintList" class="space-y-2.5"></div>
+                </div>
+            </div>
+
+            <!-- 3. SISTEMA DE ILUMINACIÓN & BOMBILLAS (8 CASQUILLOS) -->
+            <div class="card p-4 border-l-4 border-yellow-400">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg text-slate-800">Bombillas & Iluminación</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Sistema 12 Voltios Ducati • 4 Intermitentes</p>
+                    </div>
+                    <button onclick="openBulbModal()" class="text-[10px] font-black bg-yellow-500 hover:bg-yellow-600 text-slate-900 px-3.5 py-2 rounded-xl uppercase tracking-wider shadow-md active:scale-95 transition-all">
+                        <i class="fas fa-plus mr-1.5"></i>Registrar Cambio
+                    </button>
+                </div>
+
+                <!-- GUÍA RÁPIDA DE CASQUILLOS & CIRCUITO ELÉCTRICO COMPLETO -->
+                <div class="grid grid-cols-2 gap-2.5 mb-5 text-xs">
+                    <!-- 1. Faro Principal (Motor / Alternador) -->
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-black uppercase text-slate-400 block">Faro Larga/Corta</span>
+                                <p class="font-bold text-slate-800 text-xs">BA20d (25/25W)</p>
+                            </div>
+                            <span class="text-[9px] font-black text-amber-800 font-mono-num bg-amber-50 px-1.5 py-0.5 rounded-md">12V</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-amber-700 bg-amber-100/60 border border-amber-200 px-2 py-0.5 rounded-lg w-max">
+                            <i class="fas fa-cog text-[8px]"></i> Motor (AC)
+                        </div>
+                    </div>
+
+                    <!-- 2. Posición Delantera (Motor / Alternador) -->
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-black uppercase text-slate-400 block">Posición Delantera</span>
+                                <p class="font-bold text-slate-800 text-xs">Ba9s (4W)</p>
+                            </div>
+                            <span class="text-[9px] font-black text-amber-800 font-mono-num bg-amber-50 px-1.5 py-0.5 rounded-md">12V</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-amber-700 bg-amber-100/60 border border-amber-200 px-2 py-0.5 rounded-lg w-max">
+                            <i class="fas fa-cog text-[8px]"></i> Motor (AC)
+                        </div>
+                    </div>
+
+                    <!-- 3. Cuentakilómetros (Motor / Alternador) -->
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-black uppercase text-slate-400 block">Cuentakilómetros</span>
+                                <p class="font-bold text-slate-800 text-xs">Ba9s (1.2W / 2W)</p>
+                            </div>
+                            <span class="text-[9px] font-black text-amber-800 font-mono-num bg-amber-50 px-1.5 py-0.5 rounded-md">12V</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-amber-700 bg-amber-100/60 border border-amber-200 px-2 py-0.5 rounded-lg w-max">
+                            <i class="fas fa-cog text-[8px]"></i> Motor (AC)
+                        </div>
+                    </div>
+
+                    <!-- 4. Testigo Intermitentes (Batería / DC) -->
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-black uppercase text-slate-400 block">Testigo Intermitentes</span>
+                                <p class="font-bold text-slate-800 text-xs">Ba9s (1.2W / 2W)</p>
+                            </div>
+                            <span class="text-[9px] font-black text-emerald-800 font-mono-num bg-emerald-50 px-1.5 py-0.5 rounded-md">12V</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100/60 border border-emerald-200 px-2 py-0.5 rounded-lg w-max">
+                            <i class="fas fa-car-battery text-[8px]"></i> Batería (DC)
+                        </div>
+                    </div>
+
+                    <!-- 5. Testigo Luces (Motor / Alternador) -->
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-black uppercase text-slate-400 block">Testigo Luces</span>
+                                <p class="font-bold text-slate-800 text-xs">Ba9s (1.2W / 2W)</p>
+                            </div>
+                            <span class="text-[9px] font-black text-amber-800 font-mono-num bg-amber-50 px-1.5 py-0.5 rounded-md">12V</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-amber-700 bg-amber-100/60 border border-amber-200 px-2 py-0.5 rounded-lg w-max">
+                            <i class="fas fa-cog text-[8px]"></i> Motor (AC)
+                        </div>
+                    </div>
+
+                    <!-- 6. Piloto Trasero (Motor / Alternador) -->
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-black uppercase text-slate-400 block">Piloto Trasero</span>
+                                <p class="font-bold text-slate-800 text-xs">Festoon (5W)</p>
+                            </div>
+                            <span class="text-[9px] font-black text-amber-800 font-mono-num bg-amber-50 px-1.5 py-0.5 rounded-md">12V</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-amber-700 bg-amber-100/60 border border-amber-200 px-2 py-0.5 rounded-lg w-max">
+                            <i class="fas fa-cog text-[8px]"></i> Motor (AC)
+                        </div>
+                    </div>
+
+                    <!-- 7. Luz de Freno (Batería) -->
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-black uppercase text-slate-400 block">Luz de Freno</span>
+                                <p class="font-bold text-slate-800 text-xs">BA15s (10W)</p>
+                            </div>
+                            <span class="text-[9px] font-black text-emerald-800 font-mono-num bg-emerald-50 px-1.5 py-0.5 rounded-md">12V</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100/60 border border-emerald-200 px-2 py-0.5 rounded-lg w-max">
+                            <i class="fas fa-car-battery text-[8px]"></i> Batería (DC)
+                        </div>
+                    </div>
+
+                    <!-- 8. Intermitentes (Batería) -->
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-black uppercase text-slate-400 block">Intermitentes (x4)</span>
+                                <p class="font-bold text-slate-800 text-xs">BA15s R10W (10W)</p>
+                            </div>
+                            <span class="text-[9px] font-black text-emerald-800 font-mono-num bg-emerald-50 px-1.5 py-0.5 rounded-md">12V</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100/60 border border-emerald-200 px-2 py-0.5 rounded-lg w-max">
+                            <i class="fas fa-car-battery text-[8px]"></i> Batería (DC)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HISTORIAL DE CAMBIOS -->
+                <div>
+                    <h4 class="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2.5">Histórico de Sustituciones</h4>
+                    <div id="bulbsList" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- 4. CHASIS, RUEDAS & FRENOS (CON BARRAS DE DESGASTE Y PRESIONES) -->
+            <div class="card p-4 border-l-4 border-blue-500">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg text-slate-800">Chasis, Ruedas & Frenos</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Llantas 10 Pulgadas (3.00 - 10") • Tambores</p>
+                    </div>
+                    <span class="text-[9px] bg-blue-50 text-blue-800 px-2.5 py-1 rounded-full font-black uppercase tracking-wider">Dinámica</span>
+                </div>
+
+                <!-- PRESIONES CLICABLES / AJUSTE RÁPIDO -->
+                <div class="space-y-2 mb-5">
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">Presiones Recomendadas:</span>
+                        <button onclick="openPressureModal('Revisión General de Presiones')" class="text-[9px] font-black bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1 active:scale-95 transition-all">
+                            <i class="fas fa-check-circle text-[9px] text-blue-600"></i>Registrar Revisión
+                        </button>
+                    </div>
+
+                    <!-- BARRA VIVA DE REVISIÓN PERIÓDICA DE PRESIÓN (CADA 3 SEMANAS / 21 DÍAS) -->
+                    <div class="p-2.5 bg-blue-50/50 rounded-xl border border-blue-200/60 space-y-1.5">
+                        <div class="flex justify-between items-center text-[9px] font-black uppercase tracking-wider">
+                            <span id="pressureTrackerStatus" class="text-blue-900 font-bold">Calculando revisión...</span>
+                            <span id="pressureLastDate" class="text-slate-400 font-normal">Cada 3 semanas</span>
+                        </div>
+                        <div class="w-full bg-slate-200/70 h-2 rounded-full overflow-hidden">
+                            <div id="pressureProgressBar" class="bg-blue-600 h-full transition-all duration-1000" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2.5 text-center text-xs">
+                        <div onclick="openPressureModal('Ajuste Rueda Delantera (1.25 bar)')" class="p-2.5 bg-slate-50 hover:bg-blue-50/60 rounded-xl border border-slate-100 hover:border-blue-200 cursor-pointer active:scale-95 transition-all shadow-sm group">
+                            <i class="fas fa-circle-notch text-blue-500 group-hover:scale-110 text-sm mb-1 transition-transform"></i>
+                            <span class="text-slate-400 block text-[8px] uppercase font-black tracking-wider">Delantera</span>
+                            <p class="font-black text-slate-800 text-base font-mono-num mt-1">1.25 <span class="text-[9px] text-slate-400">bar</span></p>
+                            <span class="text-[8px] text-slate-400 font-semibold">18 PSI</span>
+                        </div>
+                        <div onclick="openPressureModal('Ajuste Rueda Trasera Solo (1.80 bar)')" class="p-2.5 bg-slate-50 hover:bg-amber-50/60 rounded-xl border border-slate-100 hover:border-amber-200 cursor-pointer active:scale-95 transition-all shadow-sm group">
+                            <i class="fas fa-user text-amber-600 group-hover:scale-110 text-sm mb-1 transition-transform"></i>
+                            <span class="text-slate-400 block text-[8px] uppercase font-black tracking-wider">Trasera Solo</span>
+                            <p class="font-black text-slate-800 text-base font-mono-num mt-1">1.80 <span class="text-[9px] text-slate-400">bar</span></p>
+                            <span class="text-[8px] text-slate-400 font-semibold">26 PSI</span>
+                        </div>
+                        <div onclick="openPressureModal('Ajuste Con Pasajero (2.50 bar)')" class="p-2.5 bg-slate-50 hover:bg-emerald-50/60 rounded-xl border border-slate-100 hover:border-emerald-200 cursor-pointer active:scale-95 transition-all shadow-sm group">
+                            <i class="fas fa-user-friends text-emerald-600 group-hover:scale-110 text-sm mb-1 transition-transform"></i>
+                            <span class="text-slate-400 block text-[8px] uppercase font-black tracking-wider">Con Pasajero</span>
+                            <p class="font-black text-slate-800 text-base font-mono-num mt-1">2.50 <span class="text-[9px] text-slate-400">bar</span></p>
+                            <span class="text-[8px] text-slate-400 font-semibold">36 PSI</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MÓDULOS DE DESGASTE DE CHASIS (ZAPATAS Y NEUMÁTICOS) -->
+                <div class="space-y-3 mb-5">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block px-1">Desgaste de Frenos y Neumáticos:</span>
+                    <div id="chassisMaintList" class="space-y-3"></div>
+                </div>
+
+                <!-- PARES DE APRIETE DINAMOMÉTRICA -->
+                <div class="pt-4 border-t border-slate-200/80">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block mb-2.5">Pares de Apriete (Nm Dinamométrica):</span>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <div class="p-2.5 bg-slate-50 rounded-xl text-center">
+                            <span class="text-slate-400 block text-[8px] uppercase font-bold">Tuercas Rueda</span>
+                            <span class="font-black text-slate-700 text-sm font-mono-num">20-25 <span class="text-[8px]">Nm</span></span>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 rounded-xl text-center">
+                            <span class="text-slate-400 block text-[8px] uppercase font-bold">Eje Trasero</span>
+                            <span class="font-black text-slate-700 text-sm font-mono-num">75-90 <span class="text-[8px]">Nm</span></span>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 rounded-xl text-center">
+                            <span class="text-slate-400 block text-[8px] uppercase font-bold">Tuercas Culata</span>
+                            <span class="font-black text-slate-700 text-sm font-mono-num">14-18 <span class="text-[8px]">Nm</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. COMPONENTES EXTRA / PERSONALIZADOS (SI EXISTEN) -->
+            <div id="customPartsCard" class="card p-4 border-l-4 border-purple-500 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg text-slate-800">Accesorios & Extras</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Componentes específicos montados</p>
+                    </div>
+                    <button onclick="openModal(null, 'Carrocería')" class="text-[10px] bg-slate-900 text-white px-3 py-1.5 rounded-xl font-black uppercase tracking-wider">
+                        <i class="fas fa-plus mr-1"></i>Añadir
+                    </button>
+                </div>
+                <div id="customPartsList" class="space-y-3"></div>
+            </div>
+
+            <!-- 5. DOCUMENTACIÓN & LEGAL (ITV Y SEGURO) -->
+            <div class="card p-4 space-y-3 border-l-4 border-emerald-600">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs">
+                            <i class="fas fa-file-shield"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">Documentación & Legal</h3>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase">ITV & Seguro Obligatorio</p>
+                        </div>
+                    </div>
+                    <button onclick="openDocModal()" class="text-[9px] font-black bg-slate-900 text-white px-2.5 py-1.5 rounded-lg uppercase tracking-wider active:scale-95 transition-all">
+                        <i class="fas fa-edit mr-1 text-[8px] text-amber-400"></i>Actualizar
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5 text-xs">
+                    <!-- ITV -->
+                    <div onclick="openDocModal('itv')" class="p-2.5 bg-slate-50 hover:bg-emerald-50/50 rounded-xl border border-slate-100 hover:border-emerald-200 cursor-pointer active:scale-95 transition-all space-y-1.5 group">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[9px] font-black uppercase text-slate-400 block">ITV</span>
+                            <span id="itvStatusBadge" class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">Pendiente</span>
+                        </div>
+                        <p id="itvDateDisplay" class="font-extrabold text-slate-800 text-sm font-mono-num">-</p>
+                        <p id="itvDaysLeft" class="text-[9px] font-semibold text-slate-400 truncate">Configurar fecha</p>
+                    </div>
+
+                    <!-- SEGURO -->
+                    <div onclick="openDocModal('seguro')" class="p-2.5 bg-slate-50 hover:bg-blue-50/50 rounded-xl border border-slate-100 hover:border-blue-200 cursor-pointer active:scale-95 transition-all space-y-1.5 group">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[9px] font-black uppercase text-slate-400 block">Seguro Moto</span>
+                            <span id="seguroStatusBadge" class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">Pendiente</span>
+                        </div>
+                        <p id="seguroDateDisplay" class="font-extrabold text-slate-800 text-sm font-mono-num">-</p>
+                        <p id="seguroDaysLeft" class="text-[9px] font-semibold text-slate-400 truncate">Configurar fecha</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PESTAÑA 3: GASTOS -->
+        <section id="tab-logs" class="tab-content space-y-3.5">
+            <div class="card p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 id="logFormTitle" class="text-xl text-slate-800">Nuevo Registro</h3>
+                    <button id="cancelLogEdit" onclick="resetLogForm()" class="hidden text-[10px] bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-black uppercase">Cancelar</button>
+                </div>
+                <div class="space-y-4">
+                    <input type="hidden" id="logEditId">
+                    <div class="grid grid-cols-1 gap-4">
+                        <select id="logType" onchange="toggleFuelFields(this.value)" class="font-bold text-slate-600">
+                            <option value="repostaje">⛽ Gasolina (Surtidor)</option>
+                            <option value="garrafa_comprar">🛒 Comprar para Garrafa</option>
+                            <option value="garrafa_repostar">🏠 Repostar de Garrafa</option>
+                            <option value="pieza">🔧 Pieza / Inventario</option>
+                        </select>
+                        <input type="datetime-local" id="logDate" class="font-semibold">
+                        <input type="text" id="logTitle" placeholder="¿Qué has comprado o hecho?" class="font-semibold">
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-3">
+                        <div id="logPriceContainer">
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Euros</label>
+                            <input type="number" id="logPrice" placeholder="€" step="0.01">
+                        </div>
+                        <div id="logLitrosContainer">
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Litros</label>
+                            <input type="number" id="logLitros" placeholder="L" step="0.1" oninput="updateFormMixCalc()">
+                        </div>
+                        <div id="logKmContainer">
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Km Odo</label>
+                            <input type="number" id="logKm" placeholder="Km" step="0.1">
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA DE MEZCLA INTEGRADA EN EL FORMULARIO -->
+                    <div id="formMixHelper" class="p-2.5 bg-amber-50/80 rounded-xl border border-amber-200/60 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-amber-800">
+                                <i class="fas fa-oil-can mr-1 text-amber-600"></i> Aceite Necesario:
+                            </span>
+                            <div class="flex gap-1">
+                                <button type="button" onclick="setMixRatio(2.0)" id="mixBtn20" class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-600 text-white">2.0%</button>
+                                <button type="button" onclick="setMixRatio(2.5)" id="mixBtn25" class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-white text-slate-600 border border-slate-200">2.5%</button>
+                                <button type="button" onclick="setMixRatio(3.0)" id="mixBtn30" class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-white text-slate-600 border border-slate-200">3.0%</button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p id="formMixResultText" class="text-xs font-extrabold text-amber-900">0 ml de aceite</p>
+                            <button type="button" onclick="appendMixToNotes()" class="text-[9px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded-xl transition-all">
+                                <i class="fas fa-plus mr-1"></i>Añadir a notas
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Notas</label>
+                        <input type="text" id="logNotes" placeholder="Detalles, gasolinera, etc.">
+                    </div>
+
+                    <button onclick="addLog()" class="btn-primary shadow-lg mt-2">Guardar Registro</button>
+                </div>
+            </div>
+
+            <div id="logsHistory" class="space-y-3"></div>
+        </section>
+
+        <!-- PESTAÑA 4: STATS (COSTE €/100KM, EVOLUCIÓN Y CONSUMO) -->
+        <section id="tab-stats" class="tab-content space-y-3.5">
+            
+            <!-- TARJETAS DE COSTES Y TELEMETRÍA FINANCIERA -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="card p-3.5 border-l-4 border-emerald-500">
+                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Coste Medio</p>
+                    <p id="statCostPer100" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
+                    <p class="text-[9px] font-bold text-emerald-600 mt-1">por cada 100 km</p>
+                </div>
+                <div class="card p-3.5 border-l-4 border-amber-500">
+                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Precio Medio</p>
+                    <p id="statAvgPricePerLiter" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
+                    <p class="text-[9px] font-bold text-amber-600 mt-1">por litro en surtidor</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="card p-3.5">
+                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Consumo Medio</p>
+                    <p id="avgConsumo" class="text-xl font-black text-slate-800 font-mono-num">- km/L</p>
+                    <p class="text-[9px] font-bold text-slate-400 mt-1">Eficiencia media</p>
+                </div>
+                <div class="card p-3.5">
+                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Gasto Acumulado</p>
+                    <p id="statTotalSpent" class="text-xl font-black text-slate-800 font-mono-num">- €</p>
+                    <p class="text-[9px] font-bold text-slate-400 mt-1">Total registrados</p>
+                </div>
+            </div>
+
+            <!-- GRÁFICAS -->
+            <div class="card p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest">Evolución de Km</h3>
+                    <span class="text-xs font-bold text-emerald-600"><i class="fas fa-chart-line mr-1"></i>Histórico</span>
+                </div>
+                <div class="h-36">
+                    <canvas id="kmChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest">Consumo (km / Litro)</h3>
+                    <span class="text-xs font-bold text-amber-700"><i class="fas fa-tachometer-alt mr-1"></i>Rendimiento</span>
+                </div>
+                <div class="h-36">
+                    <canvas id="consumoChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest">Precio Gasolina (€ / L)</h3>
+                    <span class="text-xs font-bold text-blue-600"><i class="fas fa-euro-sign mr-1"></i>Evolución</span>
+                </div>
+                <div class="h-36">
+                    <canvas id="precioChart"></canvas>
+                </div>
+            </div>
+
+            <!-- TABLA HISTÓRICA -->
+            <div class="card p-4">
+                <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest mb-4">Historial de Repostajes</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs">
+                        <thead>
+                            <tr class="text-slate-400 border-b border-slate-100 font-black uppercase tracking-wider">
+                                <th class="pb-2 text-left">Fecha</th>
+                                <th class="pb-2 text-right">Km</th>
+                                <th class="pb-2 text-right">Litros</th>
+                                <th class="pb-2 text-right">km/L</th>
+                                <th class="pb-2 text-right">€/L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="repostajesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+                <!-- PESTAÑA 5: AJUSTES & SISTEMA -->
+        <section id="tab-tech" class="tab-content space-y-3.5">
+            <div class="flex justify-between items-center px-2">
+                <h2 class="text-xl text-slate-800">Ajustes del Sistema</h2>
+                <span class="text-[9px] bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-black uppercase tracking-wider">Configuración</span>
+            </div>
+
+            <!-- SEGURIDAD Y BLOQUEO PIN -->
+            <div class="card p-4 border-l-4 border-amber-500">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg text-slate-800">Seguridad & Bloqueo PIN</h3>
+                        <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Control de acceso Zero-Trust a VespaCare</p>
+                    </div>
+                    <span id="settingsPinStatusBadge" class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-black uppercase">Activo (1960)</span>
+                </div>
+
+                <div class="space-y-4 text-xs">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Bloqueo de Sesión</p>
+                            <p class="text-[10px] text-slate-400">Bloquea la interfaz inmediatamente solicitando PIN para volver a entrar.</p>
+                        </div>
+                        <button onclick="togglePinLock()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-[10px] uppercase tracking-wider shadow-sm transition-all active:scale-95">
+                            <i class="fas fa-lock mr-1.5 text-amber-400"></i>Bloquear
+                        </button>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Pedir PIN en cada inicio</p>
+                            <p class="text-[10px] text-slate-400">Si está desactivado, recordará la sesión en este dispositivo móvil.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="settingStrictLock" onchange="toggleStrictLock(this.checked)" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BACKUPS & COPIAS DE SEGURIDAD -->
+            <div class="card p-4 border-l-4 border-slate-800">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg text-slate-800">Copias de Seguridad</h3>
+                        <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Respaldos redundantes en caliente</p>
+                    </div>
+                    <span class="text-[9px] bg-amber-50 text-amber-900 border border-amber-200/60 px-2.5 py-1 rounded-full font-black uppercase">Zero-Trust</span>
+                </div>
+                
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                    Tus datos se respaldan automáticamente hacia el búnker <strong>grimble</strong> y se cifran hacia <strong>Cloudflare R2</strong>.
+                </p>
+
+                <div class="space-y-3">
+                    <button onclick="downloadBackupJson()" class="w-full py-3.5 bg-slate-900 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-md active:scale-95">
+                        <i class="fas fa-download text-amber-400"></i> Descargar Copia Local (data.json)
+                    </button>
+                    <button onclick="createRemoteSnapshot()" class="w-full py-3.5 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-amber-100 transition-all shadow-sm active:scale-95">
+                        <i class="fas fa-cloud-upload-alt text-amber-600"></i> Crear Snapshot en Servidor
+                    </button>
+                </div>
+            </div>
+
+            <!-- INFORMACIÓN DE LA APLICACIÓN -->
+            <div class="card p-6 text-center space-y-2 bg-slate-50 border border-slate-100 rounded-3xl">
+                <p class="text-xs font-bold text-slate-700">VespaCare PWA • Homelab Pedro Díaz</p>
+                <p class="text-[10px] text-slate-400 font-mono font-medium">Node: blue (10.0.0.104) • HTTPS Cloudflare Zero-Trust</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- NAVBAR VINTAGE -->
+    <nav class="fixed bottom-3 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur-xl border border-white/10 p-1.5 flex gap-1 rounded-2xl shadow-2xl z-50 w-[94%] max-w-md">
+        <button onclick="showTab('garage')" id="nav-garage" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all duration-300 nav-active">
+            <i class="fas fa-motorcycle text-lg"></i>
+            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Garaje</span>
+        </button>
+        <button onclick="showTab('health')" id="nav-health" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+            <i class="fas fa-heartbeat text-lg"></i>
+            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Salud</span>
+        </button>
+        <button onclick="showTab('logs')" id="nav-logs" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+            <i class="fas fa-receipt text-lg"></i>
+            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Gastos</span>
+        </button>
+        <button onclick="showTab('stats')" id="nav-stats" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+            <i class="fas fa-chart-pie text-lg"></i>
+            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Stats</span>
+        </button>
+        <button onclick="showTab('tech')" id="nav-tech" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+            <i class="fas fa-cog text-lg"></i>
+            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Ajuste</span>
+        </button>
+    </nav>
+
+    <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
+            });
+        }
+
+        let data = {};
+        const COLORS = ['bg-amber-600', 'bg-blue-500', 'bg-orange-500', 'bg-purple-500', 'bg-pink-500'];
+        let currentMixRatio = 2.0;
+        let enteredPin = '';
+        const REQUIRED_PIN = '1960';
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.className = 'show';
+            setTimeout(() => { t.className = t.className.replace('show', ''); }, 3000);
+        }
+
+        // --- FULL APP LOCK & PIN MANAGEMENT (ZERO-TRUST) ---
+        let enteredLockPin = '';
+
+        function isPinUnlocked() {
+            return (sessionStorage.getItem('vespa_pin') === REQUIRED_PIN) || (localStorage.getItem('vespa_pin') === REQUIRED_PIN);
+        }
+
+        function getStoredPin() {
+            return sessionStorage.getItem('vespa_pin') || localStorage.getItem('vespa_pin') || '';
+        }
+
+        function checkAppLockState() {
+            const lockScreen = document.getElementById('appLockScreen');
+            if (isPinUnlocked()) {
+                if (lockScreen) lockScreen.style.display = 'none';
+                updatePinStatusUI(); initSettingsUI();
+                loadData();
+            } else {
+                if (lockScreen) lockScreen.style.display = 'flex';
+                enteredLockPin = '';
+                updateLockDots();
+            }
+        }
+
+        function pressLockPin(digit) {
+            if (enteredLockPin.length < 4) {
+                enteredLockPin += digit;
+                updateLockDots();
+                if (enteredLockPin.length === 4) {
+                    setTimeout(validateLockPin, 150);
+                }
+            }
+        }
+
+        function clearLockPin() {
+            enteredLockPin = '';
+            updateLockDots();
+        }
+
+        function backspaceLockPin() {
+            if (enteredLockPin.length > 0) {
+                enteredLockPin = enteredLockPin.slice(0, -1);
+                updateLockDots();
+            }
+        }
+
+        function updateLockDots() {
+            for (let i = 0; i < 4; i++) {
+                const dot = document.getElementById('lockDot' + i);
+                if (dot) {
+                    if (i < enteredLockPin.length) {
+                        dot.className = 'w-4 h-4 rounded-full bg-amber-600 border-2 border-amber-600 transition-all duration-200 shadow-md';
+                    } else {
+                        dot.className = 'w-4 h-4 rounded-full border-2 border-amber-600 transition-all duration-200';
+                    }
+                }
+            }
+        }
+
+        function validateLockPin() {
+            if (enteredLockPin === REQUIRED_PIN) {
+                localStorage.setItem('vespa_pin', REQUIRED_PIN);
+                sessionStorage.setItem('vespa_pin', REQUIRED_PIN);
+                const lockScreen = document.getElementById('appLockScreen');
+                if (lockScreen) {
+                    lockScreen.style.opacity = '0';
+                    setTimeout(() => { lockScreen.style.display = 'none'; }, 250);
+                }
+                updatePinStatusUI(); initSettingsUI();
+                showToast('Acceso concedido');
+                loadData();
+            } else {
+                const box = document.querySelector('#appLockScreen .card');
+                if (box) box.classList.add('shake');
+                setTimeout(() => {
+                    if (box) box.classList.remove('shake');
+                    clearLockPin();
+                }, 500);
+            }
+        }
+
+        function updatePinStatusUI() {
+            const icon = document.getElementById('pinStatusIcon');
+            const btn = document.getElementById('pinStatusBtn');
+            if (icon && btn) {
+                if (isPinUnlocked()) {
+                    icon.className = 'fas fa-lock-open text-emerald-600';
+                    btn.title = 'Sesión desbloqueada (PIN 1960) - Clic para bloquear';
+                } else {
+                    icon.className = 'fas fa-lock text-amber-600';
+                    btn.title = 'Sesión bloqueada - Clic para desbloquear';
+                }
+            }
+        }
+
+        function togglePinLock() {
+            if (isPinUnlocked()) {
+                localStorage.removeItem('vespa_pin');
+                sessionStorage.removeItem('vespa_pin');
+                updatePinStatusUI(); initSettingsUI();
+                showToast('Aplicación bloqueada');
+                checkAppLockState();
+            } else {
+                checkAppLockState();
+            }
+        }
+
+        function openPinModal(callback = null) {
+            checkAppLockState();
+        }
+
+        function closePinModal() {
+            document.getElementById('pinModal').classList.remove('active');
+        }
+
+        
+        function initSettingsUI() {
+            const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
+            const chk = document.getElementById('settingStrictLock');
+            if (chk) chk.checked = strictLock;
+        }
+
+        function toggleStrictLock(isStrict) {
+            localStorage.setItem('vespa_strict_lock', isStrict ? 'true' : 'false');
+            if (isStrict) {
+                // If strict, remove persistent local storage pin so it only lives in session
+                localStorage.removeItem('vespa_pin');
+                showToast('Bloqueo estricto activado (pedirá PIN siempre)');
+            } else {
+                if (isPinUnlocked()) localStorage.setItem('vespa_pin', REQUIRED_PIN);
+                showToast('Sesión persistente activada');
+            }
+        }
+
+        // --- DATA LOAD & SAVE (ZERO-TRUST AUTHENTICATED) ---
+        async function loadData() {
+            if (!isPinUnlocked()) {
+                checkAppLockState();
+                return;
+            }
+            document.getElementById('loader').style.display = 'block';
+            try {
+                const res = await fetch('api.php', {
+                    headers: { 'X-Vespa-PIN': getStoredPin() }
+                });
+                if (res.status === 401) {
+                    localStorage.removeItem('vespa_pin');
+                    sessionStorage.removeItem('vespa_pin');
+                    checkAppLockState();
+                    return;
+                }
+                data = await res.json();
+                data.homeFuelStock = data.homeFuelStock || 0;
+                
+                data.repostajes.forEach((r, i) => { 
+                    if(!r.id) r.id = 'r_' + (Date.now() - i); 
+                    if(!r.logType) r.logType = r.title === 'Repostaje Garrafa' ? 'garrafa_repostar' : 'repostaje';
+                });
+                data.inventario.forEach((inv, i) => { 
+                    if(!inv.id) inv.id = 'i_' + (Date.now() - i); 
+                    if(!inv.logType) inv.logType = inv.title === 'Compra Garrafa' ? 'garrafa_comprar' : 'pieza';
+                });
+
+                renderAll();
+                toggleFuelFields('repostaje');
+                updatePinStatusUI(); initSettingsUI();
+            } catch (e) {
+                console.error("Error al cargar:", e);
+            }
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        async function saveData() {
+            if (!isPinUnlocked()) {
+                openPinModal(() => saveData());
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'block';
+            try {
+                const res = await fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Vespa-PIN': getStoredPin()
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (res.status === 401) {
+                    sessionStorage.removeItem('vespa_pin');
+                    updatePinStatusUI(); initSettingsUI();
+                    openPinModal(() => saveData());
+                    throw new Error('PIN incorrecto o sesión expirada');
+                }
+                if (!res.ok) throw new Error('Error en el servidor');
+                showToast('Cambios guardados con éxito');
+                renderAll();
+            } catch (e) {
+                alert("No se pudo guardar: " + e.message);
+            }
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        // --- TABS & NAVIGATION ---
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('tab-'+id).classList.add('active');
+            document.getElementById('nav-'+id).classList.add('nav-active');
+            
+            // Mostrar odómetro y límite exclusivamente en la pestaña principal (Garaje)
+            const odoSection = document.getElementById('headerOdometerSection');
+            const mainHeader = document.getElementById('mainHeader');
+            if (odoSection) {
+                if (id === 'garage') {
+                    odoSection.style.display = 'flex';
+                    if (mainHeader) {
+                        mainHeader.classList.remove('pb-2.5');
+                        mainHeader.classList.add('pb-3.5');
+                    }
+                } else {
+                    odoSection.style.display = 'none';
+                    if (mainHeader) {
+                        mainHeader.classList.remove('pb-3.5');
+                        mainHeader.classList.add('pb-2.5');
+                    }
+                }
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (id === 'stats') {
+                setTimeout(renderCharts, 100);
+            }
+        }
+
+        // --- MAINTENANCES ---
+        function openModal(id = null, defaultCat = 'Motor') {
+            const modal = document.getElementById('maintModal');
+            document.getElementById('editId').value = id || '';
+            document.getElementById('modalTitle').innerText = id ? 'Editar Pieza' : 'Nueva Pieza';
+            
+            if(id) {
+                const m = data.mantenimientos.find(x => x.id === id);
+                document.getElementById('maintName').value = m.nombre;
+                document.getElementById('maintInterval').value = m.intervalo;
+                document.getElementById('maintLast').value = m.ultimo;
+                document.getElementById('maintCat').value = m.categoria;
+            } else {
+                document.getElementById('maintName').value = '';
+                document.getElementById('maintInterval').value = '';
+                document.getElementById('maintLast').value = data.odometer;
+                document.getElementById('maintCat').value = defaultCat;
+            }
+            modal.classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('maintModal').classList.remove('active'); }
+
+        function saveMaintItem() {
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('maintName').value;
+            const interval = parseInt(document.getElementById('maintInterval').value);
+            const last = parseInt(document.getElementById('maintLast').value);
+            const cat = document.getElementById('maintCat').value;
+
+            if(!name || isNaN(interval)) return alert("Rellena todos los campos");
+
+            if(id) {
+                const m = data.mantenimientos.find(x => x.id === id);
+                m.nombre = name;
+                m.intervalo = interval;
+                m.ultimo = isNaN(last) ? data.odometer : last;
+                m.categoria = cat;
+            } else {
+                const newId = 'm_' + Date.now();
+                data.mantenimientos.push({
+                    id: newId, nombre: name, intervalo: interval, ultimo: isNaN(last) ? data.odometer : last,
+                    categoria: cat, color: COLORS[data.mantenimientos.length % COLORS.length]
+                });
+            }
+            closeModal();
+            saveData();
+        }
+
+        function deleteMaint(id) {
+            if(confirm('¿Eliminar esta pieza?')) {
+                data.mantenimientos = data.mantenimientos.filter(x => x.id !== id);
+                saveData();
+            }
+        }
+
+        function performMaint(id) {
+            data.mantenimientos.find(x => x.id === id).ultimo = data.odometer;
+            saveData();
+        }
+
+        function updateOdo(val) { 
+            data.odometer = parseFloat(val) || 0; 
+            saveData(); 
+        }
+
+        // --- CALCULADORA DE MEZCLA ---
+        function calcMix(litros) {
+            document.getElementById('mixResult').innerHTML = `${Math.round(litros * 20)}<span class="text-xs ml-1">ml</span>`;
+        }
+
+        function setMixRatio(ratio) {
+            currentMixRatio = ratio;
+            [2.0, 2.5, 3.0].forEach(r => {
+                const btn = document.getElementById('mixBtn' + (r * 10));
+                if (btn) {
+                    if (r === ratio) {
+                        btn.className = 'px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-600 text-white';
+                    } else {
+                        btn.className = 'px-2 py-0.5 rounded-lg text-[9px] font-bold bg-white text-slate-600 border border-slate-200';
+                    }
+                }
+            });
+            updateFormMixCalc();
+        }
+
+        function updateFormMixCalc() {
+            const litros = parseFloat(document.getElementById('logLitros').value) || 0;
+            const ml = Math.round(litros * currentMixRatio * 10);
+            document.getElementById('formMixResultText').innerText = `${ml} ml de aceite (al ${currentMixRatio}%)`;
+        }
+
+        function appendMixToNotes() {
+            const litros = parseFloat(document.getElementById('logLitros').value) || 0;
+            const ml = Math.round(litros * currentMixRatio * 10);
+            const notesField = document.getElementById('logNotes');
+            const mixNote = `${ml}ml aceite (${currentMixRatio}%)`;
+            if (notesField.value) {
+                if (!notesField.value.includes(mixNote)) notesField.value += ` • ${mixNote}`;
+            } else {
+                notesField.value = mixNote;
+            }
+            showToast('Mezcla añadida a las notas');
+        }
+
+        // --- LOGS & FORMS ---
+        function toggleFuelFields(type) {
+            const isFuel = ['repostaje', 'garrafa_comprar', 'garrafa_repostar'].includes(type);
+            const isStation = type === 'repostaje';
+            document.getElementById('logLitrosContainer').classList.toggle('hidden', !isFuel);
+            document.getElementById('logPriceContainer').classList.toggle('hidden', type === 'garrafa_repostar');
+            document.getElementById('logKmContainer').classList.toggle('hidden', type === 'garrafa_comprar');
+            document.getElementById('formMixHelper').classList.toggle('hidden', !isFuel);
+            
+            const titles = {
+                'repostaje': 'Gasolina (Surtidor)',
+                'garrafa_comprar': 'Compra Garrafa',
+                'garrafa_repostar': 'Repostaje Garrafa',
+                'pieza': ''
+            };
+            if(!document.getElementById('logEditId').value) {
+                document.getElementById('logTitle').value = titles[type] || '';
+            }
+            updateFormMixCalc();
+        }
+
+        function resetLogForm() {
+            document.getElementById('logEditId').value = '';
+            document.getElementById('logFormTitle').innerText = 'Nuevo Registro';
+            document.getElementById('cancelLogEdit').classList.add('hidden');
+            document.getElementById('logTitle').value = '';
+            document.getElementById('logPrice').value = '';
+            document.getElementById('logLitros').value = '';
+            document.getElementById('logNotes').value = '';
+            document.getElementById('logKm').value = data.odometer;
+            toggleFuelFields(document.getElementById('logType').value);
+        }
+
+        function editLog(id, listName) {
+            const list = data[listName];
+            const entry = list.find(x => x.id === id);
+            if(!entry) return;
+
+            document.getElementById('logEditId').value = id;
+            document.getElementById('logFormTitle').innerText = 'Editando Registro';
+            document.getElementById('cancelLogEdit').classList.remove('hidden');
+
+            document.getElementById('logType').value = entry.logType || (listName === 'repostajes' ? 'repostaje' : 'pieza');
+            toggleFuelFields(document.getElementById('logType').value);
+
+            document.getElementById('logDate').value = entry.date;
+            document.getElementById('logTitle').value = entry.title;
+            document.getElementById('logPrice').value = entry.price;
+            document.getElementById('logLitros').value = entry.litros || '';
+            document.getElementById('logKm').value = entry.km;
+            document.getElementById('logNotes').value = entry.notes;
+
+            showTab('logs');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteLog(id, listName) {
+            if(!confirm('¿Eliminar este registro?')) return;
+            const list = data[listName];
+            const idx = list.findIndex(x => x.id === id);
+            if(idx === -1) return;
+            const entry = list[idx];
+            if(entry.logType === 'garrafa_comprar') data.homeFuelStock -= (entry.litros || 0);
+            if(entry.logType === 'garrafa_repostar') data.homeFuelStock += (entry.litros || 0);
+            list.splice(idx, 1);
+            saveData();
+        }
+
+        function addLog() {
+            const type = document.getElementById('logType').value;
+            const editId = document.getElementById('logEditId').value;
+            const entry = {
+                id: editId || 'l_' + Date.now(),
+                logType: type,
+                date: document.getElementById('logDate').value || new Date().toISOString().slice(0, 16),
+                title: document.getElementById('logTitle').value,
+                price: parseFloat(document.getElementById('logPrice').value) || 0,
+                km: parseFloat(document.getElementById('logKm').value) || data.odometer,
+                notes: document.getElementById('logNotes').value
+            };
+
+            if(editId) {
+                ['repostajes', 'inventario'].forEach(listName => {
+                    const idx = data[listName].findIndex(x => x.id === editId);
+                    if(idx !== -1) {
+                        const old = data[listName][idx];
+                        if(old.logType === 'garrafa_comprar') data.homeFuelStock -= (old.litros || 0);
+                        if(old.logType === 'garrafa_repostar') data.homeFuelStock += (old.litros || 0);
+                        data[listName].splice(idx, 1);
+                    }
+                });
+            }
+            
+            if(type === 'repostaje' || type === 'garrafa_repostar') {
+                entry.litros = parseFloat(document.getElementById('logLitros').value) || 0;
+                if (type === 'garrafa_repostar') {
+                    if (entry.litros > data.homeFuelStock) return alert("Garrafa vacía o stock insuficiente");
+                    data.homeFuelStock -= entry.litros;
+                }
+                data.repostajes.unshift(entry);
+                data.repostajes.sort((a,b) => new Date(b.date) - new Date(a.date));
+            } else if (type === 'garrafa_comprar') {
+                entry.litros = parseFloat(document.getElementById('logLitros').value) || 0;
+                data.homeFuelStock += entry.litros;
+                data.inventario.unshift(entry);
+                data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+            } else {
+                data.inventario.unshift(entry);
+                data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+
+            if(entry.km > data.odometer && type !== 'garrafa_comprar') data.odometer = entry.km;
+            resetLogForm();
+            saveData();
+        }
+
+        // --- BULB MODAL & FUNCTIONS ---
+        
+        
+        function openSparkModal() {
+            openBulbModal();
+            document.getElementById('bulbModalTitle').innerText = "Cambio de Bujía";
+            document.getElementById('bulbModalBadge').innerText = "NGK B7HS";
+            const sel = document.getElementById('bulbPresetSelect');
+            sel.value = "Bujía Rosca Corta|NGK B7HS (0.5-0.6mm) ⚙️ Motor";
+            onBulbPresetChange(sel.value);
+        }
+
+        function openElectricModal(itemType) {
+            openBulbModal();
+            const sel = document.getElementById('bulbPresetSelect');
+            if (itemType.includes('Batería')) {
+                document.getElementById('bulbModalTitle').innerText = "Cambio de Batería";
+                document.getElementById('bulbModalBadge').innerText = "12V 9Ah";
+                sel.value = "Batería de Arranque|12V 9Ah YB9-B 🔋 Batería";
+            } else if (itemType.includes('Regulador')) {
+                document.getElementById('bulbModalTitle').innerText = "Regulador de Tensión";
+                document.getElementById('bulbModalBadge').innerText = "Ducati 12V";
+                sel.value = "Regulador de Tensión|Ducati 12V ⚡ Eléctrico";
+            }
+            onBulbPresetChange(sel.value);
+        }
+
+        function openPressureModal(presionTipo = 'Revisión y Ajuste Presión') {
+            openBulbModal();
+            document.getElementById('bulbModalTitle').innerText = "Ajuste de Presión";
+            document.getElementById('bulbModalBadge').innerText = "Neumáticos";
+            document.getElementById('bulbPrice').value = '0';
+            document.getElementById('bulbNotes').value = presionTipo;
+            document.getElementById('bulbAddExpense').checked = false;
+            const sel = document.getElementById('bulbPresetSelect');
+            
+            if (presionTipo.toLowerCase().includes('pasajero')) {
+                sel.value = "Presión Con Pasajero|1.25 bar Del / 2.50 bar Tras 🛞 Neumáticos";
+            } else {
+                sel.value = "Presión Solo|1.25 bar Del / 1.80 bar Tras 🛞 Neumáticos";
+            }
+            onBulbPresetChange(sel.value);
+        }
+
+        function openBulbModal() {
+            document.getElementById('bulbModalTitle').innerText = "Cambio de Bombilla";
+            document.getElementById('bulbModalBadge').innerText = "12V PK 125 S";
+            document.getElementById('bulbKm').value = data.odometer;
+            document.getElementById('bulbDate').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('bulbPrice').value = '';
+            document.getElementById('bulbNotes').value = '';
+            document.getElementById('bulbAddExpense').checked = true;
+            document.getElementById('bulbPresetSelect').value = "Faro Principal (Larga/Corta)|BA20d 12V 25/25W ⚡ Motor";
+            document.getElementById('bulbCustomContainer').classList.add('hidden');
+            document.getElementById('bulbModal').classList.add('active');
+        }
+
+        function closeBulbModal() {
+            document.getElementById('bulbModal').classList.remove('active');
+        }
+
+        function onBulbPresetChange(val) {
+            document.getElementById('bulbCustomContainer').classList.toggle('hidden', val !== 'personalizado');
+        }
+
+        function saveBulbRecord() {
+            const preset = document.getElementById('bulbPresetSelect').value;
+            let typeStr = '';
+            let locName = 'Bombilla';
+            if (preset === 'personalizado') {
+                typeStr = document.getElementById('bulbCustomType').value.trim() || 'Bombilla Personalizada';
+                locName = typeStr;
+            } else {
+                const [loc, spec] = preset.split('|');
+                typeStr = `${loc} (${spec})`;
+                locName = loc;
+            }
+            const kmVal = parseFloat(document.getElementById('bulbKm').value) || data.odometer;
+            const dateVal = document.getElementById('bulbDate').value || new Date().toISOString().slice(0, 10);
+            const priceVal = parseFloat(document.getElementById('bulbPrice').value) || 0;
+            const notesVal = document.getElementById('bulbNotes').value.trim();
+            const addExpense = document.getElementById('bulbAddExpense').checked;
+
+            data.bombillas = data.bombillas || [];
+            data.bombillas.unshift({
+                id: 'bulb_' + Date.now(),
+                type: typeStr,
+                date: dateVal,
+                km: kmVal,
+                price: priceVal,
+                notes: notesVal
+            });
+
+            // Si se cambia la bujía, actualizar automáticamente la tarjeta de mantenimiento de bujía
+            if (typeStr.includes('Bujía')) {
+                const sparkMaint = data.mantenimientos.find(m => m.id === 'bujia' || m.nombre.toLowerCase().includes('bujía'));
+                if (sparkMaint) sparkMaint.ultimo = kmVal;
+            }
+
+            // Si se marca la casilla, registrar simultáneamente en Gastos/Inventario
+            if (addExpense) {
+                data.inventario = data.inventario || [];
+                const expNotes = [typeStr, notesVal].filter(Boolean).join(' • ');
+                const expTitle = typeStr.includes('Bujía') ? 'Bujía (' + (notesVal || 'NGK B7HS') + ')' : (typeStr.includes('Batería') ? 'Batería' : (typeStr.includes('Regulador') ? 'Regulador de Tensión' : (typeStr.includes('Presión') ? 'Ajuste de Presión Ruedas' : ('Bombilla ' + locName))));
+                data.inventario.unshift({
+                    id: 'l_part_' + Date.now(),
+                    logType: 'pieza',
+                    date: dateVal + 'T12:00',
+                    title: expTitle,
+                    price: priceVal,
+                    km: kmVal,
+                    notes: expNotes
+                });
+                data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+
+            if (kmVal > data.odometer) data.odometer = kmVal;
+
+            closeBulbModal();
+            saveData();
+            showToast(addExpense ? 'Cambio de bombilla y gasto registrados' : 'Sustitución de bombilla registrada');
+        }
+
+        function deleteBulb(id) {
+            if (confirm('¿Eliminar este registro de bombilla?')) {
+                data.bombillas = data.bombillas.filter(b => b.id !== id && (b.type + b.date + b.km) !== id);
+                saveData();
+            }
+        }
+
+        // --- BACKUP ACTIONS ---
+        function downloadBackupJson() {
+            const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+            const downloadAnchor = document.createElement('a');
+            const dateStr = new Date().toISOString().slice(0,10);
+            downloadAnchor.setAttribute("href", jsonStr);
+            downloadAnchor.setAttribute("download", `vespacare_backup_${dateStr}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast('Copia JSON descargada');
+        }
+
+        async function createRemoteSnapshot() {
+            if (!isPinUnlocked()) {
+                openPinModal(() => createRemoteSnapshot());
+                return;
+            }
+            document.getElementById('loader').style.display = 'block';
+            try {
+                const res = await fetch('api.php?action=snapshot', {
+                    method: 'POST',
+                    headers: { 'X-Vespa-PIN': getStoredPin() }
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    showToast(`Snapshot creado: ${result.snapshot}`);
+                } else {
+                    alert('Error al crear snapshot: ' + result.message);
+                }
+            } catch(e) {
+                alert('Fallo en la petición: ' + e.message);
+            }
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        // --- CHARTS & STATS ---
+        let kmChartInstance = null;
+        let consumoChartInstance = null;
+        let precioChartInstance = null;
+
+        function renderCharts() {
+            const ctxKmEl = document.getElementById('kmChart');
+            const ctxConsumoEl = document.getElementById('consumoChart');
+            const ctxPrecioEl = document.getElementById('precioChart');
+            if (!ctxKmEl || !ctxConsumoEl || !ctxPrecioEl) return;
+
+            const fuelData = [...data.repostajes].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const labels = fuelData.map(d => d.date.split('T')[0]);
+            const kms = fuelData.map(d => d.km);
+            
+            const consumos = [];
+            const labelsConsumo = [];
+            for(let i = 1; i < fuelData.length; i++) {
+                const diffKm = fuelData[i].km - fuelData[i-1].km;
+                const litros = fuelData[i].litros;
+                if(litros > 0 && diffKm > 0) {
+                    consumos.push((diffKm / litros).toFixed(2));
+                    labelsConsumo.push(fuelData[i].date.split('T')[0]);
+                }
+            }
+
+            // Precios por litro
+            const labelsPrecio = [];
+            const preciosPorLitro = [];
+            fuelData.forEach(d => {
+                if (d.logType === 'repostaje' && d.litros > 0 && d.price > 0) {
+                    labelsPrecio.push(d.date.split('T')[0]);
+                    preciosPorLitro.push((d.price / d.litros).toFixed(3));
+                }
+            });
+
+            // 1. Gráfico Km
+            if(kmChartInstance) kmChartInstance.destroy();
+            kmChartInstance = new Chart(ctxKmEl.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Km',
+                        data: kms,
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.08)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#059669'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+            });
+
+            // 2. Gráfico Consumo
+            if(consumoChartInstance) consumoChartInstance.destroy();
+            consumoChartInstance = new Chart(ctxConsumoEl.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labelsConsumo,
+                    datasets: [{
+                        label: 'km/L',
+                        data: consumos,
+                        backgroundColor: '#c19a6b',
+                        borderRadius: 8
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+            });
+
+            // 3. Gráfico Precio / Litro
+            if(precioChartInstance) precioChartInstance.destroy();
+            precioChartInstance = new Chart(ctxPrecioEl.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labelsPrecio,
+                    datasets: [{
+                        label: '€/L',
+                        data: preciosPorLitro,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#2563eb'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+            });
+
+            // Tabla detallada & KPIs
+            const tableBody = document.getElementById('repostajesTableBody');
+            tableBody.innerHTML = '';
+            let totalKmDiff = 0, totalLitros = 0, totalAutonomia = 0, count = 0;
+            let totalPriceSpent = 0, totalFuelLiters = 0;
+            const sortedFuelDesc = [...data.repostajes].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            for(let i = 0; i < sortedFuelDesc.length - 1; i++) {
+                const current = sortedFuelDesc[i], prev = sortedFuelDesc[i+1];
+                const diffKm = current.km - prev.km, litros = current.litros;
+                if(litros > 0 && diffKm > 0) {
+                    const consumption = diffKm / litros, autonomia = litros * consumption;
+                    totalKmDiff += diffKm; totalLitros += litros; totalAutonomia += autonomia; count++;
+                    const pricePerL = current.price > 0 ? (current.price / litros).toFixed(2) + ' €' : '-';
+                    tableBody.innerHTML += `
+                        <tr class="border-b border-slate-50">
+                            <td class="py-3 font-semibold text-slate-700">${current.date.split('T')[0]}</td>
+                            <td class="py-3 text-right font-mono-num">${current.km}</td>
+                            <td class="py-3 text-right font-mono-num">${litros.toFixed(1)}</td>
+                            <td class="py-3 text-right font-black text-amber-800 font-mono-num">${consumption.toFixed(1)}</td>
+                            <td class="py-3 text-right text-slate-500 font-mono-num">${pricePerL}</td>
+                        </tr>
+                    `;
+                }
+            }
+
+            // Gasto total acumulado (repostajes + inventario)
+            let totalGastos = 0;
+            data.repostajes.forEach(r => { 
+                if (r.price > 0) { 
+                    totalGastos += r.price; 
+                    if (r.litros > 0) { totalPriceSpent += r.price; totalFuelLiters += r.litros; }
+                } 
+            });
+            data.inventario.forEach(inv => { if (inv.price > 0) totalGastos += inv.price; });
+
+            if(count > 0) {
+                const avgCons = totalKmDiff / totalLitros;
+                document.getElementById('avgConsumo').innerText = avgCons.toFixed(2) + ' km/L';
+            }
+            
+            // Coste € / 100 km
+            if (totalKmDiff > 0 && totalPriceSpent > 0) {
+                const costPer100 = (totalPriceSpent / totalKmDiff) * 100;
+                document.getElementById('statCostPer100').innerText = costPer100.toFixed(2) + ' €';
+            } else {
+                document.getElementById('statCostPer100').innerText = '- €';
+            }
+
+            // Precio medio litro
+            if (totalFuelLiters > 0 && totalPriceSpent > 0) {
+                const avgPriceL = totalPriceSpent / totalFuelLiters;
+                document.getElementById('statAvgPricePerLiter').innerText = avgPriceL.toFixed(3) + ' €/L';
+            } else {
+                document.getElementById('statAvgPricePerLiter').innerText = '- €';
+            }
+
+            document.getElementById('statTotalSpent').innerText = totalGastos.toFixed(2) + ' €';
+        }
+
+        // --- RENDER ALL ---
+        function renderAll() {
+            document.getElementById('mainOdo').value = data.odometer;
+            document.getElementById('logKm').value = data.odometer;
+            document.getElementById('homeFuelDisplay').innerHTML = `${data.homeFuelStock.toFixed(1)}<span class="text-xs ml-1">L</span>`;
+            
+            if(!document.getElementById('logDate').value) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('logDate').value = now.toISOString().slice(0, 16);
+            }
+
+            // 1. Render Bujía viva integrada en la tarjeta Motor
+            const sparkItem = data.mantenimientos.find(m => m.id === 'bujia' || m.nombre.toLowerCase().includes('bujía'));
+            if (sparkItem) {
+                const sTrans = data.odometer - sparkItem.ultimo;
+                const sInterval = sparkItem.intervalo || 2000;
+                const sRest = Math.max(0, sInterval - sTrans);
+                const sPerc = Math.max(5, Math.min(100, (sRest / sInterval) * 100));
+                
+                const sRestText = document.getElementById('sparkRestText');
+                const sBar = document.getElementById('sparkProgressBar');
+                if (sRestText) {
+                    sRestText.innerHTML = `<span class="${sRest < 300 ? 'text-red-500 font-bold' : 'text-amber-800 font-bold'}">Faltan ${sRest} km</span> <span class="text-slate-400 font-normal">(${sTrans} km recorridos)</span>`;
+                }
+                if (sBar) {
+                    sBar.style.width = `${sPerc}%`;
+                    sBar.className = (sRest < 300 ? 'bg-red-500' : 'bg-amber-600') + ' h-full transition-all duration-1000';
+                }
+            }
+
+            // 2. Render de Mantenimientos dirigidos a sus tarjetas temáticas (Motor, Eléctrico, Chasis, Extras)
+            const motorBox = document.getElementById('motorMaintList');
+            const motorContainer = document.getElementById('motorMaintContainer');
+            const electricBox = document.getElementById('electricMaintList');
+            const electricContainer = document.getElementById('electricMaintContainer');
+            const chassisBox = document.getElementById('chassisMaintList');
+            const customPartsBox = document.getElementById('customPartsList');
+            const customPartsCard = document.getElementById('customPartsCard');
+            
+            if (motorBox) motorBox.innerHTML = '';
+            if (electricBox) electricBox.innerHTML = '';
+            if (chassisBox) chassisBox.innerHTML = '';
+            if (customPartsBox) customPartsBox.innerHTML = '';
+            
+            let hasMotorParts = false;
+            let hasElectricParts = false;
+            let hasCustomParts = false;
+
+            data.mantenimientos.forEach(m => {
+                if (m.id === 'bujia' || (m.nombre.toLowerCase().includes('bujía') && (m.categoria === 'Motor' || !m.categoria))) return; // Ya integrado en cabecera de motor
+                
+                const catLower = (m.categoria || '').toLowerCase();
+                const nameLower = (m.nombre || '').toLowerCase();
+                
+                let targetBox = customPartsBox;
+                
+                // Clasificación inteligente por categoría y nombre
+                if (catLower.includes('chasis') || catLower.includes('rueda') || catLower.includes('freno') || m.id === 'frenos' || nameLower.includes('zapata') || nameLower.includes('freno') || nameLower.includes('neumático') || nameLower.includes('rueda') || nameLower.includes('amortiguador')) {
+                    targetBox = chassisBox;
+                } else if (catLower.includes('eléctrico') || catLower.includes('electrico') || nameLower.includes('batería') || nameLower.includes('regulador') || nameLower.includes('relé') || nameLower.includes('fusible') || nameLower.includes('estátor') || nameLower.includes('bobina')) {
+                    targetBox = electricBox;
+                    hasElectricParts = true;
+                } else if (catLower.includes('motor') || catLower.includes('transmisión') || catLower.includes('transmision') || nameLower.includes('aceite') || nameLower.includes('embrague') || nameLower.includes('carburador') || nameLower.includes('cilindro') || nameLower.includes('pistón') || nameLower.includes('escape') || nameLower.includes('filtro')) {
+                    targetBox = motorBox;
+                    hasMotorParts = true;
+                } else {
+                    targetBox = customPartsBox;
+                    hasCustomParts = true;
+                }
+
+                const trans = data.odometer - m.ultimo;
+                const isFixedPiece = !m.intervalo || m.intervalo <= 0;
+                let infoTop = '';
+                let barHtml = '';
+                
+                if (isFixedPiece) {
+                    infoTop = `
+                        <span class="text-emerald-700 font-bold">Lleva ${Math.max(0, trans)} km en uso</span>
+                        <span class="text-slate-400">Instalado a los ${m.ultimo} km</span>
+                    `;
+                    barHtml = `<div class="bg-emerald-500 h-full w-full rounded-full"></div>`;
+                } else {
+                    const rest = Math.max(0, m.intervalo - trans);
+                    const perc = Math.max(5, Math.min(100, (rest / m.intervalo) * 100));
+                    infoTop = `
+                        <span class="${rest < 400 ? 'text-red-500 font-bold' : 'text-slate-600 font-bold'}">Faltan ${rest} km</span>
+                        <span class="text-slate-400">Cada ${m.intervalo} km</span>
+                    `;
+                    barHtml = `<div class="${rest < 400 ? 'bg-red-500' : 'bg-blue-600'} h-full transition-all duration-1000" style="width: ${perc}%"></div>`;
+                }
+
+                if (targetBox) {
+                    targetBox.innerHTML += `
+                        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                            <div class="flex justify-between items-start">
+                                <div onclick="openModal('${m.id}')" class="flex-1 cursor-pointer">
+                                    <h5 class="font-bold text-slate-800 text-xs">${m.nombre}</h5>
+                                    <span class="text-[9px] font-semibold text-slate-400">${m.categoria}</span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <button onclick="deleteMaint('${m.id}')" class="text-slate-300 hover:text-red-400 p-1.5 transition-colors"><i class="fas fa-trash-alt text-xs"></i></button>
+                                    <button onclick="performMaint('${m.id}')" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm active:scale-95 transition-all">Reset</button>
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-[9px] font-black uppercase tracking-widest">
+                                ${infoTop}
+                            </div>
+                            <div class="w-full bg-slate-200/70 h-2 rounded-full overflow-hidden">
+                                ${barHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (motorContainer) motorContainer.classList.toggle('hidden', !hasMotorParts);
+            if (electricContainer) electricContainer.classList.toggle('hidden', !hasElectricParts);
+            if (customPartsCard) customPartsCard.classList.toggle('hidden', !hasCustomParts);
+
+            const logsBox = document.getElementById('logsHistory');
+            logsBox.innerHTML = '<h3 class="text-[10px] font-black uppercase text-slate-400 px-2 mb-3 tracking-widest">Últimos Movimientos</h3>';
+            [...data.repostajes.map(x=>({...x, lName:'repostajes'})), ...data.inventario.map(x=>({...x, lName:'inventario'}))]
+                .sort((a,b)=>new Date(b.date) - new Date(a.date)).slice(0, 15).forEach(l => {
+                    const isFuel = l.lName === 'repostajes';
+                    logsBox.innerHTML += `<div class="card p-4 flex justify-between items-center">
+                        <div class="flex-1 cursor-pointer" onclick="editLog('${l.id}', '${l.lName}')">
+                            <p class="font-bold text-sm text-slate-700">${l.title}</p>
+                            <p class="text-[9px] font-black text-slate-300 uppercase tracking-tighter">${l.date.split('T')[0]} • ${l.km} km ${l.notes ? '• ' + l.notes : ''}</p>
+                        </div>
+                        <div class="text-right flex items-center gap-4">
+                            <div>
+                                <p class="font-black text-slate-800">${l.price > 0 ? l.price.toFixed(2) + '€' : (l.litros > 0 ? (l.litros + 'L') : '0.00€')}</p>
+                                ${l.litros > 0 && isFuel ? `<p class="text-[8px] font-bold text-amber-700">${l.litros}L</p>` : ''}
+                            </div>
+                            <button onclick="deleteLog('${l.id}', '${l.lName}')" class="text-slate-200 hover:text-red-400 transition-colors"><i class="fas fa-times-circle text-lg"></i></button>
+                        </div>
+                    </div>`;
+                });
+
+            const bList = document.getElementById('bulbsList');
+            if (data.bombillas && data.bombillas.length > 0) {
+                bList.innerHTML = data.bombillas.map(b => {
+                    const bId = b.id || (b.type + b.date + b.km);
+                    const costTxt = b.price > 0 ? ` • ${b.price.toFixed(2)}€` : '';
+                    const noteTxt = b.notes ? ` • ${b.notes}` : '';
+                    return `<div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-100 hover:border-amber-200 transition-all">
+                        <div class="flex-1">
+                            <p class="font-bold text-xs text-slate-800">${b.type}</p>
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mt-0.5">${b.date} • ${b.km} km${costTxt}${noteTxt}</p>
+                        </div>
+                        <button onclick="deleteBulb('${bId}')" class="text-slate-300 hover:text-red-500 p-1.5 transition-colors ml-2" title="Eliminar"><i class="fas fa-trash-alt text-xs"></i></button>
+                    </div>`;
+                }).join('');
+            } else {
+                bList.innerHTML = `<div class="p-4 bg-slate-50 rounded-2xl text-center border border-dashed border-slate-200">
+                    <p class="text-xs text-slate-400 font-semibold">Sin sustituciones registradas aún</p>
+                </div>`;
+            }
+            
+            if (data.repostajes.length >= 2) {
+                const sortedFuel = [...data.repostajes].sort((a, b) => new Date(b.date) - new Date(a.date));
+                const last = sortedFuel[0];
+                let totalKmDiff = 0, totalLitrosUsed = 0;
+                for(let i = 0; i < sortedFuel.length - 1; i++) {
+                    const diff = sortedFuel[i].km - sortedFuel[i+1].km;
+                    if(diff > 0 && sortedFuel[i].litros > 0) { totalKmDiff += diff; totalLitrosUsed += sortedFuel[i].litros; }
+                }
+                const avgConsumption = totalLitrosUsed > 0 ? (totalKmDiff / totalLitrosUsed) : 0;
+
+                if (avgConsumption > 0) {
+                    document.getElementById('lastFuelDate').innerText = last.date.split('T')[0];
+                    const maxRange = last.litros * avgConsumption, traveled = data.odometer - last.km;
+                    const remaining = Math.max(0, maxRange - traveled), perc = Math.max(0, Math.min(100, (remaining / maxRange) * 100));
+                    document.getElementById('estRangeText').innerText = `${remaining.toFixed(0)} km`;
+                    document.getElementById('estRangeBar').style.width = `${perc}%`;
+                    document.getElementById('estRangeDetails').innerText = `Media: ${avgConsumption.toFixed(2)} km/L | Límite: ${(last.km + maxRange).toFixed(0)} km`;
+                    
+                    const headerLimit = document.getElementById('headerOdoLimit');
+                    if (headerLimit) headerLimit.innerText = `${(last.km + maxRange).toFixed(0)} km`;
+                }
+            }
+            
+            const spark = data.mantenimientos.find(m => m.id === 'aceite' || m.id === 'bujia');
+            document.getElementById('nextSpark').innerText = spark ? (spark.ultimo + spark.intervalo - data.odometer) : '-';
+
+            // 3. Render Tracker de Presión de Neumáticos (Intervalo 21 días / 3 semanas)
+            renderPressureTracker();
+
+            // 4. Render Checklist / Alertas Críticas en Garaje
+            renderGarageCriticalAlerts();
+            renderLegalDocs();
+        }
+
+        
+        // --- CONTROL LEGAL: ITV & SEGURO ---
+        function openDocModal(docType = 'itv') {
+            document.getElementById('docTypeSelect').value = docType;
+            onDocTypeChange(docType);
+            
+            data.documentacion = data.documentacion || {};
+            const docInfo = data.documentacion[docType] || {};
+            
+            document.getElementById('docExpiryDate').value = docInfo.expiry || '';
+            document.getElementById('docPrice').value = docInfo.price || '';
+            document.getElementById('docEntity').value = docInfo.entity || '';
+            document.getElementById('docNotes').value = docInfo.notes || '';
+            document.getElementById('docAddExpense').checked = false;
+            
+            document.getElementById('docModal').classList.add('active');
+        }
+
+        function closeDocModal() {
+            document.getElementById('docModal').classList.remove('active');
+        }
+
+        function onDocTypeChange(val) {
+            const isItv = val === 'itv';
+            document.getElementById('docModalTitle').innerText = isItv ? "Renovación ITV" : "Póliza / Seguro Moto";
+            document.getElementById('docModalBadge').innerText = isItv ? "Inspección Técnica" : "Póliza de Seguro";
+            document.getElementById('docEntity').placeholder = isItv ? "Ej: ITV Alhama, Applus..." : "Ej: Mapfre, Allianz, Verti...";
+        }
+
+        function saveDocRecord() {
+            const type = document.getElementById('docTypeSelect').value;
+            const expiry = document.getElementById('docExpiryDate').value;
+            const price = parseFloat(document.getElementById('docPrice').value) || 0;
+            const entity = document.getElementById('docEntity').value.trim();
+            const notes = document.getElementById('docNotes').value.trim();
+            const addExpense = document.getElementById('docAddExpense').checked;
+
+            if (!expiry) {
+                alert("Por favor, introduce la fecha de vencimiento");
+                return;
+            }
+
+            data.documentacion = data.documentacion || {};
+            data.documentacion[type] = {
+                expiry: expiry,
+                price: price,
+                entity: entity,
+                notes: notes,
+                lastUpdated: new Date().toISOString().slice(0, 10)
+            };
+
+            // Registro automático en Gastos
+            if (addExpense && price > 0) {
+                data.inventario = data.inventario || [];
+                const expTitle = type === 'itv' ? `Inspección ITV (${entity || 'Estación'})` : `Seguro Anual (${entity || 'Compañía'})`;
+                const expNotes = [notes, `Vence: ${expiry}`].filter(Boolean).join(' • ');
+                data.inventario.unshift({
+                    id: 'l_doc_' + Date.now(),
+                    logType: 'pieza',
+                    date: new Date().toISOString().slice(0, 16),
+                    title: expTitle,
+                    price: price,
+                    km: data.odometer,
+                    notes: expNotes
+                });
+                data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+
+            closeDocModal();
+            saveData();
+            showToast(type === 'itv' ? 'Fecha de ITV actualizada' : 'Póliza de seguro guardada');
+        }
+
+        function renderLegalDocs() {
+            data.documentacion = data.documentacion || {};
+            const now = new Date();
+            now.setHours(0,0,0,0);
+
+            // 1. ITV
+            const itvInfo = data.documentacion.itv;
+            const itvDateEl = document.getElementById('itvDateDisplay');
+            const itvDaysEl = document.getElementById('itvDaysLeft');
+            const itvBadge = document.getElementById('itvStatusBadge');
+
+            if (itvInfo && itvInfo.expiry) {
+                const exp = new Date(itvInfo.expiry);
+                exp.setHours(0,0,0,0);
+                const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+                itvDateEl.innerText = itvInfo.expiry;
+
+                if (diffDays < 0) {
+                    itvDaysEl.innerHTML = `<span class="text-red-600 font-bold">¡Vencida hace ${Math.abs(diffDays)} d!</span>`;
+                    itvBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-red-100 text-red-700 animate-pulse';
+                    itvBadge.innerText = 'Caducada';
+                } else if (diffDays <= 30) {
+                    itvDaysEl.innerHTML = `<span class="text-amber-700 font-bold">Vence en ${diffDays} días</span>`;
+                    itvBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-amber-100 text-amber-800';
+                    itvBadge.innerText = 'Próxima';
+                } else {
+                    itvDaysEl.innerText = `Faltan ${diffDays} días`;
+                    itvBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800';
+                    itvBadge.innerText = 'En Vigor';
+                }
+            } else {
+                itvDateEl.innerText = "-";
+                itvDaysEl.innerText = "Tocar para añadir";
+                itvBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-500';
+                itvBadge.innerText = "Sin datos";
+            }
+
+            // 2. Seguro
+            const segInfo = data.documentacion.seguro;
+            const segDateEl = document.getElementById('seguroDateDisplay');
+            const segDaysEl = document.getElementById('seguroDaysLeft');
+            const segBadge = document.getElementById('seguroStatusBadge');
+
+            if (segInfo && segInfo.expiry) {
+                const exp = new Date(segInfo.expiry);
+                exp.setHours(0,0,0,0);
+                const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+                segDateEl.innerText = segInfo.expiry;
+
+                if (diffDays < 0) {
+                    segDaysEl.innerHTML = `<span class="text-red-600 font-bold">¡Vencido hace ${Math.abs(diffDays)} d!</span>`;
+                    segBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-red-100 text-red-700 animate-pulse';
+                    segBadge.innerText = 'Caducado';
+                } else if (diffDays <= 30) {
+                    segDaysEl.innerHTML = `<span class="text-amber-700 font-bold">Renovar en ${diffDays} días</span>`;
+                    segBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-amber-100 text-amber-800';
+                    segBadge.innerText = 'Próximo';
+                } else {
+                    segDaysEl.innerText = `Faltan ${diffDays} días`;
+                    segBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800';
+                    segBadge.innerText = 'En Vigor';
+                }
+            } else {
+                segDateEl.innerText = "-";
+                segDaysEl.innerText = "Tocar para añadir";
+                segBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-500';
+                segBadge.innerText = "Sin datos";
+            }
+        }
+
+        function renderGarageCriticalAlerts() {
+            const container = document.getElementById('garageCriticalAlertsList');
+            const overallBadge = document.getElementById('garageOverallBadge');
+            if (!container) return;
+
+            const alerts = [];
+            const nowDay = new Date();
+            nowDay.setHours(0,0,0,0);
+
+            // 0. Alertas Legales (ITV & Seguro)
+            data.documentacion = data.documentacion || {};
+            
+            // ITV
+            if (!data.documentacion.itv || !data.documentacion.itv.expiry) {
+                alerts.push({
+                    icon: 'fas fa-id-card',
+                    color: 'text-amber-600',
+                    bg: 'bg-amber-50/80 border-amber-200',
+                    title: 'ITV Sin Registrar',
+                    desc: 'No has configurado la fecha de vencimiento de la ITV.',
+                    action: "openDocModal('itv')",
+                    btnText: 'Añadir',
+                    badge: 'Pendiente',
+                    badgeCls: 'bg-amber-100 text-amber-800'
+                });
+            } else {
+                const itvExp = new Date(data.documentacion.itv.expiry);
+                itvExp.setHours(0,0,0,0);
+                const dDiff = Math.ceil((itvExp - nowDay) / (1000 * 60 * 60 * 24));
+                if (dDiff < 0) {
+                    alerts.push({
+                        icon: 'fas fa-id-card',
+                        color: 'text-red-500',
+                        bg: 'bg-red-50/80 border-red-200',
+                        title: 'ITV Caducada',
+                        desc: `La ITV venció el ${data.documentacion.itv.expiry} (hace ${Math.abs(dDiff)} días).`,
+                        action: "openDocModal('itv')",
+                        btnText: 'Renovar',
+                        badge: 'Urgente',
+                        badgeCls: 'bg-red-100 text-red-700'
+                    });
+                } else if (dDiff <= 30) {
+                    alerts.push({
+                        icon: 'fas fa-id-card',
+                        color: 'text-amber-600',
+                        bg: 'bg-amber-50/80 border-amber-200',
+                        title: 'ITV Próxima a Vencer',
+                        desc: `Vence en ${dDiff} día${dDiff === 1 ? '' : 's'} (${data.documentacion.itv.expiry}).`,
+                        action: "openDocModal('itv')",
+                        btnText: 'Ver',
+                        badge: '30 Días',
+                        badgeCls: 'bg-amber-100 text-amber-800'
+                    });
+                }
+            }
+
+            // Seguro
+            if (!data.documentacion.seguro || !data.documentacion.seguro.expiry) {
+                alerts.push({
+                    icon: 'fas fa-shield-halved',
+                    color: 'text-amber-600',
+                    bg: 'bg-amber-50/80 border-amber-200',
+                    title: 'Seguro Sin Registrar',
+                    desc: 'No has configurado la fecha de renovación del seguro.',
+                    action: "openDocModal('seguro')",
+                    btnText: 'Añadir',
+                    badge: 'Pendiente',
+                    badgeCls: 'bg-amber-100 text-amber-800'
+                });
+            } else {
+                const segExp = new Date(data.documentacion.seguro.expiry);
+                segExp.setHours(0,0,0,0);
+                const sDiff = Math.ceil((segExp - nowDay) / (1000 * 60 * 60 * 24));
+                if (sDiff < 0) {
+                    alerts.push({
+                        icon: 'fas fa-shield-halved',
+                        color: 'text-red-500',
+                        bg: 'bg-red-50/80 border-red-200',
+                        title: 'Seguro Caducado',
+                        desc: `El seguro venció el ${data.documentacion.seguro.expiry}. ¡No circular!`,
+                        action: "openDocModal('seguro')",
+                        btnText: 'Renovar',
+                        badge: 'Urgente',
+                        badgeCls: 'bg-red-100 text-red-700'
+                    });
+                } else if (sDiff <= 30) {
+                    alerts.push({
+                        icon: 'fas fa-shield-halved',
+                        color: 'text-amber-600',
+                        bg: 'bg-amber-50/80 border-amber-200',
+                        title: 'Seguro Próximo a Renovar',
+                        desc: `Vence en ${sDiff} día${sDiff === 1 ? '' : 's'} (${data.documentacion.seguro.expiry}).`,
+                        action: "openDocModal('seguro')",
+                        btnText: 'Ver',
+                        badge: '30 Días',
+                        badgeCls: 'bg-amber-100 text-amber-800'
+                    });
+                }
+            }
+
+            // 1. Alerta de Presión (3 semanas)
+            const pressureRecords = (data.bombillas || []).filter(b => (b.type && b.type.toLowerCase().includes('presión')) || (b.notes && b.notes.toLowerCase().includes('presión')));
+            let pDate = null;
+            if (pressureRecords.length > 0) {
+                pressureRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+                pDate = new Date(pressureRecords[0].date);
+            } else if (data.repostajes && data.repostajes.length > 0) {
+                pDate = new Date(data.repostajes[data.repostajes.length - 1].date);
+            } else {
+                pDate = new Date();
+            }
+            const pDiffDays = Math.floor(Math.abs(new Date() - pDate) / (1000 * 60 * 60 * 24));
+            const pDaysLeft = 21 - pDiffDays;
+
+            if (pDaysLeft <= 0) {
+                alerts.push({
+                    icon: 'fas fa-circle-notch',
+                    color: 'text-red-500',
+                    bg: 'bg-red-50/80 border-red-200',
+                    title: 'Presión de Neumáticos Vencida',
+                    desc: `Han pasado ${pDiffDays} días desde la última revisión (hace ${Math.abs(pDaysLeft)} días de exceso).`,
+                    action: "openPressureModal('Revisión Presión Ruedas')",
+                    btnText: 'Revisar',
+                    badge: 'Crítico',
+                    badgeCls: 'bg-red-100 text-red-700'
+                });
+            } else if (pDaysLeft <= 4) {
+                alerts.push({
+                    icon: 'fas fa-circle-notch',
+                    color: 'text-amber-600',
+                    bg: 'bg-amber-50/80 border-amber-200',
+                    title: 'Revisión de Presión Próxima',
+                    desc: `Toca verificar presiones en ${pDaysLeft} día${pDaysLeft === 1 ? '' : 's'} (1.25 / 1.80 bar).`,
+                    action: "openPressureModal('Revisión Presión Ruedas')",
+                    btnText: 'Ajustar',
+                    badge: 'Atención',
+                    badgeCls: 'bg-amber-100 text-amber-800'
+                });
+            }
+
+            // 2. Alerta de Bujía (NGK B7HS)
+            const sparkItem = data.mantenimientos.find(m => m.id === 'bujia' || m.nombre.toLowerCase().includes('bujía'));
+            if (sparkItem) {
+                const sTrans = data.odometer - sparkItem.ultimo;
+                const sInterval = sparkItem.intervalo || 2000;
+                const sRest = sInterval - sTrans;
+                if (sRest <= 0) {
+                    alerts.push({
+                        icon: 'fas fa-plug',
+                        color: 'text-red-500',
+                        bg: 'bg-red-50/80 border-red-200',
+                        title: 'Cambio de Bujía Necesario',
+                        desc: `La bujía NGK B7HS ha superado los ${sInterval} km recomendados (+${Math.abs(sRest)} km).`,
+                        action: 'openSparkModal()',
+                        btnText: 'Cambiar',
+                        badge: 'Vencido',
+                        badgeCls: 'bg-red-100 text-red-700'
+                    });
+                } else if (sRest <= 300) {
+                    alerts.push({
+                        icon: 'fas fa-plug',
+                        color: 'text-amber-600',
+                        bg: 'bg-amber-50/80 border-amber-200',
+                        title: 'Bujía Próxima a Desgaste',
+                        desc: `Quedan ${sRest} km para el cambio programado de la bujía.`,
+                        action: 'openSparkModal()',
+                        btnText: 'Ver',
+                        badge: 'Próximo',
+                        badgeCls: 'bg-amber-100 text-amber-800'
+                    });
+                }
+            }
+
+            // 3. Alertas de Otras Piezas (Frenos, Neumáticos, Aceite de Caja)
+            data.mantenimientos.forEach(m => {
+                if (m.id === 'bujia' || m.nombre.toLowerCase().includes('bujía')) return;
+                if (!m.intervalo || m.intervalo <= 0) return;
+                const trans = data.odometer - m.ultimo;
+                const rest = m.intervalo - trans;
+                if (rest <= 0) {
+                    alerts.push({
+                        icon: 'fas fa-wrench',
+                        color: 'text-red-500',
+                        bg: 'bg-red-50/80 border-red-200',
+                        title: `${m.nombre} Vencido`,
+                        desc: `Excedido por ${Math.abs(rest)} km del intervalo de ${m.intervalo} km.`,
+                        action: `showTab('health')`,
+                        btnText: 'Revisar',
+                        badge: 'Mantenimiento',
+                        badgeCls: 'bg-red-100 text-red-700'
+                    });
+                } else if (rest <= 400) {
+                    alerts.push({
+                        icon: 'fas fa-wrench',
+                        color: 'text-amber-600',
+                        bg: 'bg-amber-50/80 border-amber-200',
+                        title: `${m.nombre} Próximo`,
+                        desc: `Restan solo ${rest} km para cumplir los ${m.intervalo} km.`,
+                        action: `showTab('health')`,
+                        btnText: 'Ver',
+                        badge: 'Atención',
+                        badgeCls: 'bg-amber-100 text-amber-800'
+                    });
+                }
+            });
+
+            // 4. Si no hay ninguna alerta crítica activa
+            if (alerts.length === 0) {
+                if (overallBadge) {
+                    overallBadge.className = 'text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-black uppercase';
+                    overallBadge.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Lista para Rodar';
+                }
+                container.innerHTML = `
+                    <div class="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm">
+                            <i class="fas fa-motorcycle"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-xs text-emerald-950">Vespa PK 125 S al 100%</p>
+                            <p class="text-[10px] text-emerald-800">Presiones, bujía y consumibles dentro de los rangos óptimos.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                if (overallBadge) {
+                    overallBadge.className = 'text-[9px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-black uppercase animate-pulse';
+                    overallBadge.innerHTML = `<i class="fas fa-bell mr-1"></i>${alerts.length} Aviso${alerts.length > 1 ? 's' : ''}`;
+                }
+                container.innerHTML = alerts.map(a => `
+                    <div class="p-2.5 rounded-xl border ${a.bg} flex justify-between items-center gap-2">
+                        <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                            <div class="w-7 h-7 rounded-lg bg-white/80 ${a.color} flex items-center justify-center text-xs shrink-0 shadow-xs">
+                                <i class="${a.icon}"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <p class="font-bold text-xs text-slate-800 truncate">${a.title}</p>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded ${a.badgeCls}">${a.badge}</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 truncate">${a.desc}</p>
+                            </div>
+                        </div>
+                        <button onclick="${a.action}" class="bg-slate-900 hover:bg-slate-800 text-white px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider shrink-0 shadow-xs active:scale-95 transition-all">
+                            ${a.btnText}
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderPressureTracker() {
+            const statusEl = document.getElementById('pressureTrackerStatus');
+            const lastDateEl = document.getElementById('pressureLastDate');
+            const barEl = document.getElementById('pressureProgressBar');
+            if (!statusEl || !barEl) return;
+
+            // Buscar la última revisión de presión registrada en el historial de bombillas/mantenimientos
+            const pressureRecords = (data.bombillas || []).filter(b => (b.type && b.type.toLowerCase().includes('presión')) || (b.notes && b.notes.toLowerCase().includes('presión')));
+            
+            const INTERVAL_DAYS = 21; // 3 semanas
+            let lastDate = null;
+            let lastKm = 0;
+
+            if (pressureRecords.length > 0) {
+                // Ordenar por fecha más reciente
+                pressureRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+                lastDate = new Date(pressureRecords[0].date);
+                lastKm = pressureRecords[0].km || 0;
+            } else if (data.repostajes && data.repostajes.length > 0) {
+                // Si no hay registro explícito, usar la fecha de inicio o primer registro conocido
+                const oldest = data.repostajes[data.repostajes.length - 1];
+                lastDate = new Date(oldest.date);
+            } else {
+                lastDate = new Date();
+            }
+
+            const now = new Date();
+            const diffTime = Math.abs(now - lastDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const remainingDays = Math.max(0, INTERVAL_DAYS - diffDays);
+            const perc = Math.max(5, Math.min(100, (remainingDays / INTERVAL_DAYS) * 100));
+
+            const kmSince = data.odometer - lastKm;
+
+            if (lastDateEl && pressureRecords.length > 0) {
+                lastDateEl.innerText = `Última: ${pressureRecords[0].date.split('T')[0]}`;
+            } else if (lastDateEl) {
+                lastDateEl.innerText = 'Sin registro previo';
+            }
+
+            if (diffDays >= INTERVAL_DAYS) {
+                const overdue = diffDays - INTERVAL_DAYS;
+                statusEl.innerHTML = `<span class="text-red-600 font-bold"><i class="fas fa-exclamation-triangle mr-1 animate-pulse"></i>¡Revisar presión hoy!</span> <span class="text-slate-500 font-normal">(${diffDays} días / +${kmSince} km)</span>`;
+                barEl.style.width = '100%';
+                barEl.className = 'bg-red-500 h-full transition-all duration-1000';
+            } else if (remainingDays <= 4) {
+                statusEl.innerHTML = `<span class="text-amber-700 font-bold"><i class="fas fa-clock mr-1"></i>Toca revisar en ${remainingDays} día${remainingDays === 1 ? '' : 's'}</span> <span class="text-slate-400 font-normal">(hace ${diffDays} días)</span>`;
+                barEl.style.width = `${perc}%`;
+                barEl.className = 'bg-amber-500 h-full transition-all duration-1000';
+            } else {
+                statusEl.innerHTML = `<span class="text-emerald-700 font-bold"><i class="fas fa-check mr-1"></i>Presión al día</span> <span class="text-slate-500 font-normal">(Faltan ${remainingDays} días • ${diffDays}/21 días)</span>`;
+                barEl.style.width = `${perc}%`;
+                barEl.className = 'bg-blue-600 h-full transition-all duration-1000';
+            }
+        }
+
+        checkAppLockState();
+    </script>
+</body>
+</html>

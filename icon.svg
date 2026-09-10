@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="camelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d4b483"/>
+      <stop offset="50%" stop-color="#c19a6b"/>
+      <stop offset="100%" stop-color="#8b5a2b"/>
+    </linearGradient>
+    <radialGradient id="dialGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </radialGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- App Icon Rounded Container -->
+  <rect x="16" y="16" width="480" height="480" rx="100" fill="url(#camelGrad)" filter="url(#dropShadow)"/>
+  <rect x="28" y="28" width="456" height="456" rx="90" fill="none" stroke="#ffffff" stroke-width="4" stroke-opacity="0.4"/>
+  
+  <!-- Cream Plate -->
+  <circle cx="256" cy="230" r="160" fill="#f8f9fa" stroke="#8b5a2b" stroke-width="6"/>
+  
+  <!-- Vintage Speedometer Dial -->
+  <circle cx="256" cy="230" r="130" fill="url(#dialGrad)" stroke="#c19a6b" stroke-width="8"/>
+  
+  <!-- Dial Ticks -->
+  <circle cx="256" cy="230" r="110" fill="none" stroke="#d4b483" stroke-width="3" stroke-dasharray="4, 18"/>
+  
+  <!-- Red Speedometer Needle -->
+  <line x1="256" y1="230" x2="330" y2="170" stroke="#ef4444" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="230" r="16" fill="#cbd5e1" stroke="#8b5a2b" stroke-width="4"/>
+  <circle cx="256" cy="230" r="6" fill="#ef4444"/>
+  
+  <!-- Vintage Vespa Ribbon / Plate -->
+  <rect x="86" y="380" width="340" height="74" rx="24" fill="#1e293b" stroke="#c19a6b" stroke-width="4" filter="url(#dropShadow)"/>
+  <text x="256" y="428" font-family="'DM Serif Display', Georgia, serif" font-size="34" font-weight="bold" fill="#f8f9fa" text-anchor="middle" letter-spacing="2">
+    VESPA<tspan fill="#c19a6b">CARE</tspan>
+  </text>
+</svg>
