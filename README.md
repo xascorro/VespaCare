@@ -41,6 +41,26 @@
 
 ---
 
+## 🗺️ Hoja de Ruta / Roadmap (Futuras Mejoras)
+
+Ideas y propuestas de evolución planificadas para próximas versiones:
+
+- [ ] **Taller & Garaje:**
+  - [ ] **Modo Taller (Screen Wake Lock):** Mantener la pantalla del móvil siempre encendida mientras se consultan manuales o pares de apriete con las manos en faena.
+  - [ ] **Control de Rueda de Repuesto:** Seguimiento de presión y desgaste de la rueda alojada en el cófano izquierdo.
+  - [ ] **Protocolo de Invernaje / Parada Larga:** Checklist reactivo tras 3-4 semanas de inactividad (cierre de grifo, drenaje cuba carburador, desconexión borne batería).
+
+- [ ] **Repostaje & OCR:**
+  - [ ] **Modo Gasolinera Express:** Botón rápido de 1 clic para calcular litros y mezcla exacta introduciendo solo km e importe.
+  - [ ] **Lector OCR de Tickets:** Extracción automática de fecha, importe y litros fotografiando el ticket del surtidor o recambio.
+
+- [ ] **Informes & Exportación:**
+  - [ ] **Libro de Mantenimiento Digital (PDF):** Generador de informe histórico maquetado para archivo o certificación clásica del vehículo.
+  - [ ] **Exportación CSV / Excel:** Descarga de registros para análisis contable externo.
+  - [ ] **Alertas Proactivas (Telegram Bot / Web Push):** Notificaciones al móvil ante vencimientos inminentes de ITV o revisión de presiones.
+
+---
+
 ## 🚀 Despliegue Rápido
 
 1. Clonar el repositorio en tu servidor web (Nginx / Apache + PHP 8.x):
