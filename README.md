@@ -8,9 +8,11 @@
 
 ## ⚡ Características Principales
 
-1. **🔒 Zero-Trust App Lock & API Security:**
-   - Pantalla de bloqueo nativa en PWA con teclado numérico virtual (PIN configurable).
-   - API PHP con autenticación obligatoria mediante cabecera `X-Vespa-PIN`.
+1. **🔒 Zero-Trust App Lock & Gestión Dinámica de PIN:**
+   - **Pantalla de bloqueo nativa en PWA** con teclado numérico táctil y feedback háptico/visual.
+   - **Gestión directa desde la App:** Cambio de PIN o activación/desactivación del bloqueo desde el menú de Ajustes sin tocar código ni reiniciar servicios.
+   - **Acceso Directo Opcional:** Si se desactiva la protección por PIN, la app omite la pantalla de bloqueo y la API opera sin exigir cabecera de autenticación.
+   - **Almacenamiento Aislado:** Configuración del PIN guardada en el servidor (`pin_config.json`, protegido por `.gitignore`).
 
 2. **⛽ Telemetría de Combustible & Mezcla:**
    - Estimación reactiva de autonomía restante en tiempo real basada en el histórico de consumos.
@@ -22,7 +24,7 @@
    - **Motor & Transmisión:** Ficha técnica de carburación (SHBC 19/19 E), aceite de cárter (SAE 30) y diagnóstico visual de color de bujía (NGK B7HS).
    - **Sistema Eléctrico 12V Ducati:** Registro rápido de batería 12V 9Ah (YB9-B) y regulador de tensión.
    - **Iluminación (8 casquillos):** Catálogo completo de bombillas diferenciadas por circuito AC (motor) y DC (batería).
-   - **Chasis & Neumáticos (3.00 - 10"):** Presiones recomendadas en frío (solo/acompañante) con recordatorio periódico (cada 3 semanas).
+   - **Chasis & Neumáticos (3.00 - 10"):** Presiones recomendadas en frío (solo/acompañante) con recordatorio periódico por tiempo (cada 3 semanas) y kilometraje.
 
 4. **📋 Control Legal (ITV & Seguro):**
    - Seguimiento dinámico de fechas de vencimiento con alertas preventivas en el checklist pre-rodaje de *Garaje*.
@@ -47,7 +49,9 @@
    chmod 664 data.json
    ```
 
-3. Configurar tu PIN de seguridad en `api.php` e `index.html`.
+3. **Configuración de Seguridad (PIN):**
+   - Por defecto el PIN inicial es `1960`.
+   - Puedes cambiarlo o desactivarlo en cualquier momento directamente desde la sección **Ajustes > Seguridad & Acceso (PIN)** dentro de la propia aplicación.
 
 4. Abrir en tu navegador o instalar como **PWA** en iOS / Android.
 
