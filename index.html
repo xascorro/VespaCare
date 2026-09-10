@@ -1250,6 +1250,11 @@
             return getStoredPin().length === 4;
         }
 
+        function isPinUnlocked() {
+            if (!isPinProtectedOnServer) return true;
+            return hasLocalPin();
+        }
+
         async function checkAppLockState() {
             const lockScreen = document.getElementById('appLockScreen');
             try {
@@ -1509,6 +1514,11 @@
                     return;
                 }
                 data = await res.json();
+                data.odometer = data.odometer || 0;
+                data.mantenimientos = data.mantenimientos || [];
+                data.repostajes = data.repostajes || [];
+                data.inventario = data.inventario || [];
+                data.bombillas = data.bombillas || [];
                 data.homeFuelStock = data.homeFuelStock || 0;
                 
                 data.repostajes.forEach((r, i) => { 
