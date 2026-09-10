@@ -1,4 +1,4 @@
-const CACHE_NAME = "vespacare-v31";
+const CACHE_NAME = "vespacare-v32";
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-192.png',

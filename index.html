@@ -317,9 +317,15 @@
                         <option value="seguro">🛡️ Seguro de Moto</option>
                     </select>
                 </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Fecha de Vencimiento / Próxima Renovación</label>
-                    <input type="date" id="docExpiryDate" class="font-bold text-slate-800">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label id="docIssueDateLabel" class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Fecha Trámite / Paso</label>
+                        <input type="date" id="docIssueDate" class="font-bold text-slate-700">
+                    </div>
+                    <div>
+                        <label id="docExpiryDateLabel" class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Vence / Próxima</label>
+                        <input type="date" id="docExpiryDate" class="font-bold text-slate-800">
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -1025,26 +1031,28 @@
 
                 <div class="grid grid-cols-2 gap-2.5 text-xs">
                     <!-- ITV -->
-                    <div class="p-2.5 bg-slate-50 hover:bg-emerald-50/50 rounded-xl border border-slate-100 hover:border-emerald-200 transition-all space-y-1.5">
+                    <div class="p-2.5 bg-slate-50 hover:bg-emerald-50/50 rounded-xl border border-slate-100 hover:border-emerald-200 transition-all space-y-1">
                         <div class="flex justify-between items-start cursor-pointer" onclick="openDocModal('itv')">
                             <span class="text-[9px] font-black uppercase text-slate-400 block">ITV</span>
                             <span id="itvStatusBadge" class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">Pendiente</span>
                         </div>
-                        <p id="itvDateDisplay" onclick="openDocModal('itv')" class="font-extrabold text-slate-800 text-sm font-mono-num cursor-pointer">-</p>
-                        <div class="flex justify-between items-center pt-0.5">
+                        <p id="itvDateDisplay" onclick="openDocModal('itv')" class="font-extrabold text-slate-800 text-xs font-mono-num cursor-pointer truncate">-</p>
+                        <p id="itvPeriodDisplay" onclick="openDocModal('itv')" class="text-[9px] text-slate-400 font-semibold cursor-pointer truncate"></p>
+                        <div class="flex justify-between items-center pt-1 border-t border-slate-100">
                             <p id="itvDaysLeft" onclick="openDocModal('itv')" class="text-[9px] font-semibold text-slate-400 truncate cursor-pointer">Configurar</p>
                             <div id="itvFileAction"></div>
                         </div>
                     </div>
 
                     <!-- SEGURO -->
-                    <div class="p-2.5 bg-slate-50 hover:bg-blue-50/50 rounded-xl border border-slate-100 hover:border-blue-200 transition-all space-y-1.5">
+                    <div class="p-2.5 bg-slate-50 hover:bg-blue-50/50 rounded-xl border border-slate-100 hover:border-blue-200 transition-all space-y-1">
                         <div class="flex justify-between items-start cursor-pointer" onclick="openDocModal('seguro')">
                             <span class="text-[9px] font-black uppercase text-slate-400 block">Seguro Moto</span>
                             <span id="seguroStatusBadge" class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">Pendiente</span>
                         </div>
-                        <p id="seguroDateDisplay" onclick="openDocModal('seguro')" class="font-extrabold text-slate-800 text-sm font-mono-num cursor-pointer">-</p>
-                        <div class="flex justify-between items-center pt-0.5">
+                        <p id="seguroDateDisplay" onclick="openDocModal('seguro')" class="font-extrabold text-slate-800 text-xs font-mono-num cursor-pointer truncate">-</p>
+                        <p id="seguroPeriodDisplay" onclick="openDocModal('seguro')" class="text-[9px] text-slate-400 font-semibold cursor-pointer truncate"></p>
+                        <div class="flex justify-between items-center pt-1 border-t border-slate-100">
                             <p id="seguroDaysLeft" onclick="openDocModal('seguro')" class="text-[9px] font-semibold text-slate-400 truncate cursor-pointer">Configurar</p>
                             <div id="seguroFileAction"></div>
                         </div>
@@ -2458,7 +2466,7 @@
         let pendingDocFile = null;
         let pendingGeneralDocFile = null;
 
-        function openDocModal(docType = 'itv') {
+                function openDocModal(docType = 'itv') {
             currentEditingDocType = docType;
             document.getElementById('docTypeSelect').value = docType;
             onDocTypeChange(docType);
@@ -2466,6 +2474,7 @@
             data.documentacion = data.documentacion || {};
             const docInfo = data.documentacion[docType] || {};
             
+            document.getElementById('docIssueDate').value = docInfo.issueDate || docInfo.lastUpdated || '';
             document.getElementById('docExpiryDate').value = docInfo.expiry || '';
             document.getElementById('docPrice').value = docInfo.price || '';
             document.getElementById('docEntity').value = docInfo.entity || '';
@@ -2495,8 +2504,10 @@
         function onDocTypeChange(val) {
             currentEditingDocType = val;
             const isItv = val === 'itv';
-            document.getElementById('docModalTitle').innerText = isItv ? "Renovación ITV" : "Póliza / Seguro Moto";
+            document.getElementById('docModalTitle').innerText = isItv ? "Inspección ITV" : "Póliza / Seguro Moto";
             document.getElementById('docModalBadge').innerText = isItv ? "Inspección Técnica" : "Póliza de Seguro";
+            document.getElementById('docIssueDateLabel').innerText = isItv ? "Fecha Inspección / Paso" : "Fecha Efecto / Inicio";
+            document.getElementById('docExpiryDateLabel').innerText = isItv ? "Vencimiento ITV" : "Vencimiento Seguro";
             document.getElementById('docEntity').placeholder = isItv ? "Ej: ITV Alhama, Applus..." : "Ej: Mapfre, Allianz, Verti...";
             
             data.documentacion = data.documentacion || {};
@@ -2558,6 +2569,7 @@
 
         async function saveDocRecord() {
             const type = document.getElementById('docTypeSelect').value;
+            const issueDate = document.getElementById('docIssueDate').value || new Date().toISOString().slice(0, 10);
             const expiry = document.getElementById('docExpiryDate').value;
             const price = parseFloat(document.getElementById('docPrice').value) || 0;
             const entity = document.getElementById('docEntity').value.trim();
@@ -2573,6 +2585,7 @@
 
             data.documentacion = data.documentacion || {};
             data.documentacion[type] = data.documentacion[type] || {};
+            data.documentacion[type].issueDate = issueDate;
             data.documentacion[type].expiry = expiry;
             data.documentacion[type].price = price;
             data.documentacion[type].entity = entity;
@@ -2600,15 +2613,15 @@
                 }
             }
 
-            // Registro automático en Gastos
+            // Registro automático en Gastos (usando issueDate como fecha del gasto)
             if (addExpense && price > 0) {
                 data.inventario = data.inventario || [];
                 const expTitle = type === 'itv' ? `Inspección ITV (${entity || 'Estación'})` : `Seguro Anual (${entity || 'Compañía'})`;
-                const expNotes = [notes, `Vence: ${expiry}`].filter(Boolean).join(' • ');
+                const expNotes = [notes, `Trámite: ${issueDate}`, `Vence: ${expiry}`].filter(Boolean).join(' • ');
                 data.inventario.unshift({
                     id: 'l_doc_' + Date.now(),
                     logType: 'pieza',
-                    date: new Date().toISOString().slice(0, 16),
+                    date: issueDate + 'T12:00',
                     title: expTitle,
                     price: price,
                     km: data.odometer,
@@ -2620,7 +2633,7 @@
             closeDocModal();
             saveData();
             document.getElementById('loader').style.display = 'none';
-            showToast(type === 'itv' ? 'Fecha de ITV actualizada' : 'Póliza de seguro guardada');
+            showToast(type === 'itv' ? 'Inspección ITV guardada' : 'Póliza de seguro guardada');
         }
 
         // --- GUANTERA DIGITAL MODAL & CRUD ---
@@ -2765,6 +2778,7 @@
             // 1. ITV
             const itvInfo = data.documentacion.itv;
             const itvDateEl = document.getElementById('itvDateDisplay');
+            const itvPeriodEl = document.getElementById('itvPeriodDisplay');
             const itvDaysEl = document.getElementById('itvDaysLeft');
             const itvBadge = document.getElementById('itvStatusBadge');
             const itvFileEl = document.getElementById('itvFileAction');
@@ -2773,7 +2787,10 @@
                 const exp = new Date(itvInfo.expiry);
                 exp.setHours(0,0,0,0);
                 const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-                itvDateEl.innerText = itvInfo.expiry;
+                itvDateEl.innerText = `Vence: ${itvInfo.expiry}`;
+                if (itvPeriodEl) {
+                    itvPeriodEl.innerText = itvInfo.issueDate ? `Paso: ${itvInfo.issueDate}` : '';
+                }
 
                 if (diffDays < 0) {
                     itvDaysEl.innerHTML = `<span class="text-red-600 font-bold">¡Vencida hace ${Math.abs(diffDays)} d!</span>`;
@@ -2796,6 +2813,7 @@
                 }
             } else {
                 itvDateEl.innerText = "-";
+                if (itvPeriodEl) itvPeriodEl.innerText = '';
                 itvDaysEl.innerText = "Configurar";
                 itvBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-500';
                 itvBadge.innerText = "Sin datos";
@@ -2805,6 +2823,7 @@
             // 2. Seguro
             const segInfo = data.documentacion.seguro;
             const segDateEl = document.getElementById('seguroDateDisplay');
+            const segPeriodEl = document.getElementById('seguroPeriodDisplay');
             const segDaysEl = document.getElementById('seguroDaysLeft');
             const segBadge = document.getElementById('seguroStatusBadge');
             const segFileEl = document.getElementById('seguroFileAction');
@@ -2813,7 +2832,10 @@
                 const exp = new Date(segInfo.expiry);
                 exp.setHours(0,0,0,0);
                 const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-                segDateEl.innerText = segInfo.expiry;
+                segDateEl.innerText = `Vence: ${segInfo.expiry}`;
+                if (segPeriodEl) {
+                    segPeriodEl.innerText = segInfo.issueDate ? `Inicio: ${segInfo.issueDate}` : '';
+                }
 
                 if (diffDays < 0) {
                     segDaysEl.innerHTML = `<span class="text-red-600 font-bold">¡Vencido hace ${Math.abs(diffDays)} d!</span>`;
@@ -2836,6 +2858,7 @@
                 }
             } else {
                 segDateEl.innerText = "-";
+                if (segPeriodEl) segPeriodEl.innerText = '';
                 segDaysEl.innerText = "Configurar";
                 segBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-500';
                 segBadge.innerText = "Sin datos";
