@@ -16,7 +16,7 @@ function getPinConfig() {
         $cfg = json_decode(file_get_contents($configFile), true);
         if (is_array($cfg)) return $cfg;
     }
-    return ['pin' => '1960', 'enabled' => true];
+    return ['pin' => '1984', 'enabled' => true];
 }
 
 function savePinConfig($cfg) {
