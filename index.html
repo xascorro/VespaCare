@@ -231,6 +231,43 @@
     <div id="loader" class="loading"><div class="loading-bar"></div></div>
     <div id="toast"><i class="fas fa-check-circle mr-2 text-vespa"></i><span id="toastMsg">Mensaje</span></div>
 
+        <!-- MODAL CAMBIAR PIN DE SEGURIDAD -->
+    <div id="changePinModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3.5">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl text-slate-800">Seguridad & PIN</h3>
+                <span class="text-[9px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-black uppercase">Configuración</span>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-slate-800 text-xs">Activar protección por PIN</p>
+                        <p class="text-[9px] text-slate-400">Si se desactiva, la app abrirá directamente sin clave.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="changePinEnableToggle" onchange="toggleChangePinFields(this.checked)" checked class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                    </label>
+                </div>
+
+                <div id="changePinInputsContainer" class="space-y-3">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Nuevo PIN (4 dígitos)</label>
+                        <input type="password" id="newPinInput" maxlength="4" placeholder="••••" inputmode="numeric" class="font-mono-num text-center text-lg font-bold tracking-widest">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Confirmar Nuevo PIN</label>
+                        <input type="password" id="confirmPinInput" maxlength="4" placeholder="••••" inputmode="numeric" class="font-mono-num text-center text-lg font-bold tracking-widest">
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeChangePinModal()" class="flex-1 p-3 bg-slate-100 rounded-xl font-bold text-slate-500 text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button onclick="submitChangePin()" class="flex-1 btn-primary text-xs shadow-md">Guardar PIN</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL PIN DE SEGURIDAD (PIN: 1960) -->
     <div id="pinModal" class="modal">
         <div id="pinBox" class="card p-5 w-full max-w-xs space-y-3.5 text-center shadow-2xl">
@@ -1086,24 +1123,37 @@
                         <h3 class="text-lg text-slate-800">Seguridad & Bloqueo PIN</h3>
                         <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Control de acceso Zero-Trust a VespaCare</p>
                     </div>
-                    <span id="settingsPinStatusBadge" class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-black uppercase">Activo (1960)</span>
+                    <span id="settingsPinStatusBadge" class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-black uppercase">Activo</span>
                 </div>
 
-                <div class="space-y-4 text-xs">
+                <div class="space-y-3 text-xs">
+                    <!-- Cambiar / Desactivar PIN -->
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
                         <div>
-                            <p class="font-bold text-slate-800 text-sm">Bloqueo de Sesión</p>
-                            <p class="text-[10px] text-slate-400">Bloquea la interfaz inmediatamente solicitando PIN para volver a entrar.</p>
+                            <p class="font-bold text-slate-800 text-sm">Gestión del PIN</p>
+                            <p class="text-[10px] text-slate-400">Cambiar clave de 4 dígitos o desactivar el bloqueo.</p>
                         </div>
-                        <button onclick="togglePinLock()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-[10px] uppercase tracking-wider shadow-sm transition-all active:scale-95">
-                            <i class="fas fa-lock mr-1.5 text-amber-400"></i>Bloquear
+                        <button onclick="openChangePinModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-[10px] uppercase tracking-wider shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
+                            <i class="fas fa-key text-[9px] text-amber-400"></i>Configurar
                         </button>
                     </div>
 
-                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                    <!-- Bloquear Sesión -->
+                    <div id="sessionLockRow" class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Bloquear Sesión Ahora</p>
+                            <p class="text-[10px] text-slate-400">Bloquea la interfaz solicitando PIN para reingresar.</p>
+                        </div>
+                        <button onclick="togglePinLock()" class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black text-[10px] uppercase tracking-wider shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
+                            <i class="fas fa-lock text-[9px]"></i>Bloquear
+                        </button>
+                    </div>
+
+                    <!-- Pedir PIN siempre -->
+                    <div id="strictLockRow" class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
                         <div>
                             <p class="font-bold text-slate-800 text-sm">Pedir PIN en cada inicio</p>
-                            <p class="text-[10px] text-slate-400">Si está desactivado, recordará la sesión en este dispositivo móvil.</p>
+                            <p class="text-[10px] text-slate-400">Si está desactivado, mantiene la sesión abierta en tu dispositivo.</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="settingStrictLock" onchange="toggleStrictLock(this.checked)" class="sr-only peer">
@@ -1180,8 +1230,7 @@
         let data = {};
         const COLORS = ['bg-amber-600', 'bg-blue-500', 'bg-orange-500', 'bg-purple-500', 'bg-pink-500'];
         let currentMixRatio = 2.0;
-        let enteredPin = '';
-        const REQUIRED_PIN = '1960';
+        let isPinProtectedOnServer = true;
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -1190,20 +1239,37 @@
             setTimeout(() => { t.className = t.className.replace('show', ''); }, 3000);
         }
 
-        // --- FULL APP LOCK & PIN MANAGEMENT (ZERO-TRUST) ---
+        // --- FULL APP LOCK & DYNAMIC PIN MANAGEMENT (ZERO-TRUST) ---
         let enteredLockPin = '';
-
-        function isPinUnlocked() {
-            return (sessionStorage.getItem('vespa_pin') === REQUIRED_PIN) || (localStorage.getItem('vespa_pin') === REQUIRED_PIN);
-        }
 
         function getStoredPin() {
             return sessionStorage.getItem('vespa_pin') || localStorage.getItem('vespa_pin') || '';
         }
 
-        function checkAppLockState() {
+        function hasLocalPin() {
+            return getStoredPin().length === 4;
+        }
+
+        async function checkAppLockState() {
             const lockScreen = document.getElementById('appLockScreen');
-            if (isPinUnlocked()) {
+            try {
+                const res = await fetch('api.php?action=pin_status');
+                const st = await res.json();
+                isPinProtectedOnServer = st.enabled;
+            } catch(e) {
+                isPinProtectedOnServer = true;
+            }
+
+            // Si el servidor NO tiene PIN activado, abrir inmediatamente
+            if (!isPinProtectedOnServer) {
+                if (lockScreen) lockScreen.style.display = 'none';
+                updatePinStatusUI(); initSettingsUI();
+                loadData();
+                return;
+            }
+
+            // Si el PIN está activado en el servidor y tenemos el PIN guardado, validar cargando datos
+            if (hasLocalPin()) {
                 if (lockScreen) lockScreen.style.display = 'none';
                 updatePinStatusUI(); initSettingsUI();
                 loadData();
@@ -1249,52 +1315,87 @@
             }
         }
 
-        function validateLockPin() {
-            if (enteredLockPin === REQUIRED_PIN) {
-                localStorage.setItem('vespa_pin', REQUIRED_PIN);
-                sessionStorage.setItem('vespa_pin', REQUIRED_PIN);
-                const lockScreen = document.getElementById('appLockScreen');
-                if (lockScreen) {
-                    lockScreen.style.opacity = '0';
-                    setTimeout(() => { lockScreen.style.display = 'none'; }, 250);
+        async function validateLockPin() {
+            document.getElementById('loader').style.display = 'block';
+            try {
+                const res = await fetch('api.php?action=verify_pin', {
+                    headers: { 'X-Vespa-PIN': enteredLockPin }
+                });
+                if (res.ok) {
+                    sessionStorage.setItem('vespa_pin', enteredLockPin);
+                    const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
+                    if (!strictLock) {
+                        localStorage.setItem('vespa_pin', enteredLockPin);
+                    }
+                    const lockScreen = document.getElementById('appLockScreen');
+                    if (lockScreen) {
+                        lockScreen.style.opacity = '0';
+                        setTimeout(() => { lockScreen.style.display = 'none'; }, 250);
+                    }
+                    updatePinStatusUI(); initSettingsUI();
+                    showToast('Acceso concedido');
+                    loadData();
+                } else {
+                    triggerLockShake();
                 }
-                updatePinStatusUI(); initSettingsUI();
-                showToast('Acceso concedido');
-                loadData();
-            } else {
-                const box = document.querySelector('#appLockScreen .card');
-                if (box) box.classList.add('shake');
-                setTimeout(() => {
-                    if (box) box.classList.remove('shake');
-                    clearLockPin();
-                }, 500);
+            } catch(e) {
+                triggerLockShake();
             }
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function triggerLockShake() {
+            const box = document.querySelector('#appLockScreen .card');
+            if (box) box.classList.add('shake');
+            setTimeout(() => {
+                if (box) box.classList.remove('shake');
+                clearLockPin();
+            }, 500);
         }
 
         function updatePinStatusUI() {
             const icon = document.getElementById('pinStatusIcon');
             const btn = document.getElementById('pinStatusBtn');
-            if (icon && btn) {
-                if (isPinUnlocked()) {
-                    icon.className = 'fas fa-lock-open text-emerald-600';
-                    btn.title = 'Sesión desbloqueada (PIN 1960) - Clic para bloquear';
+            const badge = document.getElementById('settingsPinStatusBadge');
+            const sessRow = document.getElementById('sessionLockRow');
+            const strictRow = document.getElementById('strictLockRow');
+
+            if (!isPinProtectedOnServer) {
+                if (badge) {
+                    badge.className = 'text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-full font-black uppercase';
+                    badge.innerText = 'Desactivado';
+                }
+                if (icon) icon.className = 'fas fa-shield text-slate-400';
+                if (btn) btn.title = 'Protección por PIN desactivada';
+                if (sessRow) sessRow.style.display = 'none';
+                if (strictRow) strictRow.style.display = 'none';
+            } else {
+                if (badge) {
+                    badge.className = 'text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-black uppercase';
+                    badge.innerText = 'Activo';
+                }
+                if (sessRow) sessRow.style.display = 'flex';
+                if (strictRow) strictRow.style.display = 'flex';
+                if (hasLocalPin()) {
+                    if (icon) icon.className = 'fas fa-lock-open text-emerald-600';
+                    if (btn) btn.title = 'Sesión desbloqueada - Clic para bloquear';
                 } else {
-                    icon.className = 'fas fa-lock text-amber-600';
-                    btn.title = 'Sesión bloqueada - Clic para desbloquear';
+                    if (icon) icon.className = 'fas fa-lock text-amber-600';
+                    if (btn) btn.title = 'Sesión bloqueada - Clic para desbloquear';
                 }
             }
         }
 
         function togglePinLock() {
-            if (isPinUnlocked()) {
-                localStorage.removeItem('vespa_pin');
-                sessionStorage.removeItem('vespa_pin');
-                updatePinStatusUI(); initSettingsUI();
-                showToast('Aplicación bloqueada');
-                checkAppLockState();
-            } else {
-                checkAppLockState();
+            if (!isPinProtectedOnServer) {
+                showToast('El PIN está desactivado');
+                return;
             }
+            localStorage.removeItem('vespa_pin');
+            sessionStorage.removeItem('vespa_pin');
+            updatePinStatusUI(); initSettingsUI();
+            showToast('Aplicación bloqueada');
+            checkAppLockState();
         }
 
         function openPinModal(callback = null) {
@@ -1305,7 +1406,6 @@
             document.getElementById('pinModal').classList.remove('active');
         }
 
-        
         function initSettingsUI() {
             const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
             const chk = document.getElementById('settingStrictLock');
@@ -1315,13 +1415,80 @@
         function toggleStrictLock(isStrict) {
             localStorage.setItem('vespa_strict_lock', isStrict ? 'true' : 'false');
             if (isStrict) {
-                // If strict, remove persistent local storage pin so it only lives in session
                 localStorage.removeItem('vespa_pin');
                 showToast('Bloqueo estricto activado (pedirá PIN siempre)');
             } else {
-                if (isPinUnlocked()) localStorage.setItem('vespa_pin', REQUIRED_PIN);
+                const curPin = sessionStorage.getItem('vespa_pin');
+                if (curPin) localStorage.setItem('vespa_pin', curPin);
                 showToast('Sesión persistente activada');
             }
+        }
+
+        // --- GESTIÓN DE CAMBIO Y DESACTIVACIÓN DE PIN ---
+        function openChangePinModal() {
+            document.getElementById('changePinEnableToggle').checked = isPinProtectedOnServer;
+            toggleChangePinFields(isPinProtectedOnServer);
+            document.getElementById('newPinInput').value = '';
+            document.getElementById('confirmPinInput').value = '';
+            document.getElementById('changePinModal').classList.add('active');
+        }
+
+        function closeChangePinModal() {
+            document.getElementById('changePinModal').classList.remove('active');
+        }
+
+        function toggleChangePinFields(isEnabled) {
+            document.getElementById('changePinInputsContainer').classList.toggle('hidden', !isEnabled);
+        }
+
+        async function submitChangePin() {
+            const isEnabled = document.getElementById('changePinEnableToggle').checked;
+            const newPin = document.getElementById('newPinInput').value.trim();
+            const confirmPin = document.getElementById('confirmPinInput').value.trim();
+
+            if (isEnabled) {
+                if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+                    return alert("El PIN debe tener exactamente 4 números (ej: 1234)");
+                }
+                if (newPin !== confirmPin) {
+                    return alert("Los dos campos de PIN no coinciden");
+                }
+            }
+
+            document.getElementById('loader').style.display = 'block';
+            try {
+                const res = await fetch('api.php?action=change_pin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Vespa-PIN': getStoredPin()
+                    },
+                    body: JSON.stringify({
+                        enabled: isEnabled,
+                        new_pin: isEnabled ? newPin : ''
+                    })
+                });
+
+                const result = await res.json();
+                if (res.ok && result.status === 'success') {
+                    isPinProtectedOnServer = isEnabled;
+                    if (isEnabled) {
+                        sessionStorage.setItem('vespa_pin', newPin);
+                        localStorage.setItem('vespa_pin', newPin);
+                    } else {
+                        sessionStorage.removeItem('vespa_pin');
+                        localStorage.removeItem('vespa_pin');
+                    }
+                    closeChangePinModal();
+                    updatePinStatusUI();
+                    showToast(result.message);
+                } else {
+                    alert("Error: " + (result.message || 'No se pudo actualizar el PIN'));
+                }
+            } catch(e) {
+                alert("Error de conexión: " + e.message);
+            }
+            document.getElementById('loader').style.display = 'none';
         }
 
         // --- DATA LOAD & SAVE (ZERO-TRUST AUTHENTICATED) ---
