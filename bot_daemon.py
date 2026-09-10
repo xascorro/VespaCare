@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-🛵 VespaCare Telegram Daemon & Intelligent Assistant (v2.0)
+🛵 VespaCare Telegram Daemon & Intelligent Assistant (v2.1)
 Homelands Labs by Pedro Díaz
 
 Features:
 1. 🔘 Interactive Inline & Reply Keyboards.
 2. ⛽ Natural Language & Slash Command parsing for fuel, oil, expenses & odometer.
-3. 📸 Receipt/Ticket/Photo intake & secure archival in /var/www/html/vespa/docs/.
-4. 🎙️ Voice memo intake & audio logging in /var/www/html/vespa/docs/voice/.
+3. 📦 Smart Workshop Stock & Purchase intake (e.g. 'Compra bombilla freno 10w por 1.5€ en Recambios Ruiz').
+4. 📸 Receipt/Ticket/Photo intake & secure archival in /var/www/html/vespa/docs/.
+5. 🎙️ Voice memo intake & audio logging in /var/www/html/vespa/docs/voice/.
 """
 
 import json
@@ -84,7 +85,7 @@ def tg_api_call(method, payload):
         data=json.dumps(payload).encode('utf-8'),
         headers={
             "Content-Type": "application/json",
-            "User-Agent": "HomelandsLabs-VespaCareBot/2.0"
+            "User-Agent": "HomelandsLabs-VespaCareBot/2.1"
         }
     )
     try:
@@ -132,7 +133,7 @@ def get_file_info(file_id):
 
 def download_telegram_file(file_path, dest_local_path):
     url = f"{FILE_BASE_URL}/{file_path}"
-    req = urllib.request.Request(url, headers={"User-Agent": "HomelandsLabs-VespaCareBot/2.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "HomelandsLabs-VespaCareBot/2.1"})
     try:
         with urllib.request.urlopen(req, timeout=30) as response, open(dest_local_path, 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
@@ -254,17 +255,21 @@ def get_stock_text():
     stock_items = data.get("stockCasa", [])
     fuel_stock = data.get("homeFuelStock", 0)
     
-    lines = [f"📦 <b>Stock de Taller & Recambios en Garaje</b>\n", f"⛽ <b>Gasolina Garrafa 2T:</b> <code>{fuel_stock} L</code>\n"]
+    lines = [
+        "📦 <b>Stock de Taller & Recambios en Garaje</b>",
+        f"⛽ <b>Gasolina Garrafa 2T:</b> <code>{fuel_stock} L</code>\n"
+    ]
     if not stock_items:
         lines.append("<i>No hay recambios registrados en el inventario.</i>")
     else:
         for idx, item in enumerate(stock_items, 1):
-            qty = item.get("cantidad", 0)
-            nom = item.get("nombre", "Ítem")
+            qty = item.get("qty", item.get("cantidad", 0))
+            nom = item.get("name", item.get("nombre", "Ítem"))
             unit = item.get("unidad", "ud")
-            cat = item.get("categoria", "")
-            cost = item.get("precioUnitario", 0)
-            lines.append(f"{idx}. <b>{nom}</b>: <code>{qty} {unit}</code> ({cost:.2f} €) — <i>{cat}</i>")
+            cat = item.get("cat", item.get("categoria", "Recambio"))
+            cost = float(item.get("price", item.get("precioUnitario", item.get("precio", 0.0))))
+            status_icon = "🟢" if qty > 0 else "⚪"
+            lines.append(f"{status_icon} <b>{nom}</b>\n   • Cantidad: <code>{qty} {unit}</code> | Precio: <code>{cost:.2f} €</code> | <i>{cat}</i>")
             
     return "\n".join(lines)
 
@@ -292,6 +297,7 @@ def get_help_text():
 
 ✍️ <b>Registro Rápido & Lenguaje Natural:</b>
 Puedes registrar directamente con lenguaje natural o comandos:
+• <code>Compra bombilla freno 10w por 1.5€ en Recambios Ruiz</code>
 • <code>repostaje de 3L de aceite a un precio de 4.10€</code>
 • <code>/repostar 5.2L 8.50€ 145km</code>
 • <code>/gasto 12.30€ Bujía y bombilla piloto</code>
@@ -313,7 +319,6 @@ def parse_and_execute_user_input(text, chat_id, attached_doc=None):
     lower = raw.lower()
     data = load_data()
     now_iso = datetime.now().strftime("%Y-%m-%dT%H:%M")
-    now_date = datetime.now().strftime("%Y-%m-%d")
     now_ts = int(time.time() * 1000)
 
     # 1. ACTUALIZAR CUENTAKILÓMETROS (/km 150 o km 150)
@@ -343,11 +348,9 @@ def parse_and_execute_user_input(text, chat_id, attached_doc=None):
         return True
 
     # 3. DETECTAR REPOSTAJES O COMPRA DE FLUIDOS (Gasolina / Aceite 2T)
-    # Ejemplos:
-    # "repostaje de 3 l de aceite a un precio de 4,1 €"
-    # "/repostar 5.2L 8.50€ 145km"
-    # "gasolina 4.5 litros 7.20 euros"
-    is_repostaje_intent = any(k in lower for k in ["repostaje", "repostar", "gasolina", "litros de aceite", "l de aceite", "litro de aceite"]) or lower.startswith("/repostar")
+    is_repostaje_intent = any(k in lower for k in ["repostaje", "repostar", "litros de aceite", "l de aceite", "litro de aceite"]) or lower.startswith("/repostar")
+    if not is_repostaje_intent and "gasolina" in lower and any(k in lower for k in ["l", "litros", "€", "euros"]):
+        is_repostaje_intent = True
 
     if is_repostaje_intent:
         # Extraer litros
@@ -360,7 +363,7 @@ def parse_and_execute_user_input(text, chat_id, attached_doc=None):
         precio = 0.0
         price_match = re.search(r'([\d\.,]+)\s*(?:€|euros?|eur)\b', lower)
         if not price_match:
-            price_match = re.search(r'(?:precio\s*(?:de)?|total\s*(?:de)?|importe\s*(?:de)?)\s*[:=]?\s*([\d\.,]+)', lower)
+            price_match = re.search(r'(?:precio\s*(?:de|por)?|total\s*(?:de)?|importe\s*(?:de)?|por)\s*[:=]?\s*([\d\.,]+)', lower)
         if price_match:
             precio = float(price_match.group(1).replace(',', '.'))
 
@@ -376,7 +379,6 @@ def parse_and_execute_user_input(text, chat_id, attached_doc=None):
         is_oil = any(k in lower for k in ["aceite", "castrol", "motul", "2t", "lubricante"])
         
         if is_oil:
-            # Registrar como gasto de fluido / recambio de Aceite
             title = f"Aceite 2T ({litros or 1}L)" if litros else "Aceite 2T Mezcla"
             notes = f"Registrado vía Telegram Bot • {raw}"
             if attached_doc:
@@ -398,9 +400,10 @@ def parse_and_execute_user_input(text, chat_id, attached_doc=None):
             # Actualizar stock si existe ítem de aceite
             stock_list = data.get("stockCasa", [])
             for st in stock_list:
-                if "aceite" in st.get("nombre", "").lower():
+                if "aceite" in st.get("name", st.get("nombre", "")).lower():
                     if litros:
-                        st["cantidad"] = round(st.get("cantidad", 0) + litros, 2)
+                        cur_q = st.get("qty", st.get("cantidad", 0))
+                        st["qty"] = round(cur_q + litros, 2)
                     break
             
             save_data(data)
@@ -419,7 +422,6 @@ Sincronizado en el módulo de <b>Gastos & Salud</b> de la PWA.""",
             )
             return True
         else:
-            # Es repostaje de Gasolina
             litros = litros or 5.0
             price_per_l = round(precio / litros, 3) if (precio > 0 and litros > 0) else 0.0
             
@@ -452,48 +454,119 @@ Sincronizado en vivo con <b>VespaCare PWA</b>.""",
             )
             return True
 
-    # 4. REGISTRO DE GASTO GENERAL (/gasto 15€ Bujías o "gasto de 20€ en taller")
-    is_gasto_intent = lower.startswith("/gasto") or lower.startswith("gasto") or "compra de" in lower or "factura de" in lower
-    if is_gasto_intent:
+    # 4. DETECTAR COMPRAS / RECAMBIOS / GASTOS (Ej: 'Compra bombilla freno 10w por 1.5€ en Recambios Ruiz')
+    is_purchase_or_expense = (
+        lower.startswith("/gasto") or
+        lower.startswith("gasto") or
+        lower.startswith("compra") or
+        lower.startswith("comprado") or
+        lower.startswith("compré") or
+        "he comprado" in lower or
+        "compra de" in lower or
+        "factura" in lower or
+        ("bombilla" in lower and any(k in lower for k in ["€", "euros", "por", "en"]))
+    )
+
+    if is_purchase_or_expense:
+        # Extraer precio
+        precio = 0.0
         price_match = re.search(r'([\d\.,]+)\s*(?:€|euros?|eur)\b', lower)
         if not price_match:
-            price_match = re.search(r'(?:importe|precio|total|gasto)\s*[:=]?\s*([\d\.,]+)', lower)
-        
-        precio = float(price_match.group(1).replace(',', '.')) if price_match else 0.0
-        
-        # Concepto
-        concepto = re.sub(r'(?:^/gasto|^gasto\s*(?:de)?|[\d\.,]+\s*(?:€|euros?|eur))\b', '', raw, flags=re.IGNORECASE).strip()
-        concepto = re.sub(r'^[,\s:-]+', '', concepto) or "Gasto Mantenimiento"
-        
+            price_match = re.search(r'(?:por|precio|importe|total|gasto)\s*[:=]?\s*([\d\.,]+)', lower)
+        if price_match:
+            precio = float(price_match.group(1).replace(',', '.'))
+
+        # Extraer tienda / proveedor (ej: "en Recambios Ruiz")
+        tienda_match = re.search(r'\b(?:en|de|tienda)\s+([A-ZÁÉÍÓÚa-záéíóú0-9\s\.\-_]+?)(?:\s*(?:por|el|a|\.|$))', raw)
+        tienda = tienda_match.group(1).strip() if tienda_match else ""
+
+        # Extraer concepto limpio
+        concepto = raw
+        # Quitar palabras clave iniciales
+        concepto = re.sub(r'^(?:/gasto|gasto|compra(?:do)?|compré|he comprado)\s*(?:de)?', '', concepto, flags=re.IGNORECASE).strip()
+        # Quitar importe
+        concepto = re.sub(r'(?:por\s*)?[\d\.,]+\s*(?:€|euros?|eur)\b', '', concepto, flags=re.IGNORECASE).strip()
+        concepto = re.sub(r'^[,\s:-]+|[,\s:-]+$', '', concepto) or "Recambio Vespa"
+
         km = data.get("odometer", 0)
         km_custom = re.search(r'([\d]+)\s*(?:km|kms)\b', lower)
         if km_custom:
             km = int(km_custom.group(1))
 
-        item_exp = {
-            "id": f"l_tg_{now_ts}",
-            "logType": "pieza",
-            "date": now_iso,
-            "title": concepto[:60],
-            "price": precio,
-            "km": km,
-            "notes": f"Registrado vía Telegram Bot • {raw}" + (f" • Doc: {attached_doc}" if attached_doc else "")
-        }
+        # Registrar en inventario de Gastos
         if "inventario" not in data or not isinstance(data["inventario"], list):
             data["inventario"] = []
-        data["inventario"].append(item_exp)
+
+        gasto_id = f"l_tg_{now_ts}"
+        note_str = f"Compra: {raw}"
+        if tienda:
+            note_str += f" • Proveedor: {tienda}"
+        if attached_doc:
+            note_str += f" • Archivo: {attached_doc}"
+
+        data["inventario"].append({
+            "id": gasto_id,
+            "logType": "pieza",
+            "date": now_iso,
+            "title": f"Compra Recambio: {concepto[:50]}",
+            "price": precio,
+            "km": km,
+            "notes": note_str
+        })
+
+        # Smart Stock Match: Comprobar si existe en stockCasa para actualizar cantidad y precio
+        matched_stock = None
+        stock_list = data.get("stockCasa", [])
+        
+        # Palabras clave de búsqueda
+        keywords = [k for k in re.split(r'[\s,]+', lower) if len(k) > 2 and k not in ["por", "para", "con", "del", "las", "los", "recambios", "compra", "gasto", "euros"]]
+        
+        for item in stock_list:
+            item_name = item.get("name", item.get("nombre", "")).lower()
+            item_id = item.get("id", "").lower()
+            # Si coinciden 2 palabras clave o el ID específico
+            matches = sum(1 for kw in keywords if kw in item_name or kw in item_id)
+            if matches >= 2 or (len(keywords) == 1 and keywords[0] in item_name):
+                matched_stock = item
+                break
+
+        if matched_stock:
+            cur_qty = matched_stock.get("qty", matched_stock.get("cantidad", 0))
+            matched_stock["qty"] = cur_qty + 1
+            matched_stock["price"] = precio
+            if tienda:
+                matched_stock["notes"] = f"Comprada en {tienda} ({precio:.2f}€) • En estantería garaje"
+            stock_msg = f"\n📦 <b>Stock Actualizado:</b> {matched_stock.get('name')} (+1 ud -> Total: <code>{matched_stock['qty']} ud</code>)"
+        else:
+            # Añadir nuevo ítem a stock si no existe
+            new_item_id = f"stk_tg_{int(time.time()%10000)}"
+            cat = "Iluminación" if any(k in lower for k in ["bombilla", "faro", "piloto", "led", "luz"]) else "Recambio"
+            stock_list.append({
+                "id": new_item_id,
+                "name": concepto,
+                "cat": cat,
+                "qty": 1,
+                "price": precio,
+                "icon": "fa-wrench",
+                "color": "text-purple-600",
+                "notes": f"Comprado en {tienda or 'tienda'} ({precio:.2f}€) • En estantería"
+            })
+            data["stockCasa"] = stock_list
+            stock_msg = f"\n📦 <b>Nuevo Ítem Creado en Stock:</b> {concepto} (1 ud)"
+
         save_data(data)
 
         send_message(
-            f"""💶 <b>Gasto Registrado con Éxito:</b>
+            f"""🛒 <b>Compra Registrada con Éxito:</b>
 
-🏷️ <b>Concepto:</b> {concepto}
+🏷️ <b>Artículo:</b> {concepto}
 💶 <b>Importe:</b> <code>{precio:.2f} €</code>
-📍 <b>Kilometraje:</b> <code>{km} km</code>
+🏪 <b>Tienda:</b> {tienda or 'Registrado en Garaje'}
+📍 <b>Kilometraje:</b> <code>{km} km</code>{stock_msg}
 
-Añadido al historial de <b>Gastos & Salud</b> en la PWA.""",
+Sincronizado en <b>Gastos</b> y <b>Stock Taller</b> en la PWA.""",
             chat_id,
-            reply_markup=get_status_inline_keyboard()
+            reply_markup=get_stock_inline_keyboard()
         )
         return True
 
@@ -544,7 +617,6 @@ def handle_callback_query(cq):
             cat = parts[2]
             answer_callback_query(cq_id, f"Documento clasificado como {cat}")
             
-            # Registrar en documentos
             data = load_data()
             if "documentos" not in data or not isinstance(data["documentos"], list):
                 data["documentos"] = []
@@ -636,7 +708,7 @@ def handle_message(msg):
                 )
                 return
 
-    # 3. COMANDOS BÁSICOS
+    # 3. COMANDOS BÁSICOS & BOTONES DEL TECLADO
     if text.startswith("/start"):
         send_message(
             """👋 ¡Hola <b>Pedro</b>! Bienvenido al asistente inteligente <b>VespaCare</b>.
@@ -678,12 +750,12 @@ Puedes usar los botones táctiles inferiores o escribir directamente tus reposta
 
     if text in ["💶 añadir gasto", "gasto"]:
         send_message(
-            "💶 <b>Para registrar un gasto escribe:</b>\n\n<code>/gasto 16€ Cable embrague y funda</code>\n\nO envía la foto de la factura.",
+            "💶 <b>Para registrar un gasto o compra escribe:</b>\n\n<code>Compra bombilla freno 10w por 1.5€ en Recambios Ruiz</code>\n\nO envía la foto de la factura.",
             chat_id
         )
         return
 
-    # 4. INTENTAR PROCESAR COMO LENGUAJE NATURAL
+    # 4. INTENTAR PROCESAR COMO LENGUAJE NATURAL (Compras, Recambios, Gasolina, Km)
     if parse_and_execute_user_input(raw_text, chat_id):
         return
 
@@ -701,14 +773,14 @@ def handle_update(update):
         handle_message(update["message"])
 
 def main():
-    print("=== VespaCare Telegram Intelligent Daemon (v2.0) Starting ===", flush=True)
+    print("=== VespaCare Telegram Intelligent Daemon (v2.1) Starting ===", flush=True)
     offset = None
     while True:
         try:
             url = f"{BASE_URL}/getUpdates?timeout=15"
             if offset:
                 url += f"&offset={offset}"
-            req = urllib.request.Request(url, headers={"User-Agent": "HomelandsLabs-VespaCareBot/2.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "HomelandsLabs-VespaCareBot/2.1"})
             with urllib.request.urlopen(req, timeout=20) as resp:
                 res = json.loads(resp.read().decode())
                 if res.get("ok"):

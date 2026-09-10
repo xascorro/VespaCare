@@ -1229,7 +1229,7 @@
                 </div>
 
                 <!-- RESUMEN EN VIVO DE STOCK DE CASA -->
-                <div id="homeStockPreviewGrid" class="grid grid-cols-2 gap-2 text-xs">
+                <div id="homeStockPreviewGrid" class="flex flex-col gap-2.5 text-xs">
                     <!-- Se inyecta dinámicamente -->
                 </div>
             </div>
@@ -4761,7 +4761,7 @@
             }).join('');
         }
 
-        function renderHomeStock() {
+                function renderHomeStock() {
             const list = getHomeStockList();
             const grid = document.getElementById('homeStockPreviewGrid');
             const garageDisplay = document.getElementById('homeFuelDisplay');
@@ -4774,43 +4774,59 @@
 
             if (!grid) return;
 
-            // Mostrar resumen en Salud
-            grid.innerHTML = `
-                <!-- Gasolina -->
-                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div>
-                        <span class="text-[9px] font-black uppercase text-slate-400 block">Gasolina Casa</span>
-                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${(data.homeFuelStock || 0).toFixed(1)} L</p>
+            let html = `
+                <!-- Banner Gasolina Casa (1 Columna Completa) -->
+                <div class="p-3 bg-gradient-to-r from-orange-50/90 to-amber-50/50 rounded-2xl border border-orange-100 flex items-center justify-between gap-3 shadow-xs">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center text-sm shadow-xs shrink-0">
+                            <i class="fas fa-gas-pump"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <span class="text-[9px] font-black uppercase text-orange-800/70 block tracking-wider">Reserva en Garaje</span>
+                            <p class="font-black text-slate-800 text-sm font-mono-num mt-0.5">${(data.homeFuelStock || 0).toFixed(1)} <span class="text-xs font-bold text-slate-500">Litros Mezcla 2T</span></p>
+                        </div>
                     </div>
-                    <span class="text-lg">⛽</span>
-                </div>
-
-                <!-- Recambios Totales -->
-                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div>
-                        <span class="text-[9px] font-black uppercase text-slate-400 block">Recambios Stock</span>
-                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${totalStockItems} unidades</p>
-                    </div>
-                    <span class="text-lg">📦</span>
+                    <button onclick="openFuelModal(true)" class="text-[10px] font-black bg-white hover:bg-orange-50 text-orange-700 border border-orange-200 px-3 py-1.5 rounded-xl transition-all shadow-xs active:scale-95 shrink-0">
+                        Ajustar
+                    </button>
                 </div>
             `;
 
-            // Añadir los ítems más destacados (hasta 4)
-            list.slice(0, 4).forEach(item => {
-                const isOut = item.qty === 0;
-                grid.innerHTML += `
-                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between col-span-1">
-                        <div class="min-w-0 pr-1">
-                            <span class="text-[8px] font-black uppercase text-slate-400 block truncate">${item.name}</span>
-                            <span class="font-black text-xs font-mono-num ${isOut ? 'text-red-500' : 'text-slate-800'}">${isOut ? 'Sin stock' : item.qty + ' un.'}</span>
+            if (list.length === 0) {
+                html += `<div class="p-4 text-center text-slate-400 text-xs bg-slate-50 rounded-xl border border-slate-100">No hay recambios registrados en la estantería</div>`;
+            } else {
+                list.forEach(item => {
+                    const qty = item.qty || 0;
+                    const isOut = qty === 0;
+                    const statusBadge = isOut
+                        ? `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200">Montada / 0 ud</span>`
+                        : `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">${qty} ud en stock</span>`;
+
+                    html += `
+                        <div class="p-3 bg-slate-50/90 hover:bg-white rounded-2xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-3 transition-all shadow-xs">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <div class="w-9 h-9 rounded-xl bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-sm shadow-xs border border-slate-100 shrink-0">
+                                    <i class="fas ${item.icon || 'fa-box'}"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
+                                        ${statusBadge}
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 truncate mt-0.5">${item.notes || item.cat || 'Recambio Garaje'}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Descontar stock">-</button>
+                                <span class="font-mono-num font-black text-xs px-1 text-slate-800 min-w-[1.2rem] text-center">${qty}</span>
+                                <button onclick="openRestockModal('${item.id}')" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Añadir stock / compra">+</button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
-                            <button onclick="openRestockModal('${item.id}')" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
-                        </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            }
+
+            grid.innerHTML = html;
         }
 
         checkAppLockState();
