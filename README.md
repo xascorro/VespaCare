@@ -33,7 +33,7 @@
    - **Chasis & Neumáticos (3.00 - 10"):** Presiones recomendadas en frío (solo/acompañante) con recordatorio periódico por tiempo (cada 3 semanas) y kilometraje.
 
 5. **📋 Control Legal (ITV & Seguro):**
-   - Seguimiento dinámico de fechas de vencimiento con alertas preventivas en el checklist pre-rodaje de *Garaje*.
+   - Seguimiento dinámico de fechas de vencimiento y fecha de emisión/trámite con alertas preventivas en el checklist pre-rodaje de *Garaje*.
    - Integración automática de gastos al renovar.
 
 6. **📊 Gráficas & Histórico:**
@@ -63,5 +63,5 @@
 
 ---
 
-## 👨‍💻 Autor
-Desarrollado para el homelab de **Pedro Díaz**.
+## 👨‍💻 Autor & Ecosistema
+Desarrollado para **Homelands Labs by Pedro Díaz** (Fables Infrastructure).
