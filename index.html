@@ -335,6 +335,26 @@
                     <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Nº Póliza / Notas</label>
                     <input type="text" id="docNotes" placeholder="Detalles, cobertura, etc.">
                 </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Documento Adjunto (PDF o Foto)</label>
+                    <div class="mt-1 flex items-center gap-2">
+                        <label class="flex-1 cursor-pointer flex items-center justify-center gap-2 p-2.5 bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 rounded-xl text-xs font-bold text-slate-600 transition-all">
+                            <i class="fas fa-paperclip text-amber-600"></i>
+                            <span id="docFileLabel">Seleccionar archivo...</span>
+                            <input type="file" id="docFileInput" accept=".pdf,image/*" class="hidden" onchange="onDocFileSelected(this)">
+                        </label>
+                        <button type="button" id="docClearFileBtn" onclick="clearDocFileSelection()" class="hidden p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 text-xs font-bold" title="Eliminar archivo">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="docCurrentFileContainer" class="hidden mt-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between text-xs">
+                        <span id="docCurrentFileName" class="text-emerald-800 font-bold truncate max-w-[200px]">documento.pdf</span>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="viewCurrentDocFile()" class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded font-black uppercase">Ver</button>
+                            <button type="button" onclick="deleteCurrentDocFile()" class="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-black uppercase">Borrar</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="flex items-center gap-2 p-2.5 bg-amber-50 rounded-xl border border-amber-200/60">
                     <input type="checkbox" id="docAddExpense" checked class="w-4 h-4 text-amber-600 rounded">
                     <label for="docAddExpense" class="text-[10px] font-bold text-amber-900 cursor-pointer">Registrar automáticamente en Gastos</label>
@@ -343,6 +363,72 @@
             <div class="flex gap-2 pt-2">
                 <button onclick="closeDocModal()" class="flex-1 p-3 bg-slate-100 rounded-xl font-bold text-slate-500 text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
                 <button onclick="saveDocRecord()" class="flex-1 btn-primary text-xs shadow-md">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- MODAL SUBIDA GENERAL DE DOCUMENTACIÓN / MANUALES -->
+    <div id="generalDocModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3.5">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl text-slate-800">Añadir a Guantera Digital</h3>
+                <span class="text-[9px] bg-indigo-100 text-indigo-900 px-2 py-0.5 rounded-full font-black uppercase">Documentación</span>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Categoría / Tipo</label>
+                    <select id="generalDocCategory" class="font-bold text-slate-700">
+                        <option value="manual">📖 Manual de Taller / Usuario</option>
+                        <option value="legal">📑 Ficha Técnica / Permiso</option>
+                        <option value="seguro">🛡️ Seguro / Póliza</option>
+                        <option value="itv">📋 Inspección ITV / Informe</option>
+                        <option value="factura">🧾 Factura / Recambio</option>
+                        <option value="otro">📁 Otro Documento</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Título o Nombre</label>
+                    <input type="text" id="generalDocTitle" placeholder="Ej: Manual de Taller PK 125 S (PDF)" class="font-bold">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Notas o Descripción</label>
+                    <input type="text" id="generalDocNotes" placeholder="Páginas relevantes, detalles...">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Archivo (PDF o Imagen)</label>
+                    <label class="mt-1 cursor-pointer flex items-center justify-center gap-2 p-3 bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 rounded-xl text-xs font-bold text-slate-600 transition-all">
+                        <i class="fas fa-cloud-upload-alt text-lg text-indigo-600"></i>
+                        <span id="generalDocFileLabel">Seleccionar PDF o Foto...</span>
+                        <input type="file" id="generalDocFileInput" accept=".pdf,image/*" class="hidden" onchange="onGeneralDocFileSelected(this)">
+                    </label>
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeGeneralDocModal()" class="flex-1 p-3 bg-slate-100 rounded-xl font-bold text-slate-500 text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button onclick="submitGeneralDoc()" class="flex-1 btn-primary text-xs shadow-md">Subir Documento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VISOR SEGURO DE DOCUMENTOS (PDF / IMAGEN) -->
+    <div id="docViewerModal" class="modal">
+        <div class="card p-4 w-full max-w-2xl h-[85vh] flex flex-col space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <div class="flex items-center gap-2 min-w-0">
+                    <i id="viewerIcon" class="fas fa-file-pdf text-red-600 text-lg"></i>
+                    <h3 id="viewerTitle" class="text-base text-slate-800 font-bold truncate">Documento</h3>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a id="viewerDownloadBtn" href="#" target="_blank" download class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1">
+                        <i class="fas fa-download"></i> Descargar
+                    </a>
+                    <button onclick="closeDocViewerModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+                        <i class="fas fa-times text-base"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="viewerContent" class="flex-1 bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center p-1">
+                <!-- Se inyecta iframe para PDF o img para imágenes -->
             </div>
         </div>
     </div>
@@ -928,7 +1014,7 @@
                             <i class="fas fa-file-shield"></i>
                         </div>
                         <div>
-                            <h3 class="text-sm font-bold text-slate-800">Documentación & Legal</h3>
+                            <h3 class="text-sm font-bold text-slate-800">Documentación & Trámites</h3>
                             <p class="text-[9px] text-slate-400 font-bold uppercase">ITV & Seguro Obligatorio</p>
                         </div>
                     </div>
@@ -939,24 +1025,53 @@
 
                 <div class="grid grid-cols-2 gap-2.5 text-xs">
                     <!-- ITV -->
-                    <div onclick="openDocModal('itv')" class="p-2.5 bg-slate-50 hover:bg-emerald-50/50 rounded-xl border border-slate-100 hover:border-emerald-200 cursor-pointer active:scale-95 transition-all space-y-1.5 group">
-                        <div class="flex justify-between items-start">
+                    <div class="p-2.5 bg-slate-50 hover:bg-emerald-50/50 rounded-xl border border-slate-100 hover:border-emerald-200 transition-all space-y-1.5">
+                        <div class="flex justify-between items-start cursor-pointer" onclick="openDocModal('itv')">
                             <span class="text-[9px] font-black uppercase text-slate-400 block">ITV</span>
                             <span id="itvStatusBadge" class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">Pendiente</span>
                         </div>
-                        <p id="itvDateDisplay" class="font-extrabold text-slate-800 text-sm font-mono-num">-</p>
-                        <p id="itvDaysLeft" class="text-[9px] font-semibold text-slate-400 truncate">Configurar fecha</p>
+                        <p id="itvDateDisplay" onclick="openDocModal('itv')" class="font-extrabold text-slate-800 text-sm font-mono-num cursor-pointer">-</p>
+                        <div class="flex justify-between items-center pt-0.5">
+                            <p id="itvDaysLeft" onclick="openDocModal('itv')" class="text-[9px] font-semibold text-slate-400 truncate cursor-pointer">Configurar</p>
+                            <div id="itvFileAction"></div>
+                        </div>
                     </div>
 
                     <!-- SEGURO -->
-                    <div onclick="openDocModal('seguro')" class="p-2.5 bg-slate-50 hover:bg-blue-50/50 rounded-xl border border-slate-100 hover:border-blue-200 cursor-pointer active:scale-95 transition-all space-y-1.5 group">
-                        <div class="flex justify-between items-start">
+                    <div class="p-2.5 bg-slate-50 hover:bg-blue-50/50 rounded-xl border border-slate-100 hover:border-blue-200 transition-all space-y-1.5">
+                        <div class="flex justify-between items-start cursor-pointer" onclick="openDocModal('seguro')">
                             <span class="text-[9px] font-black uppercase text-slate-400 block">Seguro Moto</span>
                             <span id="seguroStatusBadge" class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">Pendiente</span>
                         </div>
-                        <p id="seguroDateDisplay" class="font-extrabold text-slate-800 text-sm font-mono-num">-</p>
-                        <p id="seguroDaysLeft" class="text-[9px] font-semibold text-slate-400 truncate">Configurar fecha</p>
+                        <p id="seguroDateDisplay" onclick="openDocModal('seguro')" class="font-extrabold text-slate-800 text-sm font-mono-num cursor-pointer">-</p>
+                        <div class="flex justify-between items-center pt-0.5">
+                            <p id="seguroDaysLeft" onclick="openDocModal('seguro')" class="text-[9px] font-semibold text-slate-400 truncate cursor-pointer">Configurar</p>
+                            <div id="seguroFileAction"></div>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- 6. GUANTERA DIGITAL & MANUALES (ARCHIVOS Y DOCUMENTOS) -->
+            <div class="card p-4 border-l-4 border-indigo-600 space-y-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center text-xs">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">Guantera Digital & Manuales</h3>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase">Manual de Taller, Fichas & Documentos</p>
+                        </div>
+                    </div>
+                    <button onclick="openGeneralDocModal()" class="text-[9px] font-black bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1 shadow-sm">
+                        <i class="fas fa-plus text-[8px]"></i>Subir Doc
+                    </button>
+                </div>
+
+                <!-- LISTADO DE DOCUMENTOS EN LA GUANTERA -->
+                <div id="digitalGloveboxList" class="space-y-2 text-xs">
+                    <!-- Se renderizan dinámicamente los documentos -->
                 </div>
             </div>
         </section>
@@ -1519,6 +1634,7 @@
                 data.repostajes = data.repostajes || [];
                 data.inventario = data.inventario || [];
                 data.bombillas = data.bombillas || [];
+                data.documentos = data.documentos || [];
                 data.homeFuelStock = data.homeFuelStock || 0;
                 
                 data.repostajes.forEach((r, i) => { 
@@ -1907,6 +2023,7 @@
             const addExpense = document.getElementById('bulbAddExpense').checked;
 
             data.bombillas = data.bombillas || [];
+                data.documentos = data.documentos || [];
             data.bombillas.unshift({
                 id: 'bulb_' + Date.now(),
                 type: typeStr,
@@ -2336,8 +2453,13 @@
         }
 
         
-        // --- CONTROL LEGAL: ITV & SEGURO ---
+        // --- GESTIÓN DOCUMENTAL & GUANTERA DIGITAL ---
+        let currentEditingDocType = 'itv';
+        let pendingDocFile = null;
+        let pendingGeneralDocFile = null;
+
         function openDocModal(docType = 'itv') {
+            currentEditingDocType = docType;
             document.getElementById('docTypeSelect').value = docType;
             onDocTypeChange(docType);
             
@@ -2350,21 +2472,91 @@
             document.getElementById('docNotes').value = docInfo.notes || '';
             document.getElementById('docAddExpense').checked = false;
             
+            clearDocFileSelection();
+
+            // Si ya existe un archivo guardado para este trámite
+            const curFileCont = document.getElementById('docCurrentFileContainer');
+            const curFileName = document.getElementById('docCurrentFileName');
+            if (docInfo.file) {
+                curFileName.innerText = docInfo.file_name || docInfo.file;
+                curFileCont.classList.remove('hidden');
+            } else {
+                curFileCont.classList.add('hidden');
+            }
+            
             document.getElementById('docModal').classList.add('active');
         }
 
         function closeDocModal() {
             document.getElementById('docModal').classList.remove('active');
+            pendingDocFile = null;
         }
 
         function onDocTypeChange(val) {
+            currentEditingDocType = val;
             const isItv = val === 'itv';
             document.getElementById('docModalTitle').innerText = isItv ? "Renovación ITV" : "Póliza / Seguro Moto";
             document.getElementById('docModalBadge').innerText = isItv ? "Inspección Técnica" : "Póliza de Seguro";
             document.getElementById('docEntity').placeholder = isItv ? "Ej: ITV Alhama, Applus..." : "Ej: Mapfre, Allianz, Verti...";
+            
+            data.documentacion = data.documentacion || {};
+            const docInfo = data.documentacion[val] || {};
+            const curFileCont = document.getElementById('docCurrentFileContainer');
+            const curFileName = document.getElementById('docCurrentFileName');
+            if (docInfo.file) {
+                curFileName.innerText = docInfo.file_name || docInfo.file;
+                curFileCont.classList.remove('hidden');
+            } else {
+                curFileCont.classList.add('hidden');
+            }
         }
 
-        function saveDocRecord() {
+        function onDocFileSelected(input) {
+            if (input.files && input.files[0]) {
+                pendingDocFile = input.files[0];
+                document.getElementById('docFileLabel').innerText = pendingDocFile.name;
+                document.getElementById('docClearFileBtn').classList.remove('hidden');
+            }
+        }
+
+        function clearDocFileSelection() {
+            pendingDocFile = null;
+            const input = document.getElementById('docFileInput');
+            if (input) input.value = '';
+            document.getElementById('docFileLabel').innerText = 'Seleccionar archivo...';
+            document.getElementById('docClearFileBtn').classList.add('hidden');
+        }
+
+        function viewCurrentDocFile() {
+            data.documentacion = data.documentacion || {};
+            const docInfo = data.documentacion[currentEditingDocType];
+            if (docInfo && docInfo.file) {
+                openDocViewer(docInfo.file, docInfo.file_name || (currentEditingDocType.toUpperCase() + ' Vespa'));
+            }
+        }
+
+        async function deleteCurrentDocFile() {
+            if (!confirm("¿Deseas eliminar este documento adjunto?")) return;
+            data.documentacion = data.documentacion || {};
+            const docInfo = data.documentacion[currentEditingDocType];
+            if (docInfo && docInfo.file) {
+                try {
+                    await fetch('api.php?action=delete_doc', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Vespa-PIN': getStoredPin() },
+                        body: JSON.stringify({ filename: docInfo.file })
+                    });
+                } catch(e) {}
+                delete docInfo.file;
+                delete docInfo.file_name;
+                document.getElementById('docCurrentFileContainer').classList.add('hidden');
+                saveData();
+                renderLegalDocs();
+                showToast('Archivo eliminado');
+            }
+        }
+
+        async function saveDocRecord() {
             const type = document.getElementById('docTypeSelect').value;
             const expiry = document.getElementById('docExpiryDate').value;
             const price = parseFloat(document.getElementById('docPrice').value) || 0;
@@ -2377,14 +2569,36 @@
                 return;
             }
 
+            document.getElementById('loader').style.display = 'block';
+
             data.documentacion = data.documentacion || {};
-            data.documentacion[type] = {
-                expiry: expiry,
-                price: price,
-                entity: entity,
-                notes: notes,
-                lastUpdated: new Date().toISOString().slice(0, 10)
-            };
+            data.documentacion[type] = data.documentacion[type] || {};
+            data.documentacion[type].expiry = expiry;
+            data.documentacion[type].price = price;
+            data.documentacion[type].entity = entity;
+            data.documentacion[type].notes = notes;
+            data.documentacion[type].lastUpdated = new Date().toISOString().slice(0, 10);
+
+            // Subir archivo si fue seleccionado
+            if (pendingDocFile) {
+                try {
+                    const fd = new FormData();
+                    fd.append('file', pendingDocFile);
+                    fd.append('category', type);
+                    const res = await fetch('api.php?action=upload_doc', {
+                        method: 'POST',
+                        headers: { 'X-Vespa-PIN': getStoredPin() },
+                        body: fd
+                    });
+                    const uploadRes = await res.json();
+                    if (uploadRes.status === 'success') {
+                        data.documentacion[type].file = uploadRes.filename;
+                        data.documentacion[type].file_name = uploadRes.original_name;
+                    }
+                } catch(e) {
+                    console.error("Error al subir archivo:", e);
+                }
+            }
 
             // Registro automático en Gastos
             if (addExpense && price > 0) {
@@ -2405,11 +2619,146 @@
 
             closeDocModal();
             saveData();
+            document.getElementById('loader').style.display = 'none';
             showToast(type === 'itv' ? 'Fecha de ITV actualizada' : 'Póliza de seguro guardada');
+        }
+
+        // --- GUANTERA DIGITAL MODAL & CRUD ---
+        function openGeneralDocModal() {
+            document.getElementById('generalDocTitle').value = '';
+            document.getElementById('generalDocNotes').value = '';
+            document.getElementById('generalDocCategory').value = 'manual';
+            document.getElementById('generalDocFileLabel').innerText = 'Seleccionar PDF o Foto...';
+            document.getElementById('generalDocFileInput').value = '';
+            pendingGeneralDocFile = null;
+            document.getElementById('generalDocModal').classList.add('active');
+        }
+
+        function closeGeneralDocModal() {
+            document.getElementById('generalDocModal').classList.remove('active');
+            pendingGeneralDocFile = null;
+        }
+
+        function onGeneralDocFileSelected(input) {
+            if (input.files && input.files[0]) {
+                pendingGeneralDocFile = input.files[0];
+                document.getElementById('generalDocFileLabel').innerText = pendingGeneralDocFile.name;
+                if (!document.getElementById('generalDocTitle').value.trim()) {
+                    // Sugerir título a partir del nombre del archivo
+                    const cleanName = pendingGeneralDocFile.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, ' ');
+                    document.getElementById('generalDocTitle').value = cleanName;
+                }
+            }
+        }
+
+        async function submitGeneralDoc() {
+            const cat = document.getElementById('generalDocCategory').value;
+            const title = document.getElementById('generalDocTitle').value.trim();
+            const notes = document.getElementById('generalDocNotes').value.trim();
+
+            if (!title) {
+                alert("Por favor, introduce un título para el documento");
+                return;
+            }
+            if (!pendingGeneralDocFile) {
+                alert("Por favor, selecciona un archivo (PDF o Imagen)");
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'block';
+            try {
+                const fd = new FormData();
+                fd.append('file', pendingGeneralDocFile);
+                fd.append('category', cat);
+                const res = await fetch('api.php?action=upload_doc', {
+                    method: 'POST',
+                    headers: { 'X-Vespa-PIN': getStoredPin() },
+                    body: fd
+                });
+                const uploadRes = await res.json();
+                if (uploadRes.status === 'success') {
+                    data.documentos = data.documentos || [];
+                    data.documentos.unshift({
+                        id: 'doc_' + Date.now(),
+                        category: cat,
+                        title: title,
+                        notes: notes,
+                        filename: uploadRes.filename,
+                        original_name: uploadRes.original_name,
+                        ext: uploadRes.ext,
+                        size: uploadRes.size,
+                        date: new Date().toISOString().slice(0, 10)
+                    });
+                    closeGeneralDocModal();
+                    saveData();
+                    renderLegalDocs();
+                    showToast('Documento añadido a la guantera');
+                } else {
+                    alert("Error: " + (uploadRes.message || 'No se pudo subir'));
+                }
+            } catch(e) {
+                alert("Error de subida: " + e.message);
+            }
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        async function deleteGeneralDoc(docId) {
+            if (!confirm("¿Deseas eliminar este documento?")) return;
+            data.documentos = data.documentos || [];
+            const idx = data.documentos.findIndex(d => d.id === docId);
+            if (idx !== -1) {
+                const doc = data.documentos[idx];
+                if (doc.filename) {
+                    try {
+                        await fetch('api.php?action=delete_doc', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-Vespa-PIN': getStoredPin() },
+                            body: JSON.stringify({ filename: doc.filename })
+                        });
+                    } catch(e) {}
+                }
+                data.documentos.splice(idx, 1);
+                saveData();
+                renderLegalDocs();
+                showToast('Documento eliminado');
+            }
+        }
+
+        // --- VISOR DE DOCUMENTOS SEGURO ---
+        function openDocViewer(filename, title = 'Documento') {
+            const viewer = document.getElementById('docViewerModal');
+            const vTitle = document.getElementById('viewerTitle');
+            const vContent = document.getElementById('viewerContent');
+            const vIcon = document.getElementById('viewerIcon');
+            const vDlBtn = document.getElementById('viewerDownloadBtn');
+
+            vTitle.innerText = title;
+            const pin = getStoredPin();
+            const docUrl = `api.php?action=view_doc&file=${encodeURIComponent(filename)}&pin=${encodeURIComponent(pin)}`;
+            const dlUrl = `api.php?action=view_doc&file=${encodeURIComponent(filename)}&download=1&pin=${encodeURIComponent(pin)}`;
+
+            vDlBtn.href = dlUrl;
+
+            const ext = filename.split('.').pop().toLowerCase();
+            if (ext === 'pdf') {
+                vIcon.className = 'fas fa-file-pdf text-red-600 text-lg';
+                vContent.innerHTML = `<iframe src="${docUrl}#toolbar=0" class="w-full h-full rounded-lg border-0 bg-white" title="${title}"></iframe>`;
+            } else {
+                vIcon.className = 'fas fa-file-image text-blue-600 text-lg';
+                vContent.innerHTML = `<img src="${docUrl}" class="max-w-full max-h-full object-contain rounded-lg shadow-sm" alt="${title}">`;
+            }
+
+            viewer.classList.add('active');
+        }
+
+        function closeDocViewerModal() {
+            document.getElementById('docViewerModal').classList.remove('active');
+            document.getElementById('viewerContent').innerHTML = '';
         }
 
         function renderLegalDocs() {
             data.documentacion = data.documentacion || {};
+            data.documentos = data.documentos || [];
             const now = new Date();
             now.setHours(0,0,0,0);
 
@@ -2418,6 +2767,7 @@
             const itvDateEl = document.getElementById('itvDateDisplay');
             const itvDaysEl = document.getElementById('itvDaysLeft');
             const itvBadge = document.getElementById('itvStatusBadge');
+            const itvFileEl = document.getElementById('itvFileAction');
 
             if (itvInfo && itvInfo.expiry) {
                 const exp = new Date(itvInfo.expiry);
@@ -2438,11 +2788,18 @@
                     itvBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800';
                     itvBadge.innerText = 'En Vigor';
                 }
+
+                if (itvInfo.file) {
+                    itvFileEl.innerHTML = `<button onclick="event.stopPropagation(); openDocViewer('${itvInfo.file}', 'ITV Vespa PK 125 S')" class="px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded font-black text-[9px] uppercase tracking-wider flex items-center gap-1"><i class="fas fa-file-alt text-[8px]"></i>Ver Doc</button>`;
+                } else {
+                    itvFileEl.innerHTML = '';
+                }
             } else {
                 itvDateEl.innerText = "-";
-                itvDaysEl.innerText = "Tocar para añadir";
+                itvDaysEl.innerText = "Configurar";
                 itvBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-500';
                 itvBadge.innerText = "Sin datos";
+                itvFileEl.innerHTML = '';
             }
 
             // 2. Seguro
@@ -2450,6 +2807,7 @@
             const segDateEl = document.getElementById('seguroDateDisplay');
             const segDaysEl = document.getElementById('seguroDaysLeft');
             const segBadge = document.getElementById('seguroStatusBadge');
+            const segFileEl = document.getElementById('seguroFileAction');
 
             if (segInfo && segInfo.expiry) {
                 const exp = new Date(segInfo.expiry);
@@ -2470,11 +2828,71 @@
                     segBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800';
                     segBadge.innerText = 'En Vigor';
                 }
+
+                if (segInfo.file) {
+                    segFileEl.innerHTML = `<button onclick="event.stopPropagation(); openDocViewer('${segInfo.file}', 'Póliza Seguro Vespa')" class="px-2 py-0.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded font-black text-[9px] uppercase tracking-wider flex items-center gap-1"><i class="fas fa-file-alt text-[8px]"></i>Ver Doc</button>`;
+                } else {
+                    segFileEl.innerHTML = '';
+                }
             } else {
                 segDateEl.innerText = "-";
-                segDaysEl.innerText = "Tocar para añadir";
+                segDaysEl.innerText = "Configurar";
                 segBadge.className = 'text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-500';
                 segBadge.innerText = "Sin datos";
+                segFileEl.innerHTML = '';
+            }
+
+            // 3. Renderizar Guantera Digital
+            const gloveboxList = document.getElementById('digitalGloveboxList');
+            if (gloveboxList) {
+                if (data.documentos && data.documentos.length > 0) {
+                    const catIcons = {
+                        'manual': { icon: 'fa-book-open', color: 'text-indigo-600', bg: 'bg-indigo-50', badge: 'Manual' },
+                        'legal': { icon: 'fa-id-card', color: 'text-emerald-600', bg: 'bg-emerald-50', badge: 'Legal' },
+                        'seguro': { icon: 'fa-shield-alt', color: 'text-blue-600', bg: 'bg-blue-50', badge: 'Seguro' },
+                        'itv': { icon: 'fa-file-signature', color: 'text-amber-600', bg: 'bg-amber-50', badge: 'ITV' },
+                        'factura': { icon: 'fa-receipt', color: 'text-slate-600', bg: 'bg-slate-100', badge: 'Factura' },
+                        'otro': { icon: 'fa-file', color: 'text-slate-500', bg: 'bg-slate-50', badge: 'Doc' }
+                    };
+
+                    gloveboxList.innerHTML = data.documentos.map(doc => {
+                        const meta = catIcons[doc.category] || catIcons['otro'];
+                        const isPdf = (doc.ext || '').toLowerCase() === 'pdf' || (doc.filename || '').toLowerCase().endsWith('.pdf');
+                        const fileBadge = isPdf ? '<span class="text-[8px] font-black bg-red-100 text-red-700 px-1.5 py-0.2 rounded">PDF</span>' : '<span class="text-[8px] font-black bg-blue-100 text-blue-700 px-1.5 py-0.2 rounded">IMG</span>';
+                        return `
+                            <div class="p-3 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-100 flex items-center justify-between gap-2.5 transition-all">
+                                <div class="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer" onclick="openDocViewer('${doc.filename}', '${doc.title.replace(/'/g, "\'")}')">
+                                    <div class="w-8 h-8 rounded-lg ${meta.bg} ${meta.color} flex items-center justify-center text-sm shrink-0 shadow-xs">
+                                        <i class="fas ${meta.icon}"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-1.5">
+                                            <p class="font-bold text-xs text-slate-800 truncate">${doc.title}</p>
+                                            ${fileBadge}
+                                        </div>
+                                        <p class="text-[10px] text-slate-400 truncate">${doc.notes ? doc.notes + ' • ' : ''}${doc.date || ''}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <button onclick="openDocViewer('${doc.filename}', '${doc.title.replace(/'/g, "\'")}')" class="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="deleteGeneralDoc('${doc.id}')" class="p-1.5 text-slate-300 hover:text-red-500 rounded-lg text-xs transition-colors" title="Eliminar">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    gloveboxList.innerHTML = `
+                        <div class="p-4 bg-slate-50 rounded-2xl text-center border border-dashed border-slate-200">
+                            <i class="fas fa-folder-open text-slate-300 text-2xl mb-1.5"></i>
+                            <p class="text-xs text-slate-400 font-semibold">Guantera digital vacía</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Sube aquí el manual de taller, ficha técnica o facturas.</p>
+                        </div>
+                    `;
+                }
             }
         }
 
