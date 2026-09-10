@@ -532,6 +532,55 @@
         </div>
     </div>
 
+        <!-- MODAL REPOSICIÓN / COMPRA DE RECAMBIO (STOCK + GASTOS) -->
+    <div id="restockModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3.5 shadow-2xl">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-sm shrink-0">
+                        <i class="fas fa-cart-plus"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 id="restockItemTitle" class="text-base font-bold text-slate-800 truncate">Reponer Recambio</h3>
+                        <p class="text-[9px] text-slate-400 font-semibold">Añadir unidades y registrar compra</p>
+                    </div>
+                </div>
+                <button onclick="closeRestockModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+
+            <input type="hidden" id="restockItemId">
+            <div class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Unidades a Añadir</label>
+                        <input type="number" id="restockQty" value="1" min="1" class="font-mono-num font-bold text-slate-800 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Coste Total (€)</label>
+                        <input type="number" id="restockPrice" placeholder="0.00" step="0.01" class="font-mono-num font-bold text-slate-800 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tienda / Marca / Notas</label>
+                    <input type="text" id="restockNotes" placeholder="Ej: Recambios Motos Clásicas, Calleja, Amazon...">
+                </div>
+
+                <div class="flex items-center gap-2 p-2.5 bg-orange-50/70 rounded-xl border border-orange-200/80">
+                    <input type="checkbox" id="restockAddExpense" checked class="w-4 h-4 text-orange-600 rounded">
+                    <label for="restockAddExpense" class="text-[10px] font-bold text-orange-950 cursor-pointer">Registrar automáticamente en Gastos</label>
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-2 border-t border-slate-100">
+                <button onclick="closeRestockModal()" class="flex-1 p-2.5 bg-slate-100 rounded-xl font-bold text-slate-500 text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button onclick="submitRestockItem()" class="flex-1 btn-primary text-xs shadow-md">Confirmar Entrada</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL REGISTRO BOMBILLA -->
     <div id="bulbModal" class="modal">
         <div class="card p-5 w-full max-w-sm space-y-3">
@@ -1811,6 +1860,68 @@
             showToast(price > 0 && addExpense ? `Guardado en stock y registrado ${price.toFixed(2)}€ en Gastos` : `Añadido: ${name}`);
         }
 
+        
+        // --- MODAL DE REPOSICIÓN RÁPIDA (+) CON COSTE Y NOTAS ---
+        let currentRestockingItemId = null;
+
+        function openRestockModal(itemId) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            currentRestockingItemId = itemId;
+            document.getElementById('restockItemId').value = itemId;
+            document.getElementById('restockItemTitle').innerText = item.name;
+            document.getElementById('restockQty').value = 1;
+            document.getElementById('restockPrice').value = '';
+            document.getElementById('restockNotes').value = '';
+            document.getElementById('restockAddExpense').checked = true;
+
+            document.getElementById('restockModal').classList.add('active');
+        }
+
+        function closeRestockModal() {
+            document.getElementById('restockModal').classList.remove('active');
+            currentRestockingItemId = null;
+        }
+
+        function submitRestockItem() {
+            const itemId = document.getElementById('restockItemId').value;
+            const qty = parseInt(document.getElementById('restockQty').value) || 1;
+            const price = parseFloat(document.getElementById('restockPrice').value) || 0;
+            const notes = document.getElementById('restockNotes').value.trim();
+            const addExpense = document.getElementById('restockAddExpense').checked;
+
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            item.qty = (item.qty || 0) + qty;
+
+            // Registrar en Gastos si se introdujo precio o se marcó el checkbox
+            if (addExpense && price > 0) {
+                data.inventario = data.inventario || [];
+                const expTitle = `Compra Stock: ${item.name} (+${qty} un.)`;
+                const expNotes = [notes, `Categoría: ${item.cat}`, `Stock Casa`].filter(Boolean).join(' • ');
+                data.inventario.unshift({
+                    id: 'l_stk_' + Date.now(),
+                    logType: 'pieza',
+                    date: new Date().toISOString().slice(0, 16),
+                    title: expTitle,
+                    price: price,
+                    km: data.odometer,
+                    notes: expNotes
+                });
+                data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+
+            closeRestockModal();
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(price > 0 && addExpense ? `+${qty} un. a ${item.name} y registrado ${price.toFixed(2)}€ en Gastos` : `+${qty} un. a ${item.name}`);
+        }
+
         function renderHomeStockModalList() {
             const list = getHomeStockList();
             const container = document.getElementById('modalStockItemsList');
@@ -1844,7 +1955,7 @@
                         <div class="flex items-center gap-1 shrink-0">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
                             <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
                             <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
                         </div>
                     </div>
@@ -1897,7 +2008,7 @@
                         </div>
                         <div class="flex items-center gap-1">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
                         </div>
                     </div>
                 `;
@@ -2026,6 +2137,68 @@
             showToast(price > 0 && addExpense ? `Guardado en stock y registrado ${price.toFixed(2)}€ en Gastos` : `Añadido: ${name}`);
         }
 
+        
+        // --- MODAL DE REPOSICIÓN RÁPIDA (+) CON COSTE Y NOTAS ---
+        let currentRestockingItemId = null;
+
+        function openRestockModal(itemId) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            currentRestockingItemId = itemId;
+            document.getElementById('restockItemId').value = itemId;
+            document.getElementById('restockItemTitle').innerText = item.name;
+            document.getElementById('restockQty').value = 1;
+            document.getElementById('restockPrice').value = '';
+            document.getElementById('restockNotes').value = '';
+            document.getElementById('restockAddExpense').checked = true;
+
+            document.getElementById('restockModal').classList.add('active');
+        }
+
+        function closeRestockModal() {
+            document.getElementById('restockModal').classList.remove('active');
+            currentRestockingItemId = null;
+        }
+
+        function submitRestockItem() {
+            const itemId = document.getElementById('restockItemId').value;
+            const qty = parseInt(document.getElementById('restockQty').value) || 1;
+            const price = parseFloat(document.getElementById('restockPrice').value) || 0;
+            const notes = document.getElementById('restockNotes').value.trim();
+            const addExpense = document.getElementById('restockAddExpense').checked;
+
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            item.qty = (item.qty || 0) + qty;
+
+            // Registrar en Gastos si se introdujo precio o se marcó el checkbox
+            if (addExpense && price > 0) {
+                data.inventario = data.inventario || [];
+                const expTitle = `Compra Stock: ${item.name} (+${qty} un.)`;
+                const expNotes = [notes, `Categoría: ${item.cat}`, `Stock Casa`].filter(Boolean).join(' • ');
+                data.inventario.unshift({
+                    id: 'l_stk_' + Date.now(),
+                    logType: 'pieza',
+                    date: new Date().toISOString().slice(0, 16),
+                    title: expTitle,
+                    price: price,
+                    km: data.odometer,
+                    notes: expNotes
+                });
+                data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+
+            closeRestockModal();
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(price > 0 && addExpense ? `+${qty} un. a ${item.name} y registrado ${price.toFixed(2)}€ en Gastos` : `+${qty} un. a ${item.name}`);
+        }
+
         function renderHomeStockModalList() {
             const list = getHomeStockList();
             const container = document.getElementById('modalStockItemsList');
@@ -2059,7 +2232,7 @@
                         <div class="flex items-center gap-1 shrink-0">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
                             <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
                             <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
                         </div>
                     </div>
@@ -2112,7 +2285,7 @@
                         </div>
                         <div class="flex items-center gap-1">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
                         </div>
                     </div>
                 `;
@@ -2332,6 +2505,68 @@
             showToast(price > 0 && addExpense ? `Guardado en stock y registrado ${price.toFixed(2)}€ en Gastos` : `Añadido: ${name}`);
         }
 
+        
+        // --- MODAL DE REPOSICIÓN RÁPIDA (+) CON COSTE Y NOTAS ---
+        let currentRestockingItemId = null;
+
+        function openRestockModal(itemId) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            currentRestockingItemId = itemId;
+            document.getElementById('restockItemId').value = itemId;
+            document.getElementById('restockItemTitle').innerText = item.name;
+            document.getElementById('restockQty').value = 1;
+            document.getElementById('restockPrice').value = '';
+            document.getElementById('restockNotes').value = '';
+            document.getElementById('restockAddExpense').checked = true;
+
+            document.getElementById('restockModal').classList.add('active');
+        }
+
+        function closeRestockModal() {
+            document.getElementById('restockModal').classList.remove('active');
+            currentRestockingItemId = null;
+        }
+
+        function submitRestockItem() {
+            const itemId = document.getElementById('restockItemId').value;
+            const qty = parseInt(document.getElementById('restockQty').value) || 1;
+            const price = parseFloat(document.getElementById('restockPrice').value) || 0;
+            const notes = document.getElementById('restockNotes').value.trim();
+            const addExpense = document.getElementById('restockAddExpense').checked;
+
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            item.qty = (item.qty || 0) + qty;
+
+            // Registrar en Gastos si se introdujo precio o se marcó el checkbox
+            if (addExpense && price > 0) {
+                data.inventario = data.inventario || [];
+                const expTitle = `Compra Stock: ${item.name} (+${qty} un.)`;
+                const expNotes = [notes, `Categoría: ${item.cat}`, `Stock Casa`].filter(Boolean).join(' • ');
+                data.inventario.unshift({
+                    id: 'l_stk_' + Date.now(),
+                    logType: 'pieza',
+                    date: new Date().toISOString().slice(0, 16),
+                    title: expTitle,
+                    price: price,
+                    km: data.odometer,
+                    notes: expNotes
+                });
+                data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+
+            closeRestockModal();
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(price > 0 && addExpense ? `+${qty} un. a ${item.name} y registrado ${price.toFixed(2)}€ en Gastos` : `+${qty} un. a ${item.name}`);
+        }
+
         function renderHomeStockModalList() {
             const list = getHomeStockList();
             const container = document.getElementById('modalStockItemsList');
@@ -2365,7 +2600,7 @@
                         <div class="flex items-center gap-1 shrink-0">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
                             <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
                             <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
                         </div>
                     </div>
@@ -2418,7 +2653,7 @@
                         </div>
                         <div class="flex items-center gap-1">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
                         </div>
                     </div>
                 `;
@@ -2554,6 +2789,68 @@
             showToast(price > 0 && addExpense ? `Guardado en stock y registrado ${price.toFixed(2)}€ en Gastos` : `Añadido: ${name}`);
         }
 
+        
+        // --- MODAL DE REPOSICIÓN RÁPIDA (+) CON COSTE Y NOTAS ---
+        let currentRestockingItemId = null;
+
+        function openRestockModal(itemId) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            currentRestockingItemId = itemId;
+            document.getElementById('restockItemId').value = itemId;
+            document.getElementById('restockItemTitle').innerText = item.name;
+            document.getElementById('restockQty').value = 1;
+            document.getElementById('restockPrice').value = '';
+            document.getElementById('restockNotes').value = '';
+            document.getElementById('restockAddExpense').checked = true;
+
+            document.getElementById('restockModal').classList.add('active');
+        }
+
+        function closeRestockModal() {
+            document.getElementById('restockModal').classList.remove('active');
+            currentRestockingItemId = null;
+        }
+
+        function submitRestockItem() {
+            const itemId = document.getElementById('restockItemId').value;
+            const qty = parseInt(document.getElementById('restockQty').value) || 1;
+            const price = parseFloat(document.getElementById('restockPrice').value) || 0;
+            const notes = document.getElementById('restockNotes').value.trim();
+            const addExpense = document.getElementById('restockAddExpense').checked;
+
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            item.qty = (item.qty || 0) + qty;
+
+            // Registrar en Gastos si se introdujo precio o se marcó el checkbox
+            if (addExpense && price > 0) {
+                data.inventario = data.inventario || [];
+                const expTitle = `Compra Stock: ${item.name} (+${qty} un.)`;
+                const expNotes = [notes, `Categoría: ${item.cat}`, `Stock Casa`].filter(Boolean).join(' • ');
+                data.inventario.unshift({
+                    id: 'l_stk_' + Date.now(),
+                    logType: 'pieza',
+                    date: new Date().toISOString().slice(0, 16),
+                    title: expTitle,
+                    price: price,
+                    km: data.odometer,
+                    notes: expNotes
+                });
+                data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+
+            closeRestockModal();
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(price > 0 && addExpense ? `+${qty} un. a ${item.name} y registrado ${price.toFixed(2)}€ en Gastos` : `+${qty} un. a ${item.name}`);
+        }
+
         function renderHomeStockModalList() {
             const list = getHomeStockList();
             const container = document.getElementById('modalStockItemsList');
@@ -2587,7 +2884,7 @@
                         <div class="flex items-center gap-1 shrink-0">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
                             <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
                             <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
                         </div>
                     </div>
@@ -2640,7 +2937,7 @@
                         </div>
                         <div class="flex items-center gap-1">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
                         </div>
                     </div>
                 `;
@@ -4361,6 +4658,68 @@
             showToast(price > 0 && addExpense ? `Guardado en stock y registrado ${price.toFixed(2)}€ en Gastos` : `Añadido: ${name}`);
         }
 
+        
+        // --- MODAL DE REPOSICIÓN RÁPIDA (+) CON COSTE Y NOTAS ---
+        let currentRestockingItemId = null;
+
+        function openRestockModal(itemId) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            currentRestockingItemId = itemId;
+            document.getElementById('restockItemId').value = itemId;
+            document.getElementById('restockItemTitle').innerText = item.name;
+            document.getElementById('restockQty').value = 1;
+            document.getElementById('restockPrice').value = '';
+            document.getElementById('restockNotes').value = '';
+            document.getElementById('restockAddExpense').checked = true;
+
+            document.getElementById('restockModal').classList.add('active');
+        }
+
+        function closeRestockModal() {
+            document.getElementById('restockModal').classList.remove('active');
+            currentRestockingItemId = null;
+        }
+
+        function submitRestockItem() {
+            const itemId = document.getElementById('restockItemId').value;
+            const qty = parseInt(document.getElementById('restockQty').value) || 1;
+            const price = parseFloat(document.getElementById('restockPrice').value) || 0;
+            const notes = document.getElementById('restockNotes').value.trim();
+            const addExpense = document.getElementById('restockAddExpense').checked;
+
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item) return;
+
+            item.qty = (item.qty || 0) + qty;
+
+            // Registrar en Gastos si se introdujo precio o se marcó el checkbox
+            if (addExpense && price > 0) {
+                data.inventario = data.inventario || [];
+                const expTitle = `Compra Stock: ${item.name} (+${qty} un.)`;
+                const expNotes = [notes, `Categoría: ${item.cat}`, `Stock Casa`].filter(Boolean).join(' • ');
+                data.inventario.unshift({
+                    id: 'l_stk_' + Date.now(),
+                    logType: 'pieza',
+                    date: new Date().toISOString().slice(0, 16),
+                    title: expTitle,
+                    price: price,
+                    km: data.odometer,
+                    notes: expNotes
+                });
+                data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+
+            closeRestockModal();
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(price > 0 && addExpense ? `+${qty} un. a ${item.name} y registrado ${price.toFixed(2)}€ en Gastos` : `+${qty} un. a ${item.name}`);
+        }
+
         function renderHomeStockModalList() {
             const list = getHomeStockList();
             const container = document.getElementById('modalStockItemsList');
@@ -4394,7 +4753,7 @@
                         <div class="flex items-center gap-1 shrink-0">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
                             <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
                             <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
                         </div>
                     </div>
@@ -4447,7 +4806,7 @@
                         </div>
                         <div class="flex items-center gap-1">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
-                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                            <button onclick="openRestockModal('${item.id}')" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
                         </div>
                     </div>
                 `;
