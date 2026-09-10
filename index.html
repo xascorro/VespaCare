@@ -439,6 +439,91 @@
         </div>
     </div>
 
+        <!-- MODAL GESTIÓN COMPLETA DE STOCK EN CASA / TALLER -->
+    <div id="homeStockModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3.5 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-sm">
+                        <i class="fas fa-boxes-stacked"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">Stock de Garaje</h3>
+                        <p class="text-[10px] text-slate-400 font-semibold">Consumibles y recambios en casa</p>
+                    </div>
+                </div>
+                <button onclick="closeHomeStockModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+
+            <!-- CONTROLES RÁPIDOS DE STOCK VIVO -->
+            <div class="flex-1 overflow-y-auto space-y-3 text-xs pr-1">
+                <!-- 1. Garrafa Gasolina -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">⛽</span>
+                            <div>
+                                <p class="font-bold text-slate-800 text-xs">Garrafa Gasolina Doméstica</p>
+                                <p class="text-[9px] text-slate-400">Stock para repostar en casa</p>
+                            </div>
+                        </div>
+                        <span id="modalFuelStockQty" class="font-black text-slate-800 text-sm font-mono-num">2.7 L</span>
+                    </div>
+                    <div class="flex items-center gap-2 pt-1">
+                        <button onclick="adjustHomeFuel(-1)" class="flex-1 py-1.5 bg-white border border-slate-200 rounded-lg font-black text-slate-700 hover:bg-slate-100 active:scale-95">-1 L</button>
+                        <button onclick="adjustHomeFuel(-0.5)" class="flex-1 py-1.5 bg-white border border-slate-200 rounded-lg font-black text-slate-700 hover:bg-slate-100 active:scale-95">-0.5 L</button>
+                        <button onclick="adjustHomeFuel(+0.5)" class="flex-1 py-1.5 bg-white border border-slate-200 rounded-lg font-black text-slate-700 hover:bg-slate-100 active:scale-95">+0.5 L</button>
+                        <button onclick="adjustHomeFuel(+5)" class="flex-1 py-1.5 bg-orange-600 text-white rounded-lg font-black hover:bg-orange-700 active:scale-95">+5 L</button>
+                    </div>
+                </div>
+
+                <!-- 2. Lista de Artículos de Stock -->
+                <div class="space-y-2 pt-1">
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Piezas & Recambios en Estantería:</span>
+                    </div>
+                    <div id="modalStockItemsList" class="space-y-2">
+                        <!-- Items renderizados dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- 3. Formulario para añadir nuevo ítem de stock -->
+                <div class="p-3 bg-orange-50/50 rounded-xl border border-orange-200/80 space-y-2.5">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-orange-900 block">Añadir Nuevo Recambio al Stock:</span>
+                    <div class="grid grid-cols-1 gap-2">
+                        <input type="text" id="newStockItemName" placeholder="Ej: Bujía NGK B7HS, Aceite 2T 1L, Fusible 8A..." class="font-bold text-xs">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[9px] font-black text-slate-400 uppercase">Categoría</label>
+                                <select id="newStockItemCat" class="font-bold text-xs">
+                                    <option value="Fluidos">🛢️ Fluidos / Aceite</option>
+                                    <option value="Iluminación">💡 Bombillas / Fusibles</option>
+                                    <option value="Motor">⚙️ Motor / Bujías</option>
+                                    <option value="Chasis">🛞 Chasis / Cables</option>
+                                    <option value="Otro">📦 Otro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-black text-slate-400 uppercase">Cantidad Inicial</label>
+                                <input type="number" id="newStockItemQty" value="1" min="1" class="font-mono-num text-xs">
+                            </div>
+                        </div>
+                        <input type="text" id="newStockItemNotes" placeholder="Notas (marca, ubicación en garaje...)" class="text-xs">
+                        <button onclick="addNewStockItem()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-sm active:scale-95 transition-all">
+                            <i class="fas fa-plus mr-1 text-amber-400"></i>Guardar en Estantería
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100">
+                <button onclick="closeHomeStockModal()" class="w-full p-2.5 bg-slate-100 rounded-xl font-bold text-slate-600 text-xs hover:bg-slate-200 transition-colors">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL REGISTRO BOMBILLA -->
     <div id="bulbModal" class="modal">
         <div class="card p-5 w-full max-w-sm space-y-3">
@@ -585,14 +670,23 @@
                         <p id="mixResult" class="text-2xl font-black text-amber-800 pb-2">0<span class="text-xs ml-1">ml</span></p>
                     </div>
                 </div>
-                <div class="card p-4 border-b-4 border-orange-400">
-                    <div class="flex items-center gap-2 mb-2 text-orange-600">
-                        <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
-                            <i class="fas fa-bottle-water"></i>
+                <div onclick="openHomeStockModal()" class="card p-4 border-b-4 border-orange-400 cursor-pointer hover:shadow-md transition-all group active:scale-95">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2 text-orange-600">
+                            <div class="w-10 h-10 rounded-xl bg-orange-50 group-hover:bg-orange-100 flex items-center justify-center transition-colors">
+                                <i class="fas fa-boxes-stacked"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xs font-black uppercase tracking-widest">Stock Casa</h2>
+                                <span class="text-[8px] font-bold text-orange-500 uppercase tracking-tighter">Taller / Repuestos</span>
+                            </div>
                         </div>
-                        <h2 class="text-xs font-black uppercase tracking-widest">Stock Casa</h2>
+                        <span class="text-[9px] bg-orange-50 text-orange-800 px-1.5 py-0.5 rounded font-black uppercase"><i class="fas fa-chevron-right text-[8px]"></i></span>
                     </div>
-                    <p id="homeFuelDisplay" class="text-3xl font-black text-slate-800">0<span class="text-sm ml-1 text-slate-400">L</span></p>
+                    <div class="flex items-baseline justify-between">
+                        <p id="homeFuelDisplay" class="text-3xl font-black text-slate-800">0<span class="text-sm ml-1 text-slate-400">L</span></p>
+                        <span id="homeStockItemsCountBadge" class="text-[9px] font-bold text-slate-400">0 recambios</span>
+                    </div>
                 </div>
             </div>
 
@@ -1057,6 +1151,29 @@
                             <div id="seguroFileAction"></div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- 6. ESTANTERÍA & STOCK EN CASA / TALLER -->
+            <div class="card p-4 border-l-4 border-orange-500 space-y-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-xs shadow-xs">
+                            <i class="fas fa-boxes-stacked"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">Estantería & Stock en Casa</h3>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase">Recambios, Fluidos & Consumibles</p>
+                        </div>
+                    </div>
+                    <button onclick="openHomeStockModal()" class="text-[9px] font-black bg-orange-600 hover:bg-orange-700 text-white px-2.5 py-1.5 rounded-lg uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1 shadow-sm">
+                        <i class="fas fa-plus text-[8px]"></i>Añadir / Ajustar
+                    </button>
+                </div>
+
+                <!-- RESUMEN EN VIVO DE STOCK DE CASA -->
+                <div id="homeStockPreviewGrid" class="grid grid-cols-2 gap-2 text-xs">
+                    <!-- Se inyecta dinámicamente -->
                 </div>
             </div>
 
@@ -1568,11 +1685,391 @@
             sessionStorage.removeItem('vespa_pin');
             updatePinStatusUI(); initSettingsUI();
             showToast('Aplicación bloqueada');
-            checkAppLockState();
+            
+        // --- GESTIÓN DE STOCK EN CASA / TALLER ---
+        const DEFAULT_HOME_STOCK = [
+            { id: 'stk_oil2t', name: 'Aceite 2T Sintético (Tubo 125ml)', cat: 'Fluidos', qty: 2, icon: 'fa-vial', color: 'text-amber-600', notes: 'Para mezcla en ruta (2%)' },
+            { id: 'stk_bujia', name: 'Bujía NGK B7HS (Rosca Corta)', cat: 'Motor', qty: 1, icon: 'fa-plug', color: 'text-yellow-600', notes: 'Repuesto en guantera' },
+            { id: 'stk_led_faro', name: 'Bombilla Faro LED BA20d AC/DC', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-blue-600', notes: 'recambiosmotosclasicas.es' },
+            { id: 'stk_faro_halo', name: 'Bombilla Faro BA20d 35/35W', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-amber-700', notes: 'Halógena stock' },
+            { id: 'stk_brake_10w', name: 'Bombilla Freno BA15s 12V 10W', cat: 'Iluminación', qty: 0, icon: 'fa-stop-circle', color: 'text-red-600', notes: 'Pendiente comprar' }
+        ];
+
+        function getHomeStockList() {
+            data.stockCasa = data.stockCasa || [];
+            if (data.stockCasa.length === 0) {
+                data.stockCasa = JSON.parse(JSON.stringify(DEFAULT_HOME_STOCK));
+            }
+            return data.stockCasa;
+        }
+
+        function openHomeStockModal() {
+            renderHomeStockModalList();
+            document.getElementById('homeStockModal').classList.add('active');
+        }
+
+        function closeHomeStockModal() {
+            document.getElementById('homeStockModal').classList.remove('active');
+        }
+
+        function adjustHomeFuel(delta) {
+            data.homeFuelStock = Math.max(0, Math.round(((data.homeFuelStock || 0) + delta) * 10) / 10);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Gasolina en garrafa: ${data.homeFuelStock.toFixed(1)} L`);
+        }
+
+        function adjustStockItemQty(itemId, delta) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (item) {
+                item.qty = Math.max(0, (item.qty || 0) + delta);
+                renderHomeStock();
+                renderHomeStockModalList();
+                saveData();
+                showToast(`${item.name}: ${item.qty} un.`);
+            }
+        }
+
+        function deleteStockItem(itemId) {
+            if (!confirm("¿Deseas eliminar este artículo de la estantería?")) return;
+            data.stockCasa = getHomeStockList().filter(x => x.id !== itemId);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast('Artículo eliminado de la estantería');
+        }
+
+        function addNewStockItem() {
+            const name = document.getElementById('newStockItemName').value.trim();
+            const cat = document.getElementById('newStockItemCat').value;
+            const qty = parseInt(document.getElementById('newStockItemQty').value) || 1;
+            const notes = document.getElementById('newStockItemNotes').value.trim();
+
+            if (!name) {
+                alert("Por favor, introduce el nombre del recambio");
+                return;
+            }
+
+            const catMeta = {
+                'Fluidos': { icon: 'fa-vial', color: 'text-amber-600' },
+                'Iluminación': { icon: 'fa-lightbulb', color: 'text-blue-600' },
+                'Motor': { icon: 'fa-gear', color: 'text-purple-600' },
+                'Chasis': { icon: 'fa-dharmachakra', color: 'text-emerald-600' },
+                'Otro': { icon: 'fa-box', color: 'text-slate-600' }
+            };
+
+            const meta = catMeta[cat] || catMeta['Otro'];
+            const list = getHomeStockList();
+            list.push({
+                id: 'stk_' + Date.now(),
+                name: name,
+                cat: cat,
+                qty: qty,
+                icon: meta.icon,
+                color: meta.color,
+                notes: notes
+            });
+
+            document.getElementById('newStockItemName').value = '';
+            document.getElementById('newStockItemNotes').value = '';
+            document.getElementById('newStockItemQty').value = '1';
+
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Añadido: ${name}`);
+        }
+
+        function renderHomeStockModalList() {
+            const list = getHomeStockList();
+            const container = document.getElementById('modalStockItemsList');
+            const fuelQtyEl = document.getElementById('modalFuelStockQty');
+            if (fuelQtyEl) fuelQtyEl.innerText = `${(data.homeFuelStock || 0).toFixed(1)} L`;
+
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-2">Sin recambios registrados</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => {
+                const isOut = item.qty === 0;
+                const qtyBadgeClass = isOut ? 'bg-red-100 text-red-700 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-800 border-slate-200';
+                return `
+                    <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-2 transition-all">
+                        <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                            <div class="w-7 h-7 rounded-lg bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-xs shadow-xs shrink-0">
+                                <i class="fas ${item.icon || 'fa-box'}"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass}">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
+                                </div>
+                                <p class="text-[9px] text-slate-400 truncate">${item.notes || item.cat}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
+                            <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHomeStock() {
+            const list = getHomeStockList();
+            const grid = document.getElementById('homeStockPreviewGrid');
+            const garageDisplay = document.getElementById('homeFuelDisplay');
+            const garageCountBadge = document.getElementById('homeStockItemsCountBadge');
+
+            if (garageDisplay) garageDisplay.innerHTML = `${(data.homeFuelStock || 0).toFixed(1)}<span class="text-sm ml-1 text-slate-400">L</span>`;
+            
+            const totalStockItems = list.reduce((acc, x) => acc + (x.qty || 0), 0);
+            if (garageCountBadge) garageCountBadge.innerText = `${totalStockItems} recambio${totalStockItems === 1 ? '' : 's'}`;
+
+            if (!grid) return;
+
+            // Mostrar resumen en Salud
+            grid.innerHTML = `
+                <!-- Gasolina -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Gasolina Casa</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${(data.homeFuelStock || 0).toFixed(1)} L</p>
+                    </div>
+                    <span class="text-lg">⛽</span>
+                </div>
+
+                <!-- Recambios Totales -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Recambios Stock</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${totalStockItems} unidades</p>
+                    </div>
+                    <span class="text-lg">📦</span>
+                </div>
+            `;
+
+            // Añadir los ítems más destacados (hasta 4)
+            list.slice(0, 4).forEach(item => {
+                const isOut = item.qty === 0;
+                grid.innerHTML += `
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between col-span-1">
+                        <div class="min-w-0 pr-1">
+                            <span class="text-[8px] font-black uppercase text-slate-400 block truncate">${item.name}</span>
+                            <span class="font-black text-xs font-mono-num ${isOut ? 'text-red-500' : 'text-slate-800'}">${isOut ? 'Sin stock' : item.qty + ' un.'}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        checkAppLockState();
         }
 
         function openPinModal(callback = null) {
-            checkAppLockState();
+            
+        // --- GESTIÓN DE STOCK EN CASA / TALLER ---
+        const DEFAULT_HOME_STOCK = [
+            { id: 'stk_oil2t', name: 'Aceite 2T Sintético (Tubo 125ml)', cat: 'Fluidos', qty: 2, icon: 'fa-vial', color: 'text-amber-600', notes: 'Para mezcla en ruta (2%)' },
+            { id: 'stk_bujia', name: 'Bujía NGK B7HS (Rosca Corta)', cat: 'Motor', qty: 1, icon: 'fa-plug', color: 'text-yellow-600', notes: 'Repuesto en guantera' },
+            { id: 'stk_led_faro', name: 'Bombilla Faro LED BA20d AC/DC', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-blue-600', notes: 'recambiosmotosclasicas.es' },
+            { id: 'stk_faro_halo', name: 'Bombilla Faro BA20d 35/35W', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-amber-700', notes: 'Halógena stock' },
+            { id: 'stk_brake_10w', name: 'Bombilla Freno BA15s 12V 10W', cat: 'Iluminación', qty: 0, icon: 'fa-stop-circle', color: 'text-red-600', notes: 'Pendiente comprar' }
+        ];
+
+        function getHomeStockList() {
+            data.stockCasa = data.stockCasa || [];
+            if (data.stockCasa.length === 0) {
+                data.stockCasa = JSON.parse(JSON.stringify(DEFAULT_HOME_STOCK));
+            }
+            return data.stockCasa;
+        }
+
+        function openHomeStockModal() {
+            renderHomeStockModalList();
+            document.getElementById('homeStockModal').classList.add('active');
+        }
+
+        function closeHomeStockModal() {
+            document.getElementById('homeStockModal').classList.remove('active');
+        }
+
+        function adjustHomeFuel(delta) {
+            data.homeFuelStock = Math.max(0, Math.round(((data.homeFuelStock || 0) + delta) * 10) / 10);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Gasolina en garrafa: ${data.homeFuelStock.toFixed(1)} L`);
+        }
+
+        function adjustStockItemQty(itemId, delta) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (item) {
+                item.qty = Math.max(0, (item.qty || 0) + delta);
+                renderHomeStock();
+                renderHomeStockModalList();
+                saveData();
+                showToast(`${item.name}: ${item.qty} un.`);
+            }
+        }
+
+        function deleteStockItem(itemId) {
+            if (!confirm("¿Deseas eliminar este artículo de la estantería?")) return;
+            data.stockCasa = getHomeStockList().filter(x => x.id !== itemId);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast('Artículo eliminado de la estantería');
+        }
+
+        function addNewStockItem() {
+            const name = document.getElementById('newStockItemName').value.trim();
+            const cat = document.getElementById('newStockItemCat').value;
+            const qty = parseInt(document.getElementById('newStockItemQty').value) || 1;
+            const notes = document.getElementById('newStockItemNotes').value.trim();
+
+            if (!name) {
+                alert("Por favor, introduce el nombre del recambio");
+                return;
+            }
+
+            const catMeta = {
+                'Fluidos': { icon: 'fa-vial', color: 'text-amber-600' },
+                'Iluminación': { icon: 'fa-lightbulb', color: 'text-blue-600' },
+                'Motor': { icon: 'fa-gear', color: 'text-purple-600' },
+                'Chasis': { icon: 'fa-dharmachakra', color: 'text-emerald-600' },
+                'Otro': { icon: 'fa-box', color: 'text-slate-600' }
+            };
+
+            const meta = catMeta[cat] || catMeta['Otro'];
+            const list = getHomeStockList();
+            list.push({
+                id: 'stk_' + Date.now(),
+                name: name,
+                cat: cat,
+                qty: qty,
+                icon: meta.icon,
+                color: meta.color,
+                notes: notes
+            });
+
+            document.getElementById('newStockItemName').value = '';
+            document.getElementById('newStockItemNotes').value = '';
+            document.getElementById('newStockItemQty').value = '1';
+
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Añadido: ${name}`);
+        }
+
+        function renderHomeStockModalList() {
+            const list = getHomeStockList();
+            const container = document.getElementById('modalStockItemsList');
+            const fuelQtyEl = document.getElementById('modalFuelStockQty');
+            if (fuelQtyEl) fuelQtyEl.innerText = `${(data.homeFuelStock || 0).toFixed(1)} L`;
+
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-2">Sin recambios registrados</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => {
+                const isOut = item.qty === 0;
+                const qtyBadgeClass = isOut ? 'bg-red-100 text-red-700 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-800 border-slate-200';
+                return `
+                    <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-2 transition-all">
+                        <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                            <div class="w-7 h-7 rounded-lg bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-xs shadow-xs shrink-0">
+                                <i class="fas ${item.icon || 'fa-box'}"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass}">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
+                                </div>
+                                <p class="text-[9px] text-slate-400 truncate">${item.notes || item.cat}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
+                            <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHomeStock() {
+            const list = getHomeStockList();
+            const grid = document.getElementById('homeStockPreviewGrid');
+            const garageDisplay = document.getElementById('homeFuelDisplay');
+            const garageCountBadge = document.getElementById('homeStockItemsCountBadge');
+
+            if (garageDisplay) garageDisplay.innerHTML = `${(data.homeFuelStock || 0).toFixed(1)}<span class="text-sm ml-1 text-slate-400">L</span>`;
+            
+            const totalStockItems = list.reduce((acc, x) => acc + (x.qty || 0), 0);
+            if (garageCountBadge) garageCountBadge.innerText = `${totalStockItems} recambio${totalStockItems === 1 ? '' : 's'}`;
+
+            if (!grid) return;
+
+            // Mostrar resumen en Salud
+            grid.innerHTML = `
+                <!-- Gasolina -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Gasolina Casa</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${(data.homeFuelStock || 0).toFixed(1)} L</p>
+                    </div>
+                    <span class="text-lg">⛽</span>
+                </div>
+
+                <!-- Recambios Totales -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Recambios Stock</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${totalStockItems} unidades</p>
+                    </div>
+                    <span class="text-lg">📦</span>
+                </div>
+            `;
+
+            // Añadir los ítems más destacados (hasta 4)
+            list.slice(0, 4).forEach(item => {
+                const isOut = item.qty === 0;
+                grid.innerHTML += `
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between col-span-1">
+                        <div class="min-w-0 pr-1">
+                            <span class="text-[8px] font-black uppercase text-slate-400 block truncate">${item.name}</span>
+                            <span class="font-black text-xs font-mono-num ${isOut ? 'text-red-500' : 'text-slate-800'}">${isOut ? 'Sin stock' : item.qty + ' un.'}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        checkAppLockState();
         }
 
         function closePinModal() {
@@ -1667,7 +2164,197 @@
         // --- DATA LOAD & SAVE (ZERO-TRUST AUTHENTICATED) ---
         async function loadData() {
             if (!isPinUnlocked()) {
-                checkAppLockState();
+                
+        // --- GESTIÓN DE STOCK EN CASA / TALLER ---
+        const DEFAULT_HOME_STOCK = [
+            { id: 'stk_oil2t', name: 'Aceite 2T Sintético (Tubo 125ml)', cat: 'Fluidos', qty: 2, icon: 'fa-vial', color: 'text-amber-600', notes: 'Para mezcla en ruta (2%)' },
+            { id: 'stk_bujia', name: 'Bujía NGK B7HS (Rosca Corta)', cat: 'Motor', qty: 1, icon: 'fa-plug', color: 'text-yellow-600', notes: 'Repuesto en guantera' },
+            { id: 'stk_led_faro', name: 'Bombilla Faro LED BA20d AC/DC', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-blue-600', notes: 'recambiosmotosclasicas.es' },
+            { id: 'stk_faro_halo', name: 'Bombilla Faro BA20d 35/35W', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-amber-700', notes: 'Halógena stock' },
+            { id: 'stk_brake_10w', name: 'Bombilla Freno BA15s 12V 10W', cat: 'Iluminación', qty: 0, icon: 'fa-stop-circle', color: 'text-red-600', notes: 'Pendiente comprar' }
+        ];
+
+        function getHomeStockList() {
+            data.stockCasa = data.stockCasa || [];
+            if (data.stockCasa.length === 0) {
+                data.stockCasa = JSON.parse(JSON.stringify(DEFAULT_HOME_STOCK));
+            }
+            return data.stockCasa;
+        }
+
+        function openHomeStockModal() {
+            renderHomeStockModalList();
+            document.getElementById('homeStockModal').classList.add('active');
+        }
+
+        function closeHomeStockModal() {
+            document.getElementById('homeStockModal').classList.remove('active');
+        }
+
+        function adjustHomeFuel(delta) {
+            data.homeFuelStock = Math.max(0, Math.round(((data.homeFuelStock || 0) + delta) * 10) / 10);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Gasolina en garrafa: ${data.homeFuelStock.toFixed(1)} L`);
+        }
+
+        function adjustStockItemQty(itemId, delta) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (item) {
+                item.qty = Math.max(0, (item.qty || 0) + delta);
+                renderHomeStock();
+                renderHomeStockModalList();
+                saveData();
+                showToast(`${item.name}: ${item.qty} un.`);
+            }
+        }
+
+        function deleteStockItem(itemId) {
+            if (!confirm("¿Deseas eliminar este artículo de la estantería?")) return;
+            data.stockCasa = getHomeStockList().filter(x => x.id !== itemId);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast('Artículo eliminado de la estantería');
+        }
+
+        function addNewStockItem() {
+            const name = document.getElementById('newStockItemName').value.trim();
+            const cat = document.getElementById('newStockItemCat').value;
+            const qty = parseInt(document.getElementById('newStockItemQty').value) || 1;
+            const notes = document.getElementById('newStockItemNotes').value.trim();
+
+            if (!name) {
+                alert("Por favor, introduce el nombre del recambio");
+                return;
+            }
+
+            const catMeta = {
+                'Fluidos': { icon: 'fa-vial', color: 'text-amber-600' },
+                'Iluminación': { icon: 'fa-lightbulb', color: 'text-blue-600' },
+                'Motor': { icon: 'fa-gear', color: 'text-purple-600' },
+                'Chasis': { icon: 'fa-dharmachakra', color: 'text-emerald-600' },
+                'Otro': { icon: 'fa-box', color: 'text-slate-600' }
+            };
+
+            const meta = catMeta[cat] || catMeta['Otro'];
+            const list = getHomeStockList();
+            list.push({
+                id: 'stk_' + Date.now(),
+                name: name,
+                cat: cat,
+                qty: qty,
+                icon: meta.icon,
+                color: meta.color,
+                notes: notes
+            });
+
+            document.getElementById('newStockItemName').value = '';
+            document.getElementById('newStockItemNotes').value = '';
+            document.getElementById('newStockItemQty').value = '1';
+
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Añadido: ${name}`);
+        }
+
+        function renderHomeStockModalList() {
+            const list = getHomeStockList();
+            const container = document.getElementById('modalStockItemsList');
+            const fuelQtyEl = document.getElementById('modalFuelStockQty');
+            if (fuelQtyEl) fuelQtyEl.innerText = `${(data.homeFuelStock || 0).toFixed(1)} L`;
+
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-2">Sin recambios registrados</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => {
+                const isOut = item.qty === 0;
+                const qtyBadgeClass = isOut ? 'bg-red-100 text-red-700 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-800 border-slate-200';
+                return `
+                    <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-2 transition-all">
+                        <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                            <div class="w-7 h-7 rounded-lg bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-xs shadow-xs shrink-0">
+                                <i class="fas ${item.icon || 'fa-box'}"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass}">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
+                                </div>
+                                <p class="text-[9px] text-slate-400 truncate">${item.notes || item.cat}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
+                            <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHomeStock() {
+            const list = getHomeStockList();
+            const grid = document.getElementById('homeStockPreviewGrid');
+            const garageDisplay = document.getElementById('homeFuelDisplay');
+            const garageCountBadge = document.getElementById('homeStockItemsCountBadge');
+
+            if (garageDisplay) garageDisplay.innerHTML = `${(data.homeFuelStock || 0).toFixed(1)}<span class="text-sm ml-1 text-slate-400">L</span>`;
+            
+            const totalStockItems = list.reduce((acc, x) => acc + (x.qty || 0), 0);
+            if (garageCountBadge) garageCountBadge.innerText = `${totalStockItems} recambio${totalStockItems === 1 ? '' : 's'}`;
+
+            if (!grid) return;
+
+            // Mostrar resumen en Salud
+            grid.innerHTML = `
+                <!-- Gasolina -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Gasolina Casa</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${(data.homeFuelStock || 0).toFixed(1)} L</p>
+                    </div>
+                    <span class="text-lg">⛽</span>
+                </div>
+
+                <!-- Recambios Totales -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Recambios Stock</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${totalStockItems} unidades</p>
+                    </div>
+                    <span class="text-lg">📦</span>
+                </div>
+            `;
+
+            // Añadir los ítems más destacados (hasta 4)
+            list.slice(0, 4).forEach(item => {
+                const isOut = item.qty === 0;
+                grid.innerHTML += `
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between col-span-1">
+                        <div class="min-w-0 pr-1">
+                            <span class="text-[8px] font-black uppercase text-slate-400 block truncate">${item.name}</span>
+                            <span class="font-black text-xs font-mono-num ${isOut ? 'text-red-500' : 'text-slate-800'}">${isOut ? 'Sin stock' : item.qty + ' un.'}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        checkAppLockState();
                 return;
             }
             document.getElementById('loader').style.display = 'block';
@@ -1678,7 +2365,197 @@
                 if (res.status === 401) {
                     localStorage.removeItem('vespa_pin');
                     sessionStorage.removeItem('vespa_pin');
-                    checkAppLockState();
+                    
+        // --- GESTIÓN DE STOCK EN CASA / TALLER ---
+        const DEFAULT_HOME_STOCK = [
+            { id: 'stk_oil2t', name: 'Aceite 2T Sintético (Tubo 125ml)', cat: 'Fluidos', qty: 2, icon: 'fa-vial', color: 'text-amber-600', notes: 'Para mezcla en ruta (2%)' },
+            { id: 'stk_bujia', name: 'Bujía NGK B7HS (Rosca Corta)', cat: 'Motor', qty: 1, icon: 'fa-plug', color: 'text-yellow-600', notes: 'Repuesto en guantera' },
+            { id: 'stk_led_faro', name: 'Bombilla Faro LED BA20d AC/DC', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-blue-600', notes: 'recambiosmotosclasicas.es' },
+            { id: 'stk_faro_halo', name: 'Bombilla Faro BA20d 35/35W', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-amber-700', notes: 'Halógena stock' },
+            { id: 'stk_brake_10w', name: 'Bombilla Freno BA15s 12V 10W', cat: 'Iluminación', qty: 0, icon: 'fa-stop-circle', color: 'text-red-600', notes: 'Pendiente comprar' }
+        ];
+
+        function getHomeStockList() {
+            data.stockCasa = data.stockCasa || [];
+            if (data.stockCasa.length === 0) {
+                data.stockCasa = JSON.parse(JSON.stringify(DEFAULT_HOME_STOCK));
+            }
+            return data.stockCasa;
+        }
+
+        function openHomeStockModal() {
+            renderHomeStockModalList();
+            document.getElementById('homeStockModal').classList.add('active');
+        }
+
+        function closeHomeStockModal() {
+            document.getElementById('homeStockModal').classList.remove('active');
+        }
+
+        function adjustHomeFuel(delta) {
+            data.homeFuelStock = Math.max(0, Math.round(((data.homeFuelStock || 0) + delta) * 10) / 10);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Gasolina en garrafa: ${data.homeFuelStock.toFixed(1)} L`);
+        }
+
+        function adjustStockItemQty(itemId, delta) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (item) {
+                item.qty = Math.max(0, (item.qty || 0) + delta);
+                renderHomeStock();
+                renderHomeStockModalList();
+                saveData();
+                showToast(`${item.name}: ${item.qty} un.`);
+            }
+        }
+
+        function deleteStockItem(itemId) {
+            if (!confirm("¿Deseas eliminar este artículo de la estantería?")) return;
+            data.stockCasa = getHomeStockList().filter(x => x.id !== itemId);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast('Artículo eliminado de la estantería');
+        }
+
+        function addNewStockItem() {
+            const name = document.getElementById('newStockItemName').value.trim();
+            const cat = document.getElementById('newStockItemCat').value;
+            const qty = parseInt(document.getElementById('newStockItemQty').value) || 1;
+            const notes = document.getElementById('newStockItemNotes').value.trim();
+
+            if (!name) {
+                alert("Por favor, introduce el nombre del recambio");
+                return;
+            }
+
+            const catMeta = {
+                'Fluidos': { icon: 'fa-vial', color: 'text-amber-600' },
+                'Iluminación': { icon: 'fa-lightbulb', color: 'text-blue-600' },
+                'Motor': { icon: 'fa-gear', color: 'text-purple-600' },
+                'Chasis': { icon: 'fa-dharmachakra', color: 'text-emerald-600' },
+                'Otro': { icon: 'fa-box', color: 'text-slate-600' }
+            };
+
+            const meta = catMeta[cat] || catMeta['Otro'];
+            const list = getHomeStockList();
+            list.push({
+                id: 'stk_' + Date.now(),
+                name: name,
+                cat: cat,
+                qty: qty,
+                icon: meta.icon,
+                color: meta.color,
+                notes: notes
+            });
+
+            document.getElementById('newStockItemName').value = '';
+            document.getElementById('newStockItemNotes').value = '';
+            document.getElementById('newStockItemQty').value = '1';
+
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Añadido: ${name}`);
+        }
+
+        function renderHomeStockModalList() {
+            const list = getHomeStockList();
+            const container = document.getElementById('modalStockItemsList');
+            const fuelQtyEl = document.getElementById('modalFuelStockQty');
+            if (fuelQtyEl) fuelQtyEl.innerText = `${(data.homeFuelStock || 0).toFixed(1)} L`;
+
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-2">Sin recambios registrados</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => {
+                const isOut = item.qty === 0;
+                const qtyBadgeClass = isOut ? 'bg-red-100 text-red-700 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-800 border-slate-200';
+                return `
+                    <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-2 transition-all">
+                        <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                            <div class="w-7 h-7 rounded-lg bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-xs shadow-xs shrink-0">
+                                <i class="fas ${item.icon || 'fa-box'}"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass}">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
+                                </div>
+                                <p class="text-[9px] text-slate-400 truncate">${item.notes || item.cat}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
+                            <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHomeStock() {
+            const list = getHomeStockList();
+            const grid = document.getElementById('homeStockPreviewGrid');
+            const garageDisplay = document.getElementById('homeFuelDisplay');
+            const garageCountBadge = document.getElementById('homeStockItemsCountBadge');
+
+            if (garageDisplay) garageDisplay.innerHTML = `${(data.homeFuelStock || 0).toFixed(1)}<span class="text-sm ml-1 text-slate-400">L</span>`;
+            
+            const totalStockItems = list.reduce((acc, x) => acc + (x.qty || 0), 0);
+            if (garageCountBadge) garageCountBadge.innerText = `${totalStockItems} recambio${totalStockItems === 1 ? '' : 's'}`;
+
+            if (!grid) return;
+
+            // Mostrar resumen en Salud
+            grid.innerHTML = `
+                <!-- Gasolina -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Gasolina Casa</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${(data.homeFuelStock || 0).toFixed(1)} L</p>
+                    </div>
+                    <span class="text-lg">⛽</span>
+                </div>
+
+                <!-- Recambios Totales -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Recambios Stock</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${totalStockItems} unidades</p>
+                    </div>
+                    <span class="text-lg">📦</span>
+                </div>
+            `;
+
+            // Añadir los ítems más destacados (hasta 4)
+            list.slice(0, 4).forEach(item => {
+                const isOut = item.qty === 0;
+                grid.innerHTML += `
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between col-span-1">
+                        <div class="min-w-0 pr-1">
+                            <span class="text-[8px] font-black uppercase text-slate-400 block truncate">${item.name}</span>
+                            <span class="font-black text-xs font-mono-num ${isOut ? 'text-red-500' : 'text-slate-800'}">${isOut ? 'Sin stock' : item.qty + ' un.'}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        checkAppLockState();
                     return;
                 }
                 data = await res.json();
@@ -2503,6 +3380,7 @@
             // 4. Render Checklist / Alertas Críticas en Garaje
             renderGarageCriticalAlerts();
             renderLegalDocs();
+            renderHomeStock();
         }
 
         
@@ -2608,6 +3486,7 @@
                 document.getElementById('docCurrentFileContainer').classList.add('hidden');
                 saveData();
                 renderLegalDocs();
+            renderHomeStock();
                 showToast('Archivo eliminado');
             }
         }
@@ -2750,6 +3629,7 @@
                     closeGeneralDocModal();
                     saveData();
                     renderLegalDocs();
+            renderHomeStock();
                     showToast('Documento añadido a la guantera');
                 } else {
                     alert("Error: " + (uploadRes.message || 'No se pudo subir'));
@@ -2778,6 +3658,7 @@
                 data.documentos.splice(idx, 1);
                 saveData();
                 renderLegalDocs();
+            renderHomeStock();
                 showToast('Documento eliminado');
             }
         }
@@ -3268,6 +4149,196 @@
                 barEl.style.width = `${perc}%`;
                 barEl.className = 'bg-blue-600 h-full transition-all duration-1000';
             }
+        }
+
+        
+        // --- GESTIÓN DE STOCK EN CASA / TALLER ---
+        const DEFAULT_HOME_STOCK = [
+            { id: 'stk_oil2t', name: 'Aceite 2T Sintético (Tubo 125ml)', cat: 'Fluidos', qty: 2, icon: 'fa-vial', color: 'text-amber-600', notes: 'Para mezcla en ruta (2%)' },
+            { id: 'stk_bujia', name: 'Bujía NGK B7HS (Rosca Corta)', cat: 'Motor', qty: 1, icon: 'fa-plug', color: 'text-yellow-600', notes: 'Repuesto en guantera' },
+            { id: 'stk_led_faro', name: 'Bombilla Faro LED BA20d AC/DC', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-blue-600', notes: 'recambiosmotosclasicas.es' },
+            { id: 'stk_faro_halo', name: 'Bombilla Faro BA20d 35/35W', cat: 'Iluminación', qty: 1, icon: 'fa-lightbulb', color: 'text-amber-700', notes: 'Halógena stock' },
+            { id: 'stk_brake_10w', name: 'Bombilla Freno BA15s 12V 10W', cat: 'Iluminación', qty: 0, icon: 'fa-stop-circle', color: 'text-red-600', notes: 'Pendiente comprar' }
+        ];
+
+        function getHomeStockList() {
+            data.stockCasa = data.stockCasa || [];
+            if (data.stockCasa.length === 0) {
+                data.stockCasa = JSON.parse(JSON.stringify(DEFAULT_HOME_STOCK));
+            }
+            return data.stockCasa;
+        }
+
+        function openHomeStockModal() {
+            renderHomeStockModalList();
+            document.getElementById('homeStockModal').classList.add('active');
+        }
+
+        function closeHomeStockModal() {
+            document.getElementById('homeStockModal').classList.remove('active');
+        }
+
+        function adjustHomeFuel(delta) {
+            data.homeFuelStock = Math.max(0, Math.round(((data.homeFuelStock || 0) + delta) * 10) / 10);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Gasolina en garrafa: ${data.homeFuelStock.toFixed(1)} L`);
+        }
+
+        function adjustStockItemQty(itemId, delta) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (item) {
+                item.qty = Math.max(0, (item.qty || 0) + delta);
+                renderHomeStock();
+                renderHomeStockModalList();
+                saveData();
+                showToast(`${item.name}: ${item.qty} un.`);
+            }
+        }
+
+        function deleteStockItem(itemId) {
+            if (!confirm("¿Deseas eliminar este artículo de la estantería?")) return;
+            data.stockCasa = getHomeStockList().filter(x => x.id !== itemId);
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast('Artículo eliminado de la estantería');
+        }
+
+        function addNewStockItem() {
+            const name = document.getElementById('newStockItemName').value.trim();
+            const cat = document.getElementById('newStockItemCat').value;
+            const qty = parseInt(document.getElementById('newStockItemQty').value) || 1;
+            const notes = document.getElementById('newStockItemNotes').value.trim();
+
+            if (!name) {
+                alert("Por favor, introduce el nombre del recambio");
+                return;
+            }
+
+            const catMeta = {
+                'Fluidos': { icon: 'fa-vial', color: 'text-amber-600' },
+                'Iluminación': { icon: 'fa-lightbulb', color: 'text-blue-600' },
+                'Motor': { icon: 'fa-gear', color: 'text-purple-600' },
+                'Chasis': { icon: 'fa-dharmachakra', color: 'text-emerald-600' },
+                'Otro': { icon: 'fa-box', color: 'text-slate-600' }
+            };
+
+            const meta = catMeta[cat] || catMeta['Otro'];
+            const list = getHomeStockList();
+            list.push({
+                id: 'stk_' + Date.now(),
+                name: name,
+                cat: cat,
+                qty: qty,
+                icon: meta.icon,
+                color: meta.color,
+                notes: notes
+            });
+
+            document.getElementById('newStockItemName').value = '';
+            document.getElementById('newStockItemNotes').value = '';
+            document.getElementById('newStockItemQty').value = '1';
+
+            renderHomeStock();
+            renderHomeStockModalList();
+            saveData();
+            showToast(`Añadido: ${name}`);
+        }
+
+        function renderHomeStockModalList() {
+            const list = getHomeStockList();
+            const container = document.getElementById('modalStockItemsList');
+            const fuelQtyEl = document.getElementById('modalFuelStockQty');
+            if (fuelQtyEl) fuelQtyEl.innerText = `${(data.homeFuelStock || 0).toFixed(1)} L`;
+
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-2">Sin recambios registrados</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => {
+                const isOut = item.qty === 0;
+                const qtyBadgeClass = isOut ? 'bg-red-100 text-red-700 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-800 border-slate-200';
+                return `
+                    <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-2 transition-all">
+                        <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                            <div class="w-7 h-7 rounded-lg bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-xs shadow-xs shrink-0">
+                                <i class="fas ${item.icon || 'fa-box'}"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass}">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
+                                </div>
+                                <p class="text-[9px] text-slate-400 truncate">${item.notes || item.cat}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
+                            <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
+                            <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHomeStock() {
+            const list = getHomeStockList();
+            const grid = document.getElementById('homeStockPreviewGrid');
+            const garageDisplay = document.getElementById('homeFuelDisplay');
+            const garageCountBadge = document.getElementById('homeStockItemsCountBadge');
+
+            if (garageDisplay) garageDisplay.innerHTML = `${(data.homeFuelStock || 0).toFixed(1)}<span class="text-sm ml-1 text-slate-400">L</span>`;
+            
+            const totalStockItems = list.reduce((acc, x) => acc + (x.qty || 0), 0);
+            if (garageCountBadge) garageCountBadge.innerText = `${totalStockItems} recambio${totalStockItems === 1 ? '' : 's'}`;
+
+            if (!grid) return;
+
+            // Mostrar resumen en Salud
+            grid.innerHTML = `
+                <!-- Gasolina -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Gasolina Casa</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${(data.homeFuelStock || 0).toFixed(1)} L</p>
+                    </div>
+                    <span class="text-lg">⛽</span>
+                </div>
+
+                <!-- Recambios Totales -->
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black uppercase text-slate-400 block">Recambios Stock</span>
+                        <p class="font-black text-slate-800 text-xs font-mono-num mt-0.5">${totalStockItems} unidades</p>
+                    </div>
+                    <span class="text-lg">📦</span>
+                </div>
+            `;
+
+            // Añadir los ítems más destacados (hasta 4)
+            list.slice(0, 4).forEach(item => {
+                const isOut = item.qty === 0;
+                grid.innerHTML += `
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between col-span-1">
+                        <div class="min-w-0 pr-1">
+                            <span class="text-[8px] font-black uppercase text-slate-400 block truncate">${item.name}</span>
+                            <span class="font-black text-xs font-mono-num ${isOut ? 'text-red-500' : 'text-slate-800'}">${isOut ? 'Sin stock' : item.qty + ' un.'}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">-</button>
+                            <button onclick="adjustStockItemQty('${item.id}', +1)" class="w-5 h-5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-600 flex items-center justify-center active:scale-95">+</button>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         checkAppLockState();
