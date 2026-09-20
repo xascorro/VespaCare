@@ -4,8 +4,17 @@ data.json.bak*
 backups/
 *.bak*
 
+# Secrets & Environment
+.env
+.env.*
+*.env
+pin_config.json
+
 # OS & Editor files
+__pycache__/
+*.pyc
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+

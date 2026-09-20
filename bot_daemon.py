@@ -22,12 +22,39 @@ import urllib.request
 import urllib.parse
 from datetime import datetime
 
-BOT_TOKEN = "8980881287:AAEsQm3gwbX4dT6vZBksBbyzlZHILkTFgl0"
-ADMIN_CHAT_ID = 129347404
-DATA_FILE = "/var/www/html/vespa/data.json"
-BACKUP_DIR = "/var/www/html/vespa/backups"
-DOCS_DIR = "/var/www/html/vespa/docs"
-VOICE_DIR = "/var/www/html/vespa/docs/voice"
+def load_env():
+    env_paths = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
+        "/home/ubuntu/VespaCare/.env"
+    ]
+    for p in env_paths:
+        if os.path.exists(p):
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, v = line.split("=", 1)
+                            k = k.strip()
+                            v = v.strip().strip("'\"")
+                            if k not in os.environ:
+                                os.environ[k] = v
+            except Exception:
+                pass
+
+load_env()
+
+BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("BOT_TOKEN", "")
+ADMIN_CHAT_ID = int(os.environ.get("ADMIN_CHAT_ID", "129347404"))
+
+BASE_DIR = "/var/www/html/vespa"
+if not os.path.exists(BASE_DIR):
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DATA_FILE = os.path.join(BASE_DIR, "data.json")
+BACKUP_DIR = os.path.join(BASE_DIR, "backups")
+DOCS_DIR = os.path.join(BASE_DIR, "docs")
+VOICE_DIR = os.path.join(BASE_DIR, "docs", "voice")
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 FILE_BASE_URL = f"https://api.telegram.org/file/bot{BOT_TOKEN}"
 
