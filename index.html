@@ -1457,36 +1457,71 @@
         </section>
 
         <!-- PESTAÑA 4: STATS (COSTE €/100KM, EVOLUCIÓN Y CONSUMO) -->
+        <!-- PESTAÑA 4: STATS (COSTE €/100KM, EVOLUCIÓN, CONSUMO & DESGLOSE FINANCIERO) -->
         <section id="tab-stats" class="tab-content space-y-3.5">
             
-            <!-- TARJETAS DE COSTES Y TELEMETRÍA FINANCIERA -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="card p-3.5 border-l-4 border-emerald-500">
-                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Coste Medio</p>
-                    <p id="statCostPer100" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
-                    <p class="text-[9px] font-bold text-emerald-600 mt-1">por cada 100 km</p>
-                </div>
+            <!-- TARJETAS DE COSTES Y TELEMETRÍA FINANCIERA (4 TARJETAS) -->
+            <div class="grid grid-cols-2 gap-3">
                 <div class="card p-3.5 border-l-4 border-amber-500">
-                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Precio Medio</p>
-                    <p id="statAvgPricePerLiter" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
-                    <p class="text-[9px] font-bold text-amber-600 mt-1">por litro en surtidor</p>
+                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Coste Gasolina / 100km</p>
+                    <p id="statCostPer100" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
+                    <p id="statCostPerKm" class="text-[9px] font-bold text-amber-700 mt-1">- € / km en ruta</p>
+                </div>
+                <div class="card p-3.5 border-l-4 border-emerald-600">
+                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Coste Operativo Total</p>
+                    <p id="statTotalTcoPer100" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
+                    <p id="statTotalCostPerKm" class="text-[9px] font-bold text-emerald-700 mt-1">- € / 100km (TCO Global)</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="card p-3.5">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="card p-3.5 border-l-4 border-blue-500">
                     <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Consumo Medio</p>
                     <p id="avgConsumo" class="text-xl font-black text-slate-800 font-mono-num">- km/L</p>
-                    <p class="text-[9px] font-bold text-slate-400 mt-1">Eficiencia media</p>
+                    <p id="avgConsumoL100" class="text-[9px] font-bold text-blue-700 mt-1">- L / 100 km</p>
                 </div>
-                <div class="card p-3.5">
-                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Gasto Acumulado</p>
+                <div class="card p-3.5 border-l-4 border-purple-500">
+                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Gasto Acumulado Total</p>
                     <p id="statTotalSpent" class="text-xl font-black text-slate-800 font-mono-num">- €</p>
-                    <p class="text-[9px] font-bold text-slate-400 mt-1">Total registrados</p>
+                    <p id="statYearlySpent" class="text-[9px] font-bold text-purple-700 mt-1">- € este año</p>
                 </div>
             </div>
 
-            <!-- GRÁFICAS -->
+            <!-- 1. GRÁFICA DONUT: REPARTO DEL GASTO TOTAL -->
+            <div class="card p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest">Distribución de Gastos</h3>
+                    <span class="text-xs font-bold text-amber-600"><i class="fas fa-chart-pie mr-1"></i>Cartera</span>
+                </div>
+                <div class="h-44 relative flex items-center justify-center">
+                    <canvas id="expenseDonutChart"></canvas>
+                </div>
+                <div id="expenseDonutLegend" class="grid grid-cols-3 gap-2 text-center text-xs mt-3 pt-3 border-t border-slate-100"></div>
+            </div>
+
+            <!-- 2. GRÁFICA EVOLUCIÓN COSTE / 100 KM -->
+            <div class="card p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest">Evolución Coste / 100 km</h3>
+                    <span class="text-xs font-bold text-emerald-600"><i class="fas fa-euro-sign mr-1"></i>€ / 100 km</span>
+                </div>
+                <div class="h-36">
+                    <canvas id="cost100Chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 3. GRÁFICA COMPARATIVA ANUAL -->
+            <div class="card p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest">Gasto Invertido por Año</h3>
+                    <span class="text-xs font-bold text-purple-600"><i class="fas fa-calendar-alt mr-1"></i>Por Año</span>
+                </div>
+                <div class="h-36">
+                    <canvas id="yearlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 4. GRÁFICAS CLÁSICAS: KM, CONSUMO & PRECIO -->
             <div class="card p-4">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest">Evolución de Km</h3>
@@ -1510,16 +1545,16 @@
             <div class="card p-4">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest">Precio Gasolina (€ / L)</h3>
-                    <span class="text-xs font-bold text-blue-600"><i class="fas fa-euro-sign mr-1"></i>Evolución</span>
+                    <span class="text-xs font-bold text-blue-600"><i class="fas fa-gas-pump mr-1"></i>Surtidor</span>
                 </div>
                 <div class="h-36">
                     <canvas id="precioChart"></canvas>
                 </div>
             </div>
 
-            <!-- TABLA HISTÓRICA -->
+            <!-- TABLA HISTÓRICA CON COSTE / 100 KM EN CADA REPOSTAJE -->
             <div class="card p-4">
-                <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest mb-4">Historial de Repostajes</h3>
+                <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest mb-4">Historial & Métricas de Repostajes</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs">
                         <thead>
@@ -1528,6 +1563,7 @@
                                 <th class="pb-2 text-right">Km</th>
                                 <th class="pb-2 text-right">Litros</th>
                                 <th class="pb-2 text-right">km/L</th>
+                                <th class="pb-2 text-right">€/100km</th>
                                 <th class="pb-2 text-right">€/L</th>
                             </tr>
                         </thead>
@@ -1678,7 +1714,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v41 • Gastos Tripartitos & Taller</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v42 • Telemetría Financiera & KPIs</span>
                     </div>
                 </div>
 
@@ -1723,7 +1759,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=41')
+                navigator.serviceWorker.register('/sw.js?v=42')
                     .then(reg => {
                         reg.update();
                     })
@@ -2906,29 +2942,58 @@
             document.getElementById('loader').style.display = 'none';
         }
 
-        // --- CHARTS & STATS ---
+        // --- CHARTS & STATS TELEMETRY ENGINE ---
         let kmChartInstance = null;
         let consumoChartInstance = null;
         let precioChartInstance = null;
+        let cost100ChartInstance = null;
+        let expenseDonutChartInstance = null;
+        let yearlyChartInstance = null;
 
         function renderCharts() {
             const ctxKmEl = document.getElementById('kmChart');
             const ctxConsumoEl = document.getElementById('consumoChart');
             const ctxPrecioEl = document.getElementById('precioChart');
+            const ctxCost100El = document.getElementById('cost100Chart');
+            const ctxDonutEl = document.getElementById('expenseDonutChart');
+            const ctxYearlyEl = document.getElementById('yearlyChart');
+
             if (!ctxKmEl || !ctxConsumoEl || !ctxPrecioEl) return;
 
             const fuelData = [...data.repostajes].sort((a, b) => new Date(a.date) - new Date(b.date));
-            const labels = fuelData.map(d => d.date.split('T')[0]);
+            const labels = fuelData.map(d => (d.date || '').split('T')[0]);
             const kms = fuelData.map(d => d.km);
-            
+
+            // Cálculos de tramos entre repostajes
             const consumos = [];
             const labelsConsumo = [];
+            const costsPer100 = [];
+            const labelsCost100 = [];
+
+            let totalKmDiff = 0, totalLitros = 0, count = 0;
+            let totalFuelPriceSpent = 0, totalFuelLiters = 0;
+
             for(let i = 1; i < fuelData.length; i++) {
                 const diffKm = fuelData[i].km - fuelData[i-1].km;
                 const litros = fuelData[i].litros;
+                const price = fuelData[i].price;
+                const dateLabel = (fuelData[i].date || '').split('T')[0];
+
                 if(litros > 0 && diffKm > 0) {
-                    consumos.push((diffKm / litros).toFixed(2));
-                    labelsConsumo.push(fuelData[i].date.split('T')[0]);
+                    const kmPerL = diffKm / litros;
+                    consumos.push(kmPerL.toFixed(2));
+                    labelsConsumo.push(dateLabel);
+                    totalKmDiff += diffKm;
+                    totalLitros += litros;
+                    count++;
+
+                    if (price > 0) {
+                        const cost100 = (price / diffKm) * 100;
+                        costsPer100.push(cost100.toFixed(2));
+                        labelsCost100.push(dateLabel);
+                        totalFuelPriceSpent += price;
+                        totalFuelLiters += litros;
+                    }
                 }
             }
 
@@ -2937,13 +3002,185 @@
             const preciosPorLitro = [];
             fuelData.forEach(d => {
                 if (d.logType === 'repostaje' && d.litros > 0 && d.price > 0) {
-                    labelsPrecio.push(d.date.split('T')[0]);
+                    labelsPrecio.push((d.date || '').split('T')[0]);
                     preciosPorLitro.push((d.price / d.litros).toFixed(3));
                 }
             });
 
-            // 1. Gráfico Km
-            if(kmChartInstance) kmChartInstance.destroy();
+            // Gastos por categoría
+            let totalFuelGlobal = 0;
+            fuelData.forEach(r => { if (r.price > 0) totalFuelGlobal += r.price; });
+            (data.inventario || []).filter(x => x.logType === 'garrafa_comprar').forEach(g => { if (g.price > 0) totalFuelGlobal += g.price; });
+
+            let totalMaintGlobal = 0;
+            (data.inventario || []).filter(x => x.logType !== 'garrafa_comprar' && !isLegalExpense(x)).forEach(m => { if (m.price > 0) totalMaintGlobal += m.price; });
+
+            let totalLegalGlobal = 0;
+            (data.inventario || []).filter(x => isLegalExpense(x)).forEach(l => { if (l.price > 0) totalLegalGlobal += l.price; });
+
+            const totalGastosTodos = totalFuelGlobal + totalMaintGlobal + totalLegalGlobal;
+
+            // Agrupación de gastos por Año
+            const yearlySpending = {};
+            const currentYear = new Date().getFullYear().toString();
+            [...data.repostajes, ...(data.inventario || [])].forEach(item => {
+                const year = (item.date || '').slice(0, 4) || currentYear;
+                if (item.price > 0) {
+                    yearlySpending[year] = (yearlySpending[year] || 0) + item.price;
+                }
+            });
+            const yearlyLabels = Object.keys(yearlySpending).sort();
+            const yearlyValues = yearlyLabels.map(y => yearlySpending[y].toFixed(2));
+
+            // Actualización de KPIs en el DOM
+            const statCost100El = document.getElementById('statCostPer100');
+            const statCostKmEl = document.getElementById('statCostPerKm');
+            const statTco100El = document.getElementById('statTotalTcoPer100');
+            const statTcoKmEl = document.getElementById('statTotalCostPerKm');
+            const avgConsumoEl = document.getElementById('avgConsumo');
+            const avgConsumoL100El = document.getElementById('avgConsumoL100');
+            const statTotalSpentEl = document.getElementById('statTotalSpent');
+            const statYearlySpentEl = document.getElementById('statYearlySpent');
+
+            if (totalKmDiff > 0 && totalFuelPriceSpent > 0) {
+                const cost100 = (totalFuelPriceSpent / totalKmDiff) * 100;
+                const costKm = totalFuelPriceSpent / totalKmDiff;
+                if (statCost100El) statCost100El.innerText = cost100.toFixed(2) + ' €';
+                if (statCostKmEl) statCostKmEl.innerText = `${costKm.toFixed(3)} € / km en ruta`;
+            } else {
+                if (statCost100El) statCost100El.innerText = '- €';
+                if (statCostKmEl) statCostKmEl.innerText = '- € / km';
+            }
+
+            if (totalKmDiff > 0 && totalGastosTodos > 0) {
+                const tco100 = (totalGastosTodos / totalKmDiff) * 100;
+                const tcoKm = totalGastosTodos / totalKmDiff;
+                if (statTco100El) statTco100El.innerText = tco100.toFixed(2) + ' €';
+                if (statTcoKmEl) statTcoKmEl.innerText = `${tcoKm.toFixed(3)} € / km (TCO Real)`;
+            } else {
+                if (statTco100El) statTco100El.innerText = '- €';
+                if (statTcoKmEl) statTcoKmEl.innerText = '- € / 100km (TCO Global)';
+            }
+
+            if (count > 0 && totalLitros > 0) {
+                const avgCons = totalKmDiff / totalLitros;
+                const l100 = 100 / avgCons;
+                if (avgConsumoEl) avgConsumoEl.innerText = avgCons.toFixed(2) + ' km/L';
+                if (avgConsumoL100El) avgConsumoL100El.innerText = `${l100.toFixed(2)} L / 100 km`;
+            } else {
+                if (avgConsumoEl) avgConsumoEl.innerText = '- km/L';
+                if (avgConsumoL100El) avgConsumoL100El.innerText = '- L / 100 km';
+            }
+
+            if (statTotalSpentEl) statTotalSpentEl.innerText = totalGastosTodos.toFixed(2) + ' €';
+            if (statYearlySpentEl) {
+                const curYearSpent = yearlySpending[currentYear] || 0;
+                statYearlySpentEl.innerText = `${curYearSpent.toFixed(2)} € invertidos en ${currentYear}`;
+            }
+
+            // 1. GRÁFICO DONUT (REPARTO GASTOS)
+            if (ctxDonutEl) {
+                if (expenseDonutChartInstance) expenseDonutChartInstance.destroy();
+                const donutData = [totalFuelGlobal, totalMaintGlobal, totalLegalGlobal];
+                const hasDonutData = totalGastosTodos > 0;
+                
+                expenseDonutChartInstance = new Chart(ctxDonutEl.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Combustible', 'Mantenimiento', 'Papeleo/Legal'],
+                        datasets: [{
+                            data: hasDonutData ? donutData : [1, 1, 1],
+                            backgroundColor: hasDonutData ? ['#d97706', '#ea580c', '#059669'] : ['#e2e8f0', '#cbd5e1', '#94a3b8'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // Leyenda interactiva debajo del Donut
+                const legendEl = document.getElementById('expenseDonutLegend');
+                if (legendEl) {
+                    const pctFuel = totalGastosTodos > 0 ? ((totalFuelGlobal / totalGastosTodos) * 100).toFixed(0) : 0;
+                    const pctMaint = totalGastosTodos > 0 ? ((totalMaintGlobal / totalGastosTodos) * 100).toFixed(0) : 0;
+                    const pctLegal = totalGastosTodos > 0 ? ((totalLegalGlobal / totalGastosTodos) * 100).toFixed(0) : 0;
+                    legendEl.innerHTML = `
+                        <div class="p-2 bg-amber-50/70 rounded-xl border border-amber-200/60">
+                            <span class="text-[8px] font-black uppercase text-amber-900 block">⛽ Combustible</span>
+                            <span class="font-extrabold text-slate-800 text-xs font-mono-num">${totalFuelGlobal.toFixed(0)} €</span>
+                            <span class="text-[8px] text-amber-700 font-bold block">${pctFuel}%</span>
+                        </div>
+                        <div class="p-2 bg-orange-50/70 rounded-xl border border-orange-200/60">
+                            <span class="text-[8px] font-black uppercase text-orange-900 block">🔧 Taller</span>
+                            <span class="font-extrabold text-slate-800 text-xs font-mono-num">${totalMaintGlobal.toFixed(0)} €</span>
+                            <span class="text-[8px] text-orange-700 font-bold block">${pctMaint}%</span>
+                        </div>
+                        <div class="p-2 bg-emerald-50/70 rounded-xl border border-emerald-200/60">
+                            <span class="text-[8px] font-black uppercase text-emerald-900 block">📋 Legal</span>
+                            <span class="font-extrabold text-slate-800 text-xs font-mono-num">${totalLegalGlobal.toFixed(0)} €</span>
+                            <span class="text-[8px] text-emerald-700 font-bold block">${pctLegal}%</span>
+                        </div>
+                    `;
+                }
+            }
+
+            // 2. GRÁFICO EVOLUCIÓN COSTE / 100 KM
+            if (ctxCost100El) {
+                if (cost100ChartInstance) cost100ChartInstance.destroy();
+                cost100ChartInstance = new Chart(ctxCost100El.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labelsCost100,
+                        datasets: [{
+                            label: '€ / 100 km',
+                            data: costsPer100,
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#059669'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { grid: { color: '#f1f5f9' }, title: { display: true, text: '€ / 100 km', font: { size: 9, weight: 'bold' } } }, x: { grid: { display: false } } }
+                    }
+                });
+            }
+
+            // 3. GRÁFICO COMPARATIVA ANUAL
+            if (ctxYearlyEl) {
+                if (yearlyChartInstance) yearlyChartInstance.destroy();
+                yearlyChartInstance = new Chart(ctxYearlyEl.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: yearlyLabels,
+                        datasets: [{
+                            label: 'Gasto Anual (€)',
+                            data: yearlyValues,
+                            backgroundColor: '#9333ea',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                    }
+                });
+            }
+
+            // 4. GRÁFICO KM
+            if (kmChartInstance) kmChartInstance.destroy();
             kmChartInstance = new Chart(ctxKmEl.getContext('2d'), {
                 type: 'line',
                 data: {
@@ -2951,19 +3188,19 @@
                     datasets: [{
                         label: 'Km',
                         data: kms,
-                        borderColor: '#059669',
-                        backgroundColor: 'rgba(5, 150, 105, 0.08)',
+                        borderColor: '#0284c7',
+                        backgroundColor: 'rgba(2, 132, 199, 0.08)',
                         fill: true,
                         tension: 0.3,
                         pointRadius: 4,
-                        pointBackgroundColor: '#059669'
+                        pointBackgroundColor: '#0284c7'
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
             });
 
-            // 2. Gráfico Consumo
-            if(consumoChartInstance) consumoChartInstance.destroy();
+            // 5. GRÁFICO CONSUMO
+            if (consumoChartInstance) consumoChartInstance.destroy();
             consumoChartInstance = new Chart(ctxConsumoEl.getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -2971,15 +3208,15 @@
                     datasets: [{
                         label: 'km/L',
                         data: consumos,
-                        backgroundColor: '#c19a6b',
+                        backgroundColor: '#d97706',
                         borderRadius: 8
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
             });
 
-            // 3. Gráfico Precio / Litro
-            if(precioChartInstance) precioChartInstance.destroy();
+            // 6. GRÁFICO PRECIO SURTIDOR
+            if (precioChartInstance) precioChartInstance.destroy();
             precioChartInstance = new Chart(ctxPrecioEl.getContext('2d'), {
                 type: 'line',
                 data: {
@@ -2998,64 +3235,32 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
             });
 
-            // Tabla detallada & KPIs
+            // TABLA HISTÓRICA CON COSTE POR 100 KM
             const tableBody = document.getElementById('repostajesTableBody');
-            tableBody.innerHTML = '';
-            let totalKmDiff = 0, totalLitros = 0, totalAutonomia = 0, count = 0;
-            let totalPriceSpent = 0, totalFuelLiters = 0;
-            const sortedFuelDesc = [...data.repostajes].sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (tableBody) {
+                tableBody.innerHTML = '';
+                const sortedFuelDesc = [...data.repostajes].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            for(let i = 0; i < sortedFuelDesc.length - 1; i++) {
-                const current = sortedFuelDesc[i], prev = sortedFuelDesc[i+1];
-                const diffKm = current.km - prev.km, litros = current.litros;
-                if(litros > 0 && diffKm > 0) {
-                    const consumption = diffKm / litros, autonomia = litros * consumption;
-                    totalKmDiff += diffKm; totalLitros += litros; totalAutonomia += autonomia; count++;
-                    const pricePerL = current.price > 0 ? (current.price / litros).toFixed(2) + ' €' : '-';
-                    tableBody.innerHTML += `
-                        <tr class="border-b border-slate-50">
-                            <td class="py-3 font-semibold text-slate-700">${current.date.split('T')[0]}</td>
-                            <td class="py-3 text-right font-mono-num">${current.km}</td>
-                            <td class="py-3 text-right font-mono-num">${litros.toFixed(1)}</td>
-                            <td class="py-3 text-right font-black text-amber-800 font-mono-num">${consumption.toFixed(1)}</td>
-                            <td class="py-3 text-right text-slate-500 font-mono-num">${pricePerL}</td>
-                        </tr>
-                    `;
+                for(let i = 0; i < sortedFuelDesc.length - 1; i++) {
+                    const current = sortedFuelDesc[i], prev = sortedFuelDesc[i+1];
+                    const diffKm = current.km - prev.km, litros = current.litros;
+                    if(litros > 0 && diffKm > 0) {
+                        const consumption = diffKm / litros;
+                        const pricePerL = current.price > 0 ? (current.price / litros).toFixed(2) + ' €' : '-';
+                        const cost100 = current.price > 0 ? ((current.price / diffKm) * 100).toFixed(2) + ' €' : '-';
+                        tableBody.innerHTML += `
+                            <tr class="border-b border-slate-50">
+                                <td class="py-2.5 font-semibold text-slate-700">${(current.date || '').split('T')[0]}</td>
+                                <td class="py-2.5 text-right font-mono-num">${current.km}</td>
+                                <td class="py-2.5 text-right font-mono-num">${litros.toFixed(1)}</td>
+                                <td class="py-2.5 text-right font-black text-amber-800 font-mono-num">${consumption.toFixed(1)}</td>
+                                <td class="py-2.5 text-right font-bold text-emerald-700 font-mono-num">${cost100}</td>
+                                <td class="py-2.5 text-right text-slate-500 font-mono-num">${pricePerL}</td>
+                            </tr>
+                        `;
+                    }
                 }
             }
-
-            // Gasto total acumulado (repostajes + inventario)
-            let totalGastos = 0;
-            data.repostajes.forEach(r => { 
-                if (r.price > 0) { 
-                    totalGastos += r.price; 
-                    if (r.litros > 0) { totalPriceSpent += r.price; totalFuelLiters += r.litros; }
-                } 
-            });
-            data.inventario.forEach(inv => { if (inv.price > 0) totalGastos += inv.price; });
-
-            if(count > 0) {
-                const avgCons = totalKmDiff / totalLitros;
-                document.getElementById('avgConsumo').innerText = avgCons.toFixed(2) + ' km/L';
-            }
-            
-            // Coste € / 100 km
-            if (totalKmDiff > 0 && totalPriceSpent > 0) {
-                const costPer100 = (totalPriceSpent / totalKmDiff) * 100;
-                document.getElementById('statCostPer100').innerText = costPer100.toFixed(2) + ' €';
-            } else {
-                document.getElementById('statCostPer100').innerText = '- €';
-            }
-
-            // Precio medio litro
-            if (totalFuelLiters > 0 && totalPriceSpent > 0) {
-                const avgPriceL = totalPriceSpent / totalFuelLiters;
-                document.getElementById('statAvgPricePerLiter').innerText = avgPriceL.toFixed(3) + ' €/L';
-            } else {
-                document.getElementById('statAvgPricePerLiter').innerText = '- €';
-            }
-
-            document.getElementById('statTotalSpent').innerText = totalGastos.toFixed(2) + ' €';
         }
 
         // --- RENDER ALL ---
