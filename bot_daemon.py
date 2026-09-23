@@ -253,7 +253,28 @@ def get_status_text():
     
     repostajes = data.get("repostajes", [])
     last_rep_txt = "Ninguno registrado"
-    if repostajes:
+    autonomia_txt = "No calculada"
+    tank_cap = float(data.get("tankCapacity", 5.0))
+    if len(repostajes) >= 2:
+        sorted_fuel = sorted(repostajes, key=lambda x: x.get('date', ''), reverse=True)
+        last = sorted_fuel[0]
+        last_rep_txt = f"{last.get('litros', 0)} L ({last.get('km', 0)} km) • {last.get('date', '')[:10]}"
+        total_km = 0
+        total_l = 0
+        for i in range(len(sorted_fuel) - 1):
+            diff = sorted_fuel[i].get('km', 0) - sorted_fuel[i+1].get('km', 0)
+            if diff > 0 and sorted_fuel[i].get('litros', 0) > 0:
+                total_km += diff
+                total_l += sorted_fuel[i].get('litros', 0)
+        if total_l > 0:
+            avg = total_km / total_l
+            is_full = last.get("fullTank", True) is not False
+            fuel_avail = tank_cap if is_full else last.get('litros', tank_cap)
+            max_range = fuel_avail * avg
+            traveled = odo - last.get('km', 0)
+            remaining = max(0, max_range - traveled)
+            autonomia_txt = f"~{remaining:.0f} km ({avg:.2f} km/L)"
+    elif repostajes:
         last = repostajes[-1]
         last_rep_txt = f"{last.get('litros', 0)} L ({last.get('km', 0)} km) • {last.get('date', '')[:10]}"
         
@@ -266,6 +287,7 @@ def get_status_text():
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 📍 <b>Cuentakilómetros Actual:</b> <code>{odo} km</code>
+⛽ <b>Autonomía estimada:</b> <code>{autonomia_txt}</code>
 ⛽ <b>Stock Gasolina Garaje:</b> <code>{fuel_stock} L</code>
 🛞 <b>Última revisión presiones:</b> <code>{last_presion}</code>
 ⛽ <b>Último repostaje:</b> {last_rep_txt}
@@ -460,6 +482,7 @@ Sincronizado en el módulo de <b>Gastos & Salud</b> de la PWA.""",
                 "price": precio,
                 "km": km,
                 "litros": litros,
+                "fullTank": True,
                 "notes": f"Registrado vía Telegram Bot • {raw}" + (f" • Ticket: {attached_doc}" if attached_doc else "")
             }
             if "repostajes" not in data or not isinstance(data["repostajes"], list):

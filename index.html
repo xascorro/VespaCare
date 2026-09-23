@@ -763,34 +763,70 @@
                 </div>
             </div>
 
-            <!-- CHECKLIST & AVISOS CRÍTICOS PRE-RODAJE -->
-            <div class="card p-4 space-y-3">
+            <!-- SALUD & ESTADO DE LA MOTO (EN GARAJE) -->
+            <div class="card p-4 space-y-3.5 border-l-4 border-emerald-500">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs">
-                            <i class="fas fa-clipboard-check"></i>
+                        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm shadow-xs">
+                            <i class="fas fa-heartbeat"></i>
                         </div>
-                        <h3 class="text-sm font-bold text-slate-800">Checklist Pre-Rodaje</h3>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">Salud & Estado de la Moto</h3>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase">Telemetría de rodaje & avisos críticos</p>
+                        </div>
                     </div>
-                    <span id="garageOverallBadge" class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-black uppercase">Todo al día</span>
+                    <span id="garageOverallBadge" class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-black uppercase tracking-wider">Todo al día</span>
                 </div>
 
-                <!-- LISTADO DE ALERTAS CRÍTICAS DINÁMICAS -->
+                <!-- RESUMEN RÁPIDO DE SALUD MECÁNICA -->
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <!-- Bujía -->
+                    <div onclick="showTab('health')" class="p-2.5 bg-slate-50 hover:bg-amber-50/60 rounded-xl border border-slate-100 hover:border-amber-200 cursor-pointer active:scale-95 transition-all">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] font-black uppercase text-slate-400">Bujía NGK</span>
+                            <i class="fas fa-plug text-amber-600 text-xs"></i>
+                        </div>
+                        <p id="garageSparkHealthText" class="font-black text-slate-800 text-sm font-mono-num">- km</p>
+                        <span class="text-[8px] text-slate-400 font-semibold block mt-0.5">Rosca corta B7HS</span>
+                    </div>
+
+                    <!-- Presión Neumáticos -->
+                    <div onclick="openPressureModal('Revisión General de Presiones')" class="p-2.5 bg-slate-50 hover:bg-blue-50/60 rounded-xl border border-slate-100 hover:border-blue-200 cursor-pointer active:scale-95 transition-all">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] font-black uppercase text-slate-400">Presiones</span>
+                            <i class="fas fa-circle-notch text-blue-600 text-xs"></i>
+                        </div>
+                        <p id="garagePressureHealthText" class="font-black text-slate-800 text-sm font-mono-num">-</p>
+                        <span class="text-[8px] text-slate-400 font-semibold block mt-0.5">1.25 / 1.80 bar</span>
+                    </div>
+                </div>
+
+                <!-- LISTADO DE ALERTAS CRÍTICAS DINÁMICAS (PRE-RODAJE) -->
                 <div id="garageCriticalAlertsList" class="space-y-2"></div>
+
+                <!-- BOTÓN IR AL TALLER -->
+                <button onclick="showTab('health')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all">
+                    <i class="fas fa-tools text-amber-400 text-xs"></i>Abrir Taller Completo & Recambios
+                </button>
             </div>
         
         </section>
 
-        <!-- PESTAÑA 2: SALUD & MECÁNICA INTEGRADA -->
+        <!-- PESTAÑA 2: TALLER & MECÁNICA INTEGRADA -->
         <section id="tab-health" class="tab-content space-y-3.5">
             <div class="flex justify-between items-center px-2">
                 <div>
-                    <h2 class="text-xl text-slate-800">Estado de la Moto</h2>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Telemetría de Mantenimiento & Ficha Interactiva</p>
+                    <h2 class="text-xl text-slate-800">Taller Vespa</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Mecánica en la Moto, Estantería de Recambios & Guantera</p>
                 </div>
-                <button onclick="openModal()" class="text-[10px] bg-slate-900 text-white px-3.5 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all">
-                    <i class="fas fa-plus mr-1.5"></i>Añadir Pieza
-                </button>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="openModal()" class="text-[10px] bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1" title="Añadir pieza a la moto">
+                        <i class="fas fa-motorcycle text-amber-400 text-[9px]"></i>+ Pieza Moto
+                    </button>
+                    <button onclick="openHomeStockModal()" class="text-[10px] bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1" title="Añadir recambio a la estantería">
+                        <i class="fas fa-boxes-stacked text-amber-200 text-[9px]"></i>+ Stock
+                    </button>
+                </div>
             </div>
 
             <!-- 1. MOTOR & TRANSMISIÓN (CON BUJÍA INTEGRADA) -->
@@ -821,7 +857,7 @@
                     </div>
                     <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
                         <span class="text-slate-400 block text-[9px] uppercase font-black tracking-wider">Depósito / Reserva</span>
-                        <span class="font-black text-slate-800 text-sm font-mono-num">5.8 <span class="text-[10px] text-slate-400">L</span></span>
+                        <span class="font-black text-slate-800 text-sm font-mono-num"><span id="specTankCapacity">5.0</span> <span class="text-[10px] text-slate-400">L</span></span>
                         <span class="text-[9px] text-amber-700 font-bold block mt-0.5">Reserva manual ~1.2L</span>
                     </div>
                 </div>
@@ -1283,6 +1319,23 @@
                         </div>
                     </div>
 
+                    <!-- SELECTOR DE DEPÓSITO LLENO / PARCIAL -->
+                    <div id="logFullTankContainer" class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs">
+                                <i class="fas fa-gas-pump"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 text-xs">Depósito Lleno (Tanque Completo)</p>
+                                <p class="text-[9px] text-slate-400">Calcula la autonomía total desde depósito lleno</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="logFullTank" checked class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                        </label>
+                    </div>
+
                     <!-- CALCULADORA DE MEZCLA INTEGRADA EN EL FORMULARIO -->
                     <div id="formMixHelper" class="p-2.5 bg-amber-50/80 rounded-xl border border-amber-200/60 space-y-2">
                         <div class="flex justify-between items-center">
@@ -1450,6 +1503,29 @@
                 </div>
             </div>
 
+            <!-- PARÁMETROS DEL VEHÍCULO & TELEMETRÍA -->
+            <div class="card p-4 border-l-4 border-amber-600">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="text-lg text-slate-800">Parámetros Vespa & Depósito</h3>
+                        <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Vespa PK 125 S Elestart (1984)</p>
+                    </div>
+                    <span class="text-[9px] bg-amber-50 text-amber-900 border border-amber-200/60 px-2.5 py-1 rounded-full font-black uppercase">Telemetría</span>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Capacidad del Depósito</p>
+                            <p class="text-[10px] text-slate-400">Total depósito incluyendo reserva (~1.2L)</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <input type="number" id="settingTankCapacity" step="0.1" min="1" max="20" class="w-16 text-center font-black text-slate-800 py-1.5 px-2 bg-white border border-slate-200 rounded-xl font-mono-num" onchange="updateTankCapacity(this.value)">
+                            <span class="text-xs font-bold text-slate-500">L</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- BACKUPS & COPIAS DE SEGURIDAD -->
             <div class="card p-4 border-l-4 border-slate-800">
                 <div class="flex justify-between items-center mb-4">
@@ -1514,9 +1590,13 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v39 • Dynamic Stock & Zero-Trust</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v40 • Taller & Telemetría Viva</span>
                     </div>
                 </div>
+
+                <button onclick="forcePwaUpdate()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xs">
+                    <i class="fas fa-sync-alt text-[10px] text-amber-600"></i> Forzar Actualización PWA & Limpiar Caché
+                </button>
 
                 <!-- DETALLE MOTO Y HOMELAB -->
                 <div class="pt-2 border-t border-slate-200/60 flex justify-between items-center text-[10px] text-slate-400 font-medium">
@@ -1534,8 +1614,8 @@
             <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Garaje</span>
         </button>
         <button onclick="showTab('health')" id="nav-health" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-heartbeat text-lg"></i>
-            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Salud</span>
+            <i class="fas fa-tools text-lg"></i>
+            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Taller</span>
         </button>
         <button onclick="showTab('logs')" id="nav-logs" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
             <i class="fas fa-receipt text-lg"></i>
@@ -1555,12 +1635,39 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=39')
+                navigator.serviceWorker.register('/sw.js?v=40')
                     .then(reg => {
                         reg.update();
                     })
                     .catch(err => console.log('SW error:', err));
             });
+
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+        }
+
+        async function forcePwaUpdate() {
+            showToast('Actualizando VespaCare...');
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+            }
+            if ('caches' in window) {
+                const keys = await caches.keys();
+                for (let key of keys) {
+                    await caches.delete(key);
+                }
+            }
+            setTimeout(() => {
+                window.location.href = window.location.origin + window.location.pathname + '?v=' + Date.now();
+            }, 500);
         }
 
         let data = {};
@@ -1755,6 +1862,18 @@
             const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
             const chk = document.getElementById('settingStrictLock');
             if (chk) chk.checked = strictLock;
+            const tankInput = document.getElementById('settingTankCapacity');
+            if (tankInput) tankInput.value = data.tankCapacity || 5.0;
+            const specCap = document.getElementById('specTankCapacity');
+            if (specCap) specCap.innerText = (data.tankCapacity || 5.0).toFixed(1);
+        }
+
+        function updateTankCapacity(val) {
+            const num = parseFloat(val);
+            if (!num || num <= 0) return;
+            data.tankCapacity = num;
+            saveData();
+            showToast(`Capacidad depósito actualizada a ${num} L`);
         }
 
         function toggleStrictLock(isStrict) {
@@ -2051,6 +2170,8 @@
             const isFuel = ['repostaje', 'garrafa_comprar', 'garrafa_repostar'].includes(type);
             const isStation = type === 'repostaje';
             document.getElementById('logLitrosContainer').classList.toggle('hidden', !isFuel);
+            const fullTankEl = document.getElementById('logFullTankContainer');
+            if (fullTankEl) fullTankEl.classList.toggle('hidden', !['repostaje', 'garrafa_repostar'].includes(type));
             document.getElementById('logPriceContainer').classList.toggle('hidden', type === 'garrafa_repostar');
             document.getElementById('logKmContainer').classList.toggle('hidden', type === 'garrafa_comprar');
             document.getElementById('formMixHelper').classList.toggle('hidden', !isFuel);
@@ -2074,6 +2195,8 @@
             document.getElementById('logTitle').value = '';
             document.getElementById('logPrice').value = '';
             document.getElementById('logLitros').value = '';
+            const fullTankEl = document.getElementById('logFullTank');
+            if (fullTankEl) fullTankEl.checked = true;
             document.getElementById('logNotes').value = '';
             document.getElementById('logKm').value = data.odometer;
             toggleFuelFields(document.getElementById('logType').value);
@@ -2095,6 +2218,8 @@
             document.getElementById('logTitle').value = entry.title;
             document.getElementById('logPrice').value = entry.price;
             document.getElementById('logLitros').value = entry.litros || '';
+            const fullTankEl = document.getElementById('logFullTank');
+            if (fullTankEl) fullTankEl.checked = entry.fullTank !== false;
             document.getElementById('logKm').value = entry.km;
             document.getElementById('logNotes').value = entry.notes;
 
@@ -2141,6 +2266,8 @@
             
             if(type === 'repostaje' || type === 'garrafa_repostar') {
                 entry.litros = parseFloat(document.getElementById('logLitros').value) || 0;
+                const fullTankEl = document.getElementById('logFullTank');
+                entry.fullTank = fullTankEl ? fullTankEl.checked : true;
                 if (type === 'garrafa_repostar') {
                     if (entry.litros > data.homeFuelStock) return alert("Garrafa vacía o stock insuficiente");
                     data.homeFuelStock -= entry.litros;
@@ -2790,11 +2917,14 @@
 
                 if (avgConsumption > 0) {
                     document.getElementById('lastFuelDate').innerText = last.date.split('T')[0];
-                    const maxRange = last.litros * avgConsumption, traveled = data.odometer - last.km;
+                    const tankCap = parseFloat(data.tankCapacity) || 5.0;
+                    const isFull = last.fullTank !== false;
+                    const fuelAvailable = isFull ? tankCap : (last.litros || tankCap);
+                    const maxRange = fuelAvailable * avgConsumption, traveled = data.odometer - last.km;
                     const remaining = Math.max(0, maxRange - traveled), perc = Math.max(0, Math.min(100, (remaining / maxRange) * 100));
                     document.getElementById('estRangeText').innerText = `${remaining.toFixed(0)} km`;
                     document.getElementById('estRangeBar').style.width = `${perc}%`;
-                    document.getElementById('estRangeDetails').innerText = `Media: ${avgConsumption.toFixed(2)} km/L | Límite: ${(last.km + maxRange).toFixed(0)} km`;
+                    document.getElementById('estRangeDetails').innerText = `Media: ${avgConsumption.toFixed(2)} km/L | Depósito: ${fuelAvailable.toFixed(1)}L | Límite: ${(last.km + maxRange).toFixed(0)} km`;
                     
                     const headerLimit = document.getElementById('headerOdoLimit');
                     if (headerLimit) headerLimit.innerText = `${(last.km + maxRange).toFixed(0)} km`;
@@ -3481,7 +3611,24 @@
                 }
             });
 
-            // 4. Si no hay ninguna alerta crítica activa
+            // 4. Actualizar indicadores rápidos de Salud en Garaje
+            const sparkEl = document.getElementById('garageSparkHealthText');
+            if (sparkEl && sparkItem) {
+                const sTrans = data.odometer - sparkItem.ultimo;
+                const sRest = Math.max(0, (sparkItem.intervalo || 2000) - sTrans);
+                sparkEl.innerHTML = `<span class="${sRest < 300 ? 'text-red-500 font-bold' : ''}">${sRest} km rest.</span>`;
+            }
+            
+            const pressEl = document.getElementById('garagePressureHealthText');
+            if (pressEl) {
+                if (pDaysLeft <= 0) {
+                    pressEl.innerHTML = `<span class="text-red-500 font-bold">¡Revisar!</span>`;
+                } else {
+                    pressEl.innerHTML = `<span>${pDaysLeft}d rest.</span>`;
+                }
+            }
+
+            // 5. Renderizado de la lista de alertas
             if (alerts.length === 0) {
                 if (overallBadge) {
                     overallBadge.className = 'text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-black uppercase';
@@ -3509,12 +3656,12 @@
                             <div class="w-7 h-7 rounded-lg bg-white/80 ${a.color} flex items-center justify-center text-xs shrink-0 shadow-xs">
                                 <i class="${a.icon}"></i>
                             </div>
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-1.5">
-                                    <p class="font-bold text-xs text-slate-800 truncate">${a.title}</p>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <p class="font-bold text-xs text-slate-800 break-words">${a.title}</p>
                                     <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded ${a.badgeCls}">${a.badge}</span>
                                 </div>
-                                <p class="text-[10px] text-slate-500 truncate">${a.desc}</p>
+                                <p class="text-[10px] text-slate-500 break-words mt-0.5 leading-snug">${a.desc}</p>
                             </div>
                         </div>
                         <button onclick="${a.action}" class="bg-slate-900 hover:bg-slate-800 text-white px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider shrink-0 shadow-xs active:scale-95 transition-all">
@@ -3763,6 +3910,59 @@
             showToast(price > 0 && addExpense ? `+${qty} un. a ${item.name} y registrado ${price.toFixed(2)}€ en Gastos` : `+${qty} un. a ${item.name}`);
         }
 
+        function installStockItem(itemId) {
+            const list = getHomeStockList();
+            const item = list.find(x => x.id === itemId);
+            if (!item || (item.qty || 0) <= 0) {
+                showToast("No hay unidades disponibles en stock");
+                return;
+            }
+            
+            // Si es bujía
+            if (item.name.toLowerCase().includes('bujía') || item.name.toLowerCase().includes('bujia')) {
+                openSparkModal();
+                return;
+            }
+            
+            // Si es regulador o batería
+            if (item.name.toLowerCase().includes('batería') || item.name.toLowerCase().includes('bateria') || item.name.toLowerCase().includes('regulador')) {
+                openElectricModal(item.name);
+                return;
+            }
+
+            // Si es bombilla
+            if (item.cat === 'Iluminación') {
+                openBulbModal(item.id);
+                return;
+            }
+
+            // Para cualquier otra pieza: consultar si desea registrar la sustitución en la moto
+            if (confirm(`¿Deseas instalar "${item.name}" en la moto ahora?\n\nSe descontará 1 unidad del stock de casa y se actualizará su odómetro a ${data.odometer} km.`)) {
+                item.qty -= 1;
+                
+                // Buscar o crear en mantenimientos
+                let m = data.mantenimientos.find(x => x.nombre.toLowerCase() === item.name.toLowerCase());
+                if (m) {
+                    m.ultimo = data.odometer;
+                } else {
+                    data.mantenimientos.push({
+                        id: 'm_' + Date.now(),
+                        nombre: item.name,
+                        intervalo: 0,
+                        ultimo: data.odometer,
+                        categoria: item.cat === 'Fluidos' ? 'Motor' : item.cat,
+                        color: 'bg-emerald-500'
+                    });
+                }
+                
+                renderAll();
+                renderHomeStock();
+                renderHomeStockModalList();
+                saveData();
+                showToast(`"${item.name}" montada en la moto a los ${data.odometer} km`);
+            }
+        }
+
         function renderHomeStockModalList() {
             const list = getHomeStockList();
             const container = document.getElementById('modalStockItemsList');
@@ -3781,19 +3981,19 @@
                 const qtyBadgeClass = isOut ? 'bg-red-100 text-red-700 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-800 border-slate-200';
                 return `
                     <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-2 transition-all">
-                        <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                            <div class="w-7 h-7 rounded-lg bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-xs shadow-xs shrink-0">
+                        <div class="flex items-start gap-2.5 flex-1 min-w-0">
+                            <div class="w-7 h-7 rounded-lg bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-xs shadow-xs shrink-0 mt-0.5">
                                 <i class="fas ${item.icon || 'fa-box'}"></i>
                             </div>
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-1.5">
-                                    <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <p class="font-bold text-xs text-slate-800 break-words">${item.name}</p>
                                     <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass}">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
                                 </div>
-                                <p class="text-[9px] text-slate-400 truncate">${item.notes || item.cat}</p>
+                                <p class="text-[9px] text-slate-500 break-words mt-0.5 leading-snug">${item.notes || item.cat}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1 shrink-0">
+                        <div class="flex items-center gap-1 shrink-0 self-center">
                             <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
                             <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
                             <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
@@ -3804,7 +4004,7 @@
             }).join('');
         }
 
-                function renderHomeStock() {
+        function renderHomeStock() {
             const list = getHomeStockList();
             const grid = document.getElementById('homeStockPreviewGrid');
             const garageDisplay = document.getElementById('homeFuelDisplay');
@@ -3842,24 +4042,25 @@
                     const qty = item.qty || 0;
                     const isOut = qty === 0;
                     const statusBadge = isOut
-                        ? `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200">Montada / 0 ud</span>`
+                        ? `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200">Agotado / 0 ud</span>`
                         : `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">${qty} ud en stock</span>`;
 
                     html += `
                         <div class="p-3 bg-slate-50/90 hover:bg-white rounded-2xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-3 transition-all shadow-xs">
-                            <div class="flex items-center gap-3 min-w-0 flex-1">
-                                <div class="w-9 h-9 rounded-xl bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-sm shadow-xs border border-slate-100 shrink-0">
+                            <div class="flex items-start gap-3 min-w-0 flex-1">
+                                <div class="w-9 h-9 rounded-xl bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-sm shadow-xs border border-slate-100 shrink-0 mt-0.5">
                                     <i class="fas ${item.icon || 'fa-box'}"></i>
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
+                                        <p class="font-bold text-xs text-slate-800 break-words">${item.name}</p>
                                         ${statusBadge}
                                     </div>
-                                    <p class="text-[10px] text-slate-400 truncate mt-0.5">${item.notes || item.cat || 'Recambio Garaje'}</p>
+                                    ${item.notes ? `<p class="text-[10px] text-slate-500 break-words mt-1 leading-snug">${item.notes}</p>` : `<p class="text-[9px] text-slate-400 mt-0.5 font-semibold">${item.cat || 'Recambio Garaje'}</p>`}
+                                    ${!isOut ? `<button onclick="installStockItem('${item.id}')" class="mt-2 text-[9px] font-black bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1 active:scale-95 transition-all w-max shadow-xs"><i class="fas fa-wrench text-[8px] text-amber-600"></i>Montar en Moto</button>` : ''}
                                 </div>
                             </div>
-                            <div class="flex items-center gap-1.5 shrink-0">
+                            <div class="flex items-center gap-1.5 shrink-0 self-center">
                                 <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Descontar stock">-</button>
                                 <span class="font-mono-num font-black text-xs px-1 text-slate-800 min-w-[1.2rem] text-center">${qty}</span>
                                 <button onclick="openRestockModal('${item.id}')" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Añadir stock / compra">+</button>

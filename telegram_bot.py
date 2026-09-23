@@ -78,8 +78,10 @@ def build_status_report(data):
     odo = data.get("odometer", 0)
     fuel_stock = data.get("homeFuelStock", 0)
     docs = data.get("documentacion", {})
-    itv = docs.get("itv", {})
-    seguro = docs.get("seguro", {})
+    if not isinstance(docs, dict):
+        docs = {}
+    itv = docs.get("itv", {}) if isinstance(docs, dict) else {}
+    seguro = docs.get("seguro", {}) if isinstance(docs, dict) else {}
     
     # Calcular autonomía
     repostajes = data.get("repostajes", [])
@@ -96,7 +98,10 @@ def build_status_report(data):
                 total_l += sorted_fuel[i].get('litros', 0)
         if total_l > 0:
             avg = total_km / total_l
-            max_range = last.get('litros', 0) * avg
+            tank_cap = float(data.get("tankCapacity", 5.0))
+            is_full = last.get("fullTank", True) is not False
+            fuel_avail = tank_cap if is_full else last.get('litros', tank_cap)
+            max_range = fuel_avail * avg
             traveled = odo - last.get('km', 0)
             remaining = max(0, max_range - traveled)
             autonomia_txt = f"~{remaining:.0f} km ({avg:.2f} km/L)"

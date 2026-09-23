@@ -196,6 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } else {
         echo json_encode([
             'odometer' => 0,
+            'tankCapacity' => 5.0,
             'mantenimientos' => [],
             'repostajes' => [],
             'inventario' => [],

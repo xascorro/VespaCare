@@ -1,5 +1,6 @@
 {
     "odometer": 850,
+    "tankCapacity": 5.0,
     "mantenimientos": [
         {
             "id": "bujia",
