@@ -1717,7 +1717,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v43 • Categorías Taller & Stock Unificadas</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v44 • Estantería por Categorías & Stock</span>
                     </div>
                 </div>
 
@@ -1762,7 +1762,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=43')
+                navigator.serviceWorker.register('/sw.js?v=44')
                     .then(reg => {
                         reg.update();
                     })
@@ -4468,6 +4468,27 @@
             }
         }
 
+        // --- GESTIÓN Y RENDERIZADO DE ESTANTERÍA POR CATEGORÍAS TÉCNICAS ---
+        const UNIFIED_STOCK_CATEGORIES = [
+            { key: 'Motor', title: 'Motor & Transmisión', icon: 'fa-gear', color: 'text-amber-700', badgeClass: 'bg-amber-100/80 text-amber-950 border-amber-200' },
+            { key: 'Fluidos', title: 'Aceites & Fluidos', icon: 'fa-vial', color: 'text-amber-600', badgeClass: 'bg-amber-50 text-amber-900 border-amber-200/80' },
+            { key: 'Eléctrico', title: 'Sistema Eléctrico', icon: 'fa-bolt', color: 'text-yellow-600', badgeClass: 'bg-yellow-100/80 text-yellow-950 border-yellow-200' },
+            { key: 'Iluminación', title: 'Bombillas & Iluminación', icon: 'fa-lightbulb', color: 'text-blue-600', badgeClass: 'bg-blue-100/80 text-blue-950 border-blue-200' },
+            { key: 'Chasis', title: 'Chasis, Ruedas & Frenos', icon: 'fa-dharmachakra', color: 'text-emerald-600', badgeClass: 'bg-emerald-100/80 text-emerald-950 border-emerald-200' },
+            { key: 'Carrocería', title: 'Carrocería & Accesorios', icon: 'fa-motorcycle', color: 'text-purple-600', badgeClass: 'bg-purple-100/80 text-purple-950 border-purple-200' }
+        ];
+
+        function normalizeStockCategory(cat) {
+            if (!cat) return 'Carrocería';
+            const c = cat.toLowerCase();
+            if (c.includes('motor') || c.includes('transmis')) return 'Motor';
+            if (c.includes('fluid') || c.includes('aceite')) return 'Fluidos';
+            if (c.includes('eléctric') || c.includes('electric') || c.includes('batería') || c.includes('regulador') || c.includes('relé') || c.includes('fusible')) return 'Eléctrico';
+            if (c.includes('ilumin') || c.includes('bombill') || c.includes('faro') || c.includes('luz') || c.includes('luces')) return 'Iluminación';
+            if (c.includes('chasis') || c.includes('rueda') || c.includes('freno') || c.includes('neumátic') || c.includes('amortiguador') || c.includes('cable') || c.includes('cuentakm')) return 'Chasis';
+            return 'Carrocería';
+        }
+
         function renderHomeStockModalList() {
             const list = getHomeStockList();
             const container = document.getElementById('modalStockItemsList');
@@ -4477,36 +4498,58 @@
             if (!container) return;
 
             if (list.length === 0) {
-                container.innerHTML = `<p class="text-slate-400 text-center py-2">Sin recambios registrados</p>`;
+                container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Sin recambios registrados</p>`;
                 return;
             }
 
-            container.innerHTML = list.map(item => {
-                const isOut = item.qty === 0;
-                const qtyBadgeClass = isOut ? 'bg-red-100 text-red-700 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-800 border-slate-200';
-                return `
-                    <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-2 transition-all">
-                        <div class="flex items-start gap-2.5 flex-1 min-w-0">
-                            <div class="w-7 h-7 rounded-lg bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-xs shadow-xs shrink-0 mt-0.5">
-                                <i class="fas ${item.icon || 'fa-box'}"></i>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <p class="font-bold text-xs text-slate-800 break-words">${item.name}</p>
-                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass}">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
-                                </div>
-                                <p class="text-[9px] text-slate-500 break-words mt-0.5 leading-snug">${item.notes || item.cat}</p>
-                            </div>
+            let html = '';
+            UNIFIED_STOCK_CATEGORIES.forEach(catDef => {
+                const catItems = list.filter(x => normalizeStockCategory(x.cat) === catDef.key);
+                if (catItems.length === 0) return;
+
+                const catUnitsCount = catItems.reduce((acc, x) => acc + (x.qty || 0), 0);
+
+                html += `
+                    <div class="space-y-1.5 pt-2 first:pt-0">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                <i class="fas ${catDef.icon} ${catDef.color}"></i> ${catDef.title}
+                            </span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.2 rounded-md ${catDef.badgeClass} border">${catUnitsCount} un.</span>
                         </div>
-                        <div class="flex items-center gap-1 shrink-0 self-center">
-                            <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">-</button>
-                            <span class="font-mono-num font-black text-xs px-1 text-slate-800">${item.qty}</span>
-                            <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center">+</button>
-                            <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors"><i class="fas fa-trash-alt text-[10px]"></i></button>
-                        </div>
-                    </div>
                 `;
-            }).join('');
+
+                catItems.forEach(item => {
+                    const isOut = item.qty === 0;
+                    const qtyBadgeClass = isOut ? 'bg-red-100 text-red-700 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-800 border-slate-200';
+                    html += `
+                        <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-2 transition-all">
+                            <div class="flex items-start gap-2.5 flex-1 min-w-0">
+                                <div class="w-7 h-7 rounded-lg bg-white ${item.color || catDef.color} flex items-center justify-center text-xs shadow-xs shrink-0 mt-0.5">
+                                    <i class="fas ${item.icon || catDef.icon}"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <p class="font-bold text-xs text-slate-800 break-words">${item.name}</p>
+                                        <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass}">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
+                                    </div>
+                                    <p class="text-[9px] text-slate-500 break-words mt-0.5 leading-snug">${item.notes || item.cat}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0 self-center">
+                                <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center shadow-xs" title="Descontar">-</button>
+                                <span class="font-mono-num font-black text-xs px-1 text-slate-800 min-w-[1.1rem] text-center">${item.qty}</span>
+                                <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center shadow-xs" title="Añadir stock">+</button>
+                                <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors" title="Eliminar"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
         }
 
         function renderHomeStock() {
@@ -4543,35 +4586,54 @@
             if (list.length === 0) {
                 html += `<div class="p-4 text-center text-slate-400 text-xs bg-slate-50 rounded-xl border border-slate-100">No hay recambios registrados en la estantería</div>`;
             } else {
-                list.forEach(item => {
-                    const qty = item.qty || 0;
-                    const isOut = qty === 0;
-                    const statusBadge = isOut
-                        ? `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200">Agotado / 0 ud</span>`
-                        : `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">${qty} ud en stock</span>`;
+                UNIFIED_STOCK_CATEGORIES.forEach(catDef => {
+                    const catItems = list.filter(x => normalizeStockCategory(x.cat) === catDef.key);
+                    if (catItems.length === 0) return;
+
+                    const catUnitsCount = catItems.reduce((acc, x) => acc + (x.qty || 0), 0);
 
                     html += `
-                        <div class="p-3 bg-slate-50/90 hover:bg-white rounded-2xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-3 transition-all shadow-xs">
-                            <div class="flex items-start gap-3 min-w-0 flex-1">
-                                <div class="w-9 h-9 rounded-xl bg-white ${item.color || 'text-slate-600'} flex items-center justify-center text-sm shadow-xs border border-slate-100 shrink-0 mt-0.5">
-                                    <i class="fas ${item.icon || 'fa-box'}"></i>
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <p class="font-bold text-xs text-slate-800 break-words">${item.name}</p>
-                                        ${statusBadge}
-                                    </div>
-                                    ${item.notes ? `<p class="text-[10px] text-slate-500 break-words mt-1 leading-snug">${item.notes}</p>` : `<p class="text-[9px] text-slate-400 mt-0.5 font-semibold">${item.cat || 'Recambio Garaje'}</p>`}
-                                    ${!isOut ? `<button onclick="installStockItem('${item.id}')" class="mt-2 text-[9px] font-black bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1 active:scale-95 transition-all w-max shadow-xs"><i class="fas fa-wrench text-[8px] text-amber-600"></i>Montar en Moto</button>` : ''}
-                                </div>
+                        <div class="space-y-2 pt-2 first:pt-1">
+                            <div class="flex items-center justify-between px-1">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                    <i class="fas ${catDef.icon} ${catDef.color}"></i> ${catDef.title}
+                                </span>
+                                <span class="text-[8px] font-bold px-1.5 py-0.2 rounded-md ${catDef.badgeClass} border">${catUnitsCount} un.</span>
                             </div>
-                            <div class="flex items-center gap-1.5 shrink-0 self-center">
-                                <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Descontar stock">-</button>
-                                <span class="font-mono-num font-black text-xs px-1 text-slate-800 min-w-[1.2rem] text-center">${qty}</span>
-                                <button onclick="openRestockModal('${item.id}')" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Añadir stock / compra">+</button>
-                            </div>
-                        </div>
                     `;
+
+                    catItems.forEach(item => {
+                        const qty = item.qty || 0;
+                        const isOut = qty === 0;
+                        const statusBadge = isOut
+                            ? `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200">Agotado / 0 ud</span>`
+                            : `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">${qty} ud en stock</span>`;
+
+                        html += `
+                            <div class="p-3 bg-slate-50/90 hover:bg-white rounded-2xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-3 transition-all shadow-xs">
+                                <div class="flex items-start gap-3 min-w-0 flex-1">
+                                    <div class="w-9 h-9 rounded-xl bg-white ${item.color || catDef.color} flex items-center justify-center text-sm shadow-xs border border-slate-100 shrink-0 mt-0.5">
+                                        <i class="fas ${item.icon || catDef.icon}"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <p class="font-bold text-xs text-slate-800 break-words">${item.name}</p>
+                                            ${statusBadge}
+                                        </div>
+                                        ${item.notes ? `<p class="text-[10px] text-slate-500 break-words mt-1 leading-snug">${item.notes}</p>` : `<p class="text-[9px] text-slate-400 mt-0.5 font-semibold">${item.cat || catDef.title}</p>`}
+                                        ${!isOut ? `<button onclick="installStockItem('${item.id}')" class="mt-2 text-[9px] font-black bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1 active:scale-95 transition-all w-max shadow-xs"><i class="fas fa-wrench text-[8px] text-amber-600"></i>Montar en Moto</button>` : ''}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1.5 shrink-0 self-center">
+                                    <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Descontar stock">-</button>
+                                    <span class="font-mono-num font-black text-xs px-1 text-slate-800 min-w-[1.2rem] text-center">${qty}</span>
+                                    <button onclick="openRestockModal('${item.id}')" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Añadir stock / compra">+</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`;
                 });
             }
 
