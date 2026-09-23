@@ -1717,7 +1717,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v44 • Estantería por Categorías & Stock</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v45 • Layout Optimizado de Estantería</span>
                     </div>
                 </div>
 
@@ -1762,7 +1762,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=44')
+                navigator.serviceWorker.register('/sw.js?v=45')
                     .then(reg => {
                         reg.update();
                     })
@@ -4510,12 +4510,12 @@
                 const catUnitsCount = catItems.reduce((acc, x) => acc + (x.qty || 0), 0);
 
                 html += `
-                    <div class="space-y-1.5 pt-2 first:pt-0">
-                        <div class="flex items-center justify-between px-1">
-                            <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                                <i class="fas ${catDef.icon} ${catDef.color}"></i> ${catDef.title}
+                    <div class="space-y-1.5 pt-2.5 first:pt-0">
+                        <div class="flex items-center justify-between px-2 py-1 bg-slate-100/90 rounded-xl border border-slate-200/80">
+                            <span class="text-xs font-black uppercase tracking-wide text-slate-700 flex items-center gap-2">
+                                <i class="fas ${catDef.icon} ${catDef.color} text-sm"></i> ${catDef.title}
                             </span>
-                            <span class="text-[8px] font-bold px-1.5 py-0.2 rounded-md ${catDef.badgeClass} border">${catUnitsCount} un.</span>
+                            <span class="text-[9px] font-black px-2 py-0.5 rounded-md ${catDef.badgeClass} border shadow-xs">${catUnitsCount} un.</span>
                         </div>
                 `;
 
@@ -4523,24 +4523,29 @@
                     const isOut = item.qty === 0;
                     const qtyBadgeClass = isOut ? 'bg-red-100 text-red-700 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-800 border-slate-200';
                     html += `
-                        <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-2 transition-all">
-                            <div class="flex items-start gap-2.5 flex-1 min-w-0">
-                                <div class="w-7 h-7 rounded-lg bg-white ${item.color || catDef.color} flex items-center justify-center text-xs shadow-xs shrink-0 mt-0.5">
-                                    <i class="fas ${item.icon || catDef.icon}"></i>
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-1.5 flex-wrap">
-                                        <p class="font-bold text-xs text-slate-800 break-words">${item.name}</p>
-                                        <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass}">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
+                        <div class="p-2.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-100 hover:border-slate-200 space-y-1.5 transition-all shadow-xs">
+                            <!-- Fila 1: Icono + Nombre + Badge Estado -->
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 min-w-0 flex-1">
+                                    <div class="w-6 h-6 rounded-lg bg-white ${item.color || catDef.color} flex items-center justify-center text-xs shadow-xs border border-slate-100 shrink-0">
+                                        <i class="fas ${item.icon || catDef.icon}"></i>
                                     </div>
-                                    <p class="text-[9px] text-slate-500 break-words mt-0.5 leading-snug">${item.notes || item.cat}</p>
+                                    <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
                                 </div>
+                                <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded border ${qtyBadgeClass} shrink-0">${isOut ? 'Agotado' : item.qty + ' un.'}</span>
                             </div>
-                            <div class="flex items-center gap-1 shrink-0 self-center">
-                                <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center shadow-xs" title="Descontar">-</button>
-                                <span class="font-mono-num font-black text-xs px-1 text-slate-800 min-w-[1.1rem] text-center">${item.qty}</span>
-                                <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center shadow-xs" title="Añadir stock">+</button>
-                                <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors" title="Eliminar"><i class="fas fa-trash-alt text-[10px]"></i></button>
+
+                            ${item.notes ? `<p class="text-[10px] text-slate-500 truncate leading-snug px-0.5">${item.notes}</p>` : ''}
+
+                            <!-- Fila 2: 2 Columnas (Categoría / Detalles | Controles) -->
+                            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100/80 items-center">
+                                <span class="text-[9px] text-slate-400 font-semibold truncate px-0.5">${item.cat || catDef.title}</span>
+                                <div class="flex items-center justify-end gap-1">
+                                    <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center shadow-xs" title="Descontar">-</button>
+                                    <span class="font-mono-num font-black text-xs px-1 text-slate-800 min-w-[1.1rem] text-center">${item.qty}</span>
+                                    <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-95 flex items-center justify-center shadow-xs" title="Añadir stock">+</button>
+                                    <button onclick="deleteStockItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 ml-1 transition-colors" title="Eliminar"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -4569,7 +4574,7 @@
                 <!-- Banner Gasolina Casa (1 Columna Completa) -->
                 <div class="p-3 bg-gradient-to-r from-orange-50/90 to-amber-50/50 rounded-2xl border border-orange-100 flex items-center justify-between gap-3 shadow-xs">
                     <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center text-sm shadow-xs shrink-0">
+                        <div class="w-8 h-8 rounded-xl bg-orange-500 text-white flex items-center justify-center text-sm shadow-xs shrink-0">
                             <i class="fas fa-gas-pump"></i>
                         </div>
                         <div class="min-w-0">
@@ -4593,47 +4598,60 @@
                     const catUnitsCount = catItems.reduce((acc, x) => acc + (x.qty || 0), 0);
 
                     html += `
-                        <div class="space-y-2 pt-2 first:pt-1">
-                            <div class="flex items-center justify-between px-1">
-                                <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                                    <i class="fas ${catDef.icon} ${catDef.color}"></i> ${catDef.title}
+                        <div class="space-y-2 pt-3 first:pt-1">
+                            <!-- Cabecera de Categoría más Grande -->
+                            <div class="flex items-center justify-between px-2.5 py-1.5 bg-slate-100/90 rounded-xl border border-slate-200/80">
+                                <span class="text-xs font-black uppercase tracking-wide text-slate-700 flex items-center gap-2">
+                                    <i class="fas ${catDef.icon} ${catDef.color} text-sm"></i> ${catDef.title}
                                 </span>
-                                <span class="text-[8px] font-bold px-1.5 py-0.2 rounded-md ${catDef.badgeClass} border">${catUnitsCount} un.</span>
+                                <span class="text-[9px] font-black px-2 py-0.5 rounded-md ${catDef.badgeClass} border shadow-xs">${catUnitsCount} un.</span>
                             </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     `;
 
                     catItems.forEach(item => {
                         const qty = item.qty || 0;
                         const isOut = qty === 0;
                         const statusBadge = isOut
-                            ? `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200">Agotado / 0 ud</span>`
-                            : `<span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">${qty} ud en stock</span>`;
+                            ? `<span class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200 shrink-0">Agotado</span>`
+                            : `<span class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">${qty} ud en stock</span>`;
 
                         html += `
-                            <div class="p-3 bg-slate-50/90 hover:bg-white rounded-2xl border border-slate-100 hover:border-slate-200 flex items-center justify-between gap-3 transition-all shadow-xs">
-                                <div class="flex items-start gap-3 min-w-0 flex-1">
-                                    <div class="w-9 h-9 rounded-xl bg-white ${item.color || catDef.color} flex items-center justify-center text-sm shadow-xs border border-slate-100 shrink-0 mt-0.5">
-                                        <i class="fas ${item.icon || catDef.icon}"></i>
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <div class="flex items-center gap-2 flex-wrap">
-                                            <p class="font-bold text-xs text-slate-800 break-words">${item.name}</p>
-                                            ${statusBadge}
+                            <div class="p-2.5 bg-slate-50/90 hover:bg-white rounded-2xl border border-slate-100 hover:border-slate-200 space-y-2 transition-all shadow-xs flex flex-col justify-between">
+                                <div class="space-y-1">
+                                    <!-- Fila 1: Icono junto al Nombre y Badge en una sola línea -->
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 min-w-0 flex-1">
+                                            <div class="w-6 h-6 rounded-lg bg-white ${item.color || catDef.color} flex items-center justify-center text-xs shadow-xs border border-slate-100 shrink-0">
+                                                <i class="fas ${item.icon || catDef.icon}"></i>
+                                            </div>
+                                            <p class="font-bold text-xs text-slate-800 truncate">${item.name}</p>
                                         </div>
-                                        ${item.notes ? `<p class="text-[10px] text-slate-500 break-words mt-1 leading-snug">${item.notes}</p>` : `<p class="text-[9px] text-slate-400 mt-0.5 font-semibold">${item.cat || catDef.title}</p>`}
-                                        ${!isOut ? `<button onclick="installStockItem('${item.id}')" class="mt-2 text-[9px] font-black bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1 active:scale-95 transition-all w-max shadow-xs"><i class="fas fa-wrench text-[8px] text-amber-600"></i>Montar en Moto</button>` : ''}
+                                        ${statusBadge}
                                     </div>
+                                    ${item.notes ? `<p class="text-[10px] text-slate-500 truncate leading-snug px-0.5">${item.notes}</p>` : ''}
                                 </div>
-                                <div class="flex items-center gap-1.5 shrink-0 self-center">
-                                    <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Descontar stock">-</button>
-                                    <span class="font-mono-num font-black text-xs px-1 text-slate-800 min-w-[1.2rem] text-center">${qty}</span>
-                                    <button onclick="openRestockModal('${item.id}')" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Añadir stock / compra">+</button>
+
+                                <!-- Fila 2: Debajo en 2 Columnas (Montar / Sin Stock | Controles Cantidad) -->
+                                <div class="grid grid-cols-2 gap-2 pt-1.5 border-t border-slate-100/90 items-center">
+                                    <div>
+                                        ${!isOut ? `<button onclick="installStockItem('${item.id}')" class="w-full py-1.5 px-2 text-[9px] font-black bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 rounded-xl flex items-center justify-center gap-1 active:scale-95 transition-all shadow-xs"><i class="fas fa-wrench text-[8px] text-amber-600"></i>Montar</button>` : `<span class="text-[9px] text-slate-400 font-semibold italic block text-center py-1">Sin existencias</span>`}
+                                    </div>
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <button onclick="adjustStockItemQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Descontar stock">-</button>
+                                        <span class="font-mono-num font-black text-xs px-1 text-slate-800 min-w-[1.1rem] text-center">${qty}</span>
+                                        <button onclick="openRestockModal('${item.id}')" class="w-6 h-6 rounded-lg bg-white border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-100 active:scale-90 flex items-center justify-center shadow-xs transition-all" title="Añadir stock / compra">+</button>
+                                    </div>
                                 </div>
                             </div>
                         `;
                     });
 
-                    html += `</div>`;
+                    html += `
+                            </div>
+                        </div>
+                    `;
                 });
             }
 
