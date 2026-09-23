@@ -498,11 +498,12 @@
                             <div>
                                 <label class="text-[9px] font-black text-slate-400 uppercase">Categoría</label>
                                 <select id="newStockItemCat" class="font-bold text-xs">
-                                    <option value="Fluidos">🛢️ Fluidos</option>
-                                    <option value="Iluminación">💡 Bombillas</option>
-                                    <option value="Motor">⚙️ Motor</option>
-                                    <option value="Chasis">🛞 Chasis</option>
-                                    <option value="Otro">📦 Otro</option>
+                                    <option value="Motor">⚙️ Motor & Transmisión</option>
+                                    <option value="Fluidos">🛢️ Aceites & Fluidos</option>
+                                    <option value="Eléctrico">⚡ Sistema Eléctrico</option>
+                                    <option value="Iluminación">💡 Bombillas & Iluminación</option>
+                                    <option value="Chasis">🛞 Chasis, Ruedas & Frenos</option>
+                                    <option value="Carrocería">🛵 Carrocería & Accesorios</option>
                                 </select>
                             </div>
                             <div>
@@ -659,7 +660,9 @@
                     <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Categoría</label>
                     <select id="maintCat">
                         <option value="Motor">⚙️ Motor & Transmisión</option>
+                        <option value="Fluidos">🛢️ Aceites & Fluidos</option>
                         <option value="Eléctrico">⚡ Sistema Eléctrico</option>
+                        <option value="Iluminación">💡 Bombillas & Iluminación</option>
                         <option value="Chasis">🛞 Chasis, Ruedas & Frenos</option>
                         <option value="Carrocería">🛵 Carrocería & Accesorios</option>
                     </select>
@@ -1714,7 +1717,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v42 • Telemetría Financiera & KPIs</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v43 • Categorías Taller & Stock Unificadas</span>
                     </div>
                 </div>
 
@@ -1759,7 +1762,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=42')
+                navigator.serviceWorker.register('/sw.js?v=43')
                     .then(reg => {
                         reg.update();
                     })
@@ -4300,10 +4303,12 @@
             }
 
             const catMeta = {
+                'Motor': { icon: 'fa-gear', color: 'text-amber-700' },
                 'Fluidos': { icon: 'fa-vial', color: 'text-amber-600' },
+                'Eléctrico': { icon: 'fa-bolt', color: 'text-yellow-600' },
                 'Iluminación': { icon: 'fa-lightbulb', color: 'text-blue-600' },
-                'Motor': { icon: 'fa-gear', color: 'text-purple-600' },
                 'Chasis': { icon: 'fa-dharmachakra', color: 'text-emerald-600' },
+                'Carrocería': { icon: 'fa-motorcycle', color: 'text-purple-600' },
                 'Otro': { icon: 'fa-box', color: 'text-slate-600' }
             };
 
