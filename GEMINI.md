@@ -4,20 +4,21 @@ Este archivo contiene las reglas permanentes de infraestructura, arquitectura y 
 
 ---
 
-## 🏛️ 1. Arquitectura de Nodos y Entornos
+## 🏛️ 1. Arquitectura y Servidor Único de Producción
 
-| Entorno | Servidor / Nodo | Ubicación del Código | Función |
+VespaCare reside y opera de forma oficial y única en el nodo **`blue`**:
+
+| Entorno | Servidor / Nodo | Ubicación | Función |
 | :--- | :--- | :--- | :--- |
-| **Desarrollo / CLI** | `beta` (`10.0.0.93`) | `/home/ubuntu/VespaCare` | Edición de código, pruebas y repositorio Git local. |
-| **Producción (PWA Live)** | `blue` (`10.0.0.104`) | `/var/www/html/vespa` | Servidor Nginx que sirve `https://vespa.pedrodiaz.eu`. |
+| **Producción Oficial** | `blue` (`10.0.0.104`) | `/var/www/html/vespa` | Servidor Nginx + PHP 8.3 que sirve `https://vespa.pedrodiaz.eu`. |
 | **Repositorio Remoto** | GitHub | `git@github.com:xascorro/VespaCare.git` | Control de versiones (rama `main`). |
-| **Bot Daemon Telegram** | `blue` (`10.0.0.104`) | `vespacare-bot.service` | Servicio systemd activo en el nodo `blue`. |
+| **Bot Daemon Telegram** | `blue` (`10.0.0.104`) | `vespacare-bot.service` | Servicio systemd activo 24/7 en el nodo `blue`. |
 
 ---
 
-## 🚀 2. Protocolo Obligatorio de Despliegue (Production Deployment)
+## 🚀 2. Protocolo Obligatorio de Despliegue en Vivo
 
-Cada vez que se modifique código en `/home/ubuntu/VespaCare/` (`index.html`, `sw.js`, `api.php`, `telegram_bot.py`, `bot_daemon.py`, etc.), se DEBEN ejecutar **automáticamente y sin excepción** los siguientes pasos:
+Cualquier cambio realizado en el código (`index.html`, `sw.js`, `api.php`, `telegram_bot.py`, `bot_daemon.py`, etc.) se DEBE desplegar **inmediata y automáticamente** al servidor `blue`:
 
 ### Paso 1: Incrementar versión de Service Worker / Caché
 * Incrementar `CACHE_NAME` en `sw.js` (ej: `vespacare-v40`, `vespacare-v41`).
@@ -30,7 +31,7 @@ git commit -m "feat/fix: descripción de los cambios"
 git push origin main
 ```
 
-### Paso 3: Sincronizar archivos a Producción en el nodo `blue`
+### Paso 3: Sincronizar archivos al servidor `blue`
 ```bash
 scp index.html sw.js api.php telegram_bot.py bot_daemon.py blue:/var/www/html/vespa/
 ```
