@@ -1286,6 +1286,27 @@
 
         <!-- PESTAÑA 3: GASTOS -->
         <section id="tab-logs" class="tab-content space-y-3.5">
+            
+            <!-- RESUMEN DE GASTOS POR CATEGORÍA -->
+            <div class="grid grid-cols-3 gap-2 text-xs">
+                <div class="card p-3 border-b-4 border-amber-600">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block">⛽ Combustible</span>
+                    <span id="gastosFuelTotal" class="font-black text-slate-800 text-sm font-mono-num">0.00 €</span>
+                    <span id="gastosFuelCount" class="text-[8px] text-slate-400 block font-semibold mt-0.5">0 repostajes</span>
+                </div>
+                <div class="card p-3 border-b-4 border-orange-500">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block">🔧 Taller/Piezas</span>
+                    <span id="gastosMaintTotal" class="font-black text-slate-800 text-sm font-mono-num">0.00 €</span>
+                    <span id="gastosMaintCount" class="text-[8px] text-slate-400 block font-semibold mt-0.5">0 gastos</span>
+                </div>
+                <div class="card p-3 border-b-4 border-emerald-600">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block">📋 Papeleo/Legal</span>
+                    <span id="gastosLegalTotal" class="font-black text-slate-800 text-sm font-mono-num">0.00 €</span>
+                    <span id="gastosLegalCount" class="text-[8px] text-slate-400 block font-semibold mt-0.5">0 trámites</span>
+                </div>
+            </div>
+
+            <!-- FORMULARIO NUEVO REGISTRO -->
             <div class="card p-4">
                 <div class="flex justify-between items-center mb-3">
                     <h3 id="logFormTitle" class="text-xl text-slate-800">Nuevo Registro</h3>
@@ -1294,11 +1315,18 @@
                 <div class="space-y-4">
                     <input type="hidden" id="logEditId">
                     <div class="grid grid-cols-1 gap-4">
-                        <select id="logType" onchange="toggleFuelFields(this.value)" class="font-bold text-slate-600">
-                            <option value="repostaje">⛽ Gasolina (Surtidor)</option>
-                            <option value="garrafa_comprar">🛒 Comprar para Garrafa</option>
-                            <option value="garrafa_repostar">🏠 Repostar de Garrafa</option>
-                            <option value="pieza">🔧 Pieza / Inventario</option>
+                        <select id="logType" onchange="toggleFuelFields(this.value)" class="font-bold text-slate-700">
+                            <optgroup label="⛽ Combustible">
+                                <option value="repostaje">⛽ Gasolina (Surtidor)</option>
+                                <option value="garrafa_comprar">🛒 Comprar para Garrafa</option>
+                                <option value="garrafa_repostar">🏠 Repostar de Garrafa a Moto</option>
+                            </optgroup>
+                            <optgroup label="🔧 Mantenimiento & Taller">
+                                <option value="pieza">🔧 Pieza / Recambio / Taller</option>
+                            </optgroup>
+                            <optgroup label="📋 Papeleo & Trámites">
+                                <option value="papeleo">📋 Papeleo / ITV / Seguro / Impuesto</option>
+                            </optgroup>
                         </select>
                         <input type="datetime-local" id="logDate" class="font-semibold">
                         <input type="text" id="logTitle" placeholder="¿Qué has comprado o hecho?" class="font-semibold">
@@ -1307,15 +1335,15 @@
                     <div class="grid grid-cols-3 gap-3">
                         <div id="logPriceContainer">
                             <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Euros</label>
-                            <input type="number" id="logPrice" placeholder="€" step="0.01">
+                            <input type="number" id="logPrice" placeholder="€" step="0.01" class="font-mono-num font-bold">
                         </div>
                         <div id="logLitrosContainer">
                             <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Litros</label>
-                            <input type="number" id="logLitros" placeholder="L" step="0.1" oninput="updateFormMixCalc()">
+                            <input type="number" id="logLitros" placeholder="L" step="0.1" class="font-mono-num font-bold" oninput="updateFormMixCalc()">
                         </div>
                         <div id="logKmContainer">
                             <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Km Odo</label>
-                            <input type="number" id="logKm" placeholder="Km" step="0.1">
+                            <input type="number" id="logKm" placeholder="Km" step="0.1" class="font-mono-num font-bold">
                         </div>
                     </div>
 
@@ -1358,14 +1386,74 @@
 
                     <div>
                         <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Notas</label>
-                        <input type="text" id="logNotes" placeholder="Detalles, gasolinera, etc.">
+                        <input type="text" id="logNotes" placeholder="Detalles, gasolinera, marca, etc.">
                     </div>
 
                     <button onclick="addLog()" class="btn-primary shadow-lg mt-2">Guardar Registro</button>
                 </div>
             </div>
 
-            <div id="logsHistory" class="space-y-3"></div>
+            <!-- SECCIÓN 1: GASTOS DE COMBUSTIBLE & SURTIDOR -->
+            <div class="card p-4 space-y-3 border-l-4 border-amber-600">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs">
+                            <i class="fas fa-gas-pump"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">Gastos de Combustible</h3>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase">Surtidor & Garrafa</p>
+                        </div>
+                    </div>
+                    <span id="fuelSectionSubtotal" class="text-xs font-black text-amber-900 font-mono-num bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg">0.00 €</span>
+                </div>
+                <div id="fuelLogsHistoryList" class="space-y-2 text-xs">
+                    <!-- Se inyectan los 5 últimos repostajes por defecto -->
+                </div>
+                <div id="fuelLogsToggleContainer" class="pt-1 text-center"></div>
+            </div>
+
+            <!-- SECCIÓN 2: GASTOS DE MANTENIMIENTO & RECAMBIOS -->
+            <div class="card p-4 space-y-3 border-l-4 border-orange-500">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-xs">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">Gastos de Mantenimiento</h3>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase">Recambios, Piezas & Taller</p>
+                        </div>
+                    </div>
+                    <span id="maintSectionSubtotal" class="text-xs font-black text-orange-950 font-mono-num bg-orange-50 border border-orange-200 px-2 py-1 rounded-lg">0.00 €</span>
+                </div>
+                <div id="maintLogsHistoryList" class="space-y-2 text-xs">
+                    <!-- Se inyectan los gastos de mantenimiento -->
+                </div>
+                <div id="maintLogsToggleContainer" class="pt-1 text-center"></div>
+            </div>
+
+            <!-- SECCIÓN 3: GASTOS DE PAPELEO & LEGAL -->
+            <div class="card p-4 space-y-3 border-l-4 border-emerald-600">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">Papeleo & Trámites Legales</h3>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase">ITV, Seguro, Tasas & Impuestos</p>
+                        </div>
+                    </div>
+                    <span id="legalSectionSubtotal" class="text-xs font-black text-emerald-950 font-mono-num bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-lg">0.00 €</span>
+                </div>
+                <div id="legalLogsHistoryList" class="space-y-2 text-xs">
+                    <!-- Se inyectan los gastos de papeleo/legal -->
+                </div>
+                <div id="legalLogsToggleContainer" class="pt-1 text-center"></div>
+            </div>
+
+            <div id="logsHistory" class="hidden"></div>
         </section>
 
         <!-- PESTAÑA 4: STATS (COSTE €/100KM, EVOLUCIÓN Y CONSUMO) -->
@@ -1590,7 +1678,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v40 • Taller & Telemetría Viva</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v41 • Gastos Tripartitos & Taller</span>
                     </div>
                 </div>
 
@@ -1635,7 +1723,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=40')
+                navigator.serviceWorker.register('/sw.js?v=41')
                     .then(reg => {
                         reg.update();
                     })
@@ -2165,25 +2253,62 @@
             showToast('Mezcla añadida a las notas');
         }
 
-        // --- LOGS & FORMS ---
+        // --- LOGS, GASTOS & EXPENSES SECTION ---
+        let fuelHistoryExpanded = false;
+        let maintHistoryExpanded = false;
+        let legalHistoryExpanded = false;
+
+        function toggleFuelHistory(expand) {
+            fuelHistoryExpanded = expand !== undefined ? expand : !fuelHistoryExpanded;
+            renderLogsHistory();
+        }
+
+        function toggleMaintHistory(expand) {
+            maintHistoryExpanded = expand !== undefined ? expand : !maintHistoryExpanded;
+            renderLogsHistory();
+        }
+
+        function toggleLegalHistory(expand) {
+            legalHistoryExpanded = expand !== undefined ? expand : !legalHistoryExpanded;
+            renderLogsHistory();
+        }
+
+        function isLegalExpense(item) {
+            if (!item) return false;
+            if (item.logType === 'papeleo') return true;
+            const txt = ((item.title || '') + ' ' + (item.notes || '')).toLowerCase();
+            return /(itv|seguro|póliza|poliza|impuesto|tasa|gestor|transferencia|trámite|tramite|dgt|rodaje|ivtm|multa)/i.test(txt);
+        }
+
         function toggleFuelFields(type) {
             const isFuel = ['repostaje', 'garrafa_comprar', 'garrafa_repostar'].includes(type);
             const isStation = type === 'repostaje';
+            const isLegal = type === 'papeleo';
+            
             document.getElementById('logLitrosContainer').classList.toggle('hidden', !isFuel);
             const fullTankEl = document.getElementById('logFullTankContainer');
             if (fullTankEl) fullTankEl.classList.toggle('hidden', !['repostaje', 'garrafa_repostar'].includes(type));
             document.getElementById('logPriceContainer').classList.toggle('hidden', type === 'garrafa_repostar');
-            document.getElementById('logKmContainer').classList.toggle('hidden', type === 'garrafa_comprar');
+            document.getElementById('logKmContainer').classList.toggle('hidden', type === 'garrafa_comprar' || isLegal);
             document.getElementById('formMixHelper').classList.toggle('hidden', !isFuel);
             
             const titles = {
                 'repostaje': 'Gasolina (Surtidor)',
                 'garrafa_comprar': 'Compra Garrafa',
                 'garrafa_repostar': 'Repostaje Garrafa',
-                'pieza': ''
+                'pieza': '',
+                'papeleo': ''
             };
+            const titleInput = document.getElementById('logTitle');
             if(!document.getElementById('logEditId').value) {
-                document.getElementById('logTitle').value = titles[type] || '';
+                titleInput.value = titles[type] || '';
+            }
+            if (isLegal) {
+                titleInput.placeholder = 'Ej: Seguro Anual Mapfre, ITV Alhama, Impuesto Rodaje...';
+            } else if (type === 'pieza') {
+                titleInput.placeholder = 'Ej: Aceite caja SAE 30, Juego de zapatas, Filtro...';
+            } else {
+                titleInput.placeholder = '¿Qué has comprado o hecho?';
             }
             updateFormMixCalc();
         }
@@ -2204,6 +2329,7 @@
 
         function editLog(id, listName) {
             const list = data[listName];
+            if (!list) return;
             const entry = list.find(x => x.id === id);
             if(!entry) return;
 
@@ -2211,17 +2337,24 @@
             document.getElementById('logFormTitle').innerText = 'Editando Registro';
             document.getElementById('cancelLogEdit').classList.remove('hidden');
 
-            document.getElementById('logType').value = entry.logType || (listName === 'repostajes' ? 'repostaje' : 'pieza');
-            toggleFuelFields(document.getElementById('logType').value);
+            let inferredType = entry.logType;
+            if (!inferredType) {
+                if (listName === 'repostajes') inferredType = 'repostaje';
+                else if (isLegalExpense(entry)) inferredType = 'papeleo';
+                else inferredType = 'pieza';
+            }
+
+            document.getElementById('logType').value = inferredType;
+            toggleFuelFields(inferredType);
 
             document.getElementById('logDate').value = entry.date;
-            document.getElementById('logTitle').value = entry.title;
-            document.getElementById('logPrice').value = entry.price;
+            document.getElementById('logTitle').value = entry.title || '';
+            document.getElementById('logPrice').value = (entry.price !== undefined && entry.price !== null) ? entry.price : '';
             document.getElementById('logLitros').value = entry.litros || '';
             const fullTankEl = document.getElementById('logFullTank');
             if (fullTankEl) fullTankEl.checked = entry.fullTank !== false;
-            document.getElementById('logKm').value = entry.km;
-            document.getElementById('logNotes').value = entry.notes;
+            document.getElementById('logKm').value = entry.km !== undefined ? entry.km : data.odometer;
+            document.getElementById('logNotes').value = entry.notes || '';
 
             showTab('logs');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2230,6 +2363,7 @@
         function deleteLog(id, listName) {
             if(!confirm('¿Eliminar este registro?')) return;
             const list = data[listName];
+            if (!list) return;
             const idx = list.findIndex(x => x.id === id);
             if(idx === -1) return;
             const entry = list[idx];
@@ -2242,14 +2376,16 @@
         function addLog() {
             const type = document.getElementById('logType').value;
             const editId = document.getElementById('logEditId').value;
+            const isLegal = type === 'papeleo';
+            const defaultTitle = isLegal ? 'Trámite Legal' : (type === 'pieza' ? 'Pieza / Mantenimiento' : 'Registro');
             const entry = {
                 id: editId || 'l_' + Date.now(),
                 logType: type,
                 date: document.getElementById('logDate').value || new Date().toISOString().slice(0, 16),
-                title: document.getElementById('logTitle').value,
+                title: document.getElementById('logTitle').value.trim() || defaultTitle,
                 price: parseFloat(document.getElementById('logPrice').value) || 0,
                 km: parseFloat(document.getElementById('logKm').value) || data.odometer,
-                notes: document.getElementById('logNotes').value
+                notes: document.getElementById('logNotes').value.trim()
             };
 
             if(editId) {
@@ -2280,13 +2416,190 @@
                 data.inventario.unshift(entry);
                 data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
             } else {
+                // 'pieza' o 'papeleo'
                 data.inventario.unshift(entry);
                 data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
             }
 
-            if(entry.km > data.odometer && type !== 'garrafa_comprar') data.odometer = entry.km;
+            if(entry.km > data.odometer && type !== 'garrafa_comprar' && !isLegal) data.odometer = entry.km;
             resetLogForm();
             saveData();
+        }
+
+        function renderLogsHistory() {
+            const fuelListEl = document.getElementById('fuelLogsHistoryList');
+            const fuelToggleEl = document.getElementById('fuelLogsToggleContainer');
+            const maintListEl = document.getElementById('maintLogsHistoryList');
+            const maintToggleEl = document.getElementById('maintLogsToggleContainer');
+            const legalListEl = document.getElementById('legalLogsHistoryList');
+            const legalToggleEl = document.getElementById('legalLogsToggleContainer');
+
+            if (!fuelListEl || !maintListEl || !legalListEl) return;
+
+            // Listados ordenados
+            const sortedFuel = [...data.repostajes].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const garrafaPurchases = (data.inventario || []).filter(x => x.logType === 'garrafa_comprar');
+            
+            const maintList = (data.inventario || []).filter(x => x.logType !== 'garrafa_comprar' && !isLegalExpense(x))
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const legalList = (data.inventario || []).filter(x => isLegalExpense(x))
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Totales
+            let totalFuelSpent = 0;
+            sortedFuel.forEach(r => { if (r.price > 0) totalFuelSpent += r.price; });
+            garrafaPurchases.forEach(g => { if (g.price > 0) totalFuelSpent += g.price; });
+
+            let totalMaintSpent = 0;
+            maintList.forEach(m => { if (m.price > 0) totalMaintSpent += m.price; });
+
+            let totalLegalSpent = 0;
+            legalList.forEach(l => { if (l.price > 0) totalLegalSpent += l.price; });
+
+            // Actualizar tarjetas de cabecera y subtotales
+            const gFuelTot = document.getElementById('gastosFuelTotal');
+            const gFuelCnt = document.getElementById('gastosFuelCount');
+            const gMaintTot = document.getElementById('gastosMaintTotal');
+            const gMaintCnt = document.getElementById('gastosMaintCount');
+            const gLegalTot = document.getElementById('gastosLegalTotal');
+            const gLegalCnt = document.getElementById('gastosLegalCount');
+
+            if (gFuelTot) gFuelTot.innerText = totalFuelSpent.toFixed(2) + ' €';
+            if (gFuelCnt) gFuelCnt.innerText = `${sortedFuel.length} repostajes`;
+            if (gMaintTot) gMaintTot.innerText = totalMaintSpent.toFixed(2) + ' €';
+            if (gMaintCnt) gMaintCnt.innerText = `${maintList.length} registros`;
+            if (gLegalTot) gLegalTot.innerText = totalLegalSpent.toFixed(2) + ' €';
+            if (gLegalCnt) gLegalCnt.innerText = `${legalList.length} trámites`;
+
+            const sFuelSub = document.getElementById('fuelSectionSubtotal');
+            const sMaintSub = document.getElementById('maintSectionSubtotal');
+            const sLegalSub = document.getElementById('legalSectionSubtotal');
+            if (sFuelSub) sFuelSub.innerText = totalFuelSpent.toFixed(2) + ' €';
+            if (sMaintSub) sMaintSub.innerText = totalMaintSpent.toFixed(2) + ' €';
+            if (sLegalSub) sLegalSub.innerText = totalLegalSpent.toFixed(2) + ' €';
+
+            // 1. RENDER HISTORIAL COMBUSTIBLE (Solo 5 visibles por defecto)
+            const visibleFuel = fuelHistoryExpanded ? sortedFuel : sortedFuel.slice(0, 5);
+            if (sortedFuel.length === 0) {
+                fuelListEl.innerHTML = `<div class="p-3 bg-slate-50 rounded-xl text-center text-slate-400 font-semibold">Sin repostajes registrados</div>`;
+            } else {
+                fuelListEl.innerHTML = visibleFuel.map(l => {
+                    const isGarrafa = l.logType === 'garrafa_repostar';
+                    const iconBadge = isGarrafa 
+                        ? `<span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-orange-100 text-orange-900">🏠 Garrafa</span>`
+                        : `<span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-900">⛽ Surtidor</span>`;
+                    const litersTxt = l.litros > 0 ? `${l.litros.toFixed(1)} L` : '';
+                    const pricePerL = (l.price > 0 && l.litros > 0) ? `(${ (l.price / l.litros).toFixed(2) } €/L)` : '';
+                    const priceDisplay = l.price > 0 ? `${l.price.toFixed(2)} €` : (l.litros > 0 ? `${l.litros.toFixed(1)} L` : '0.00 €');
+                    
+                    return `
+                        <div class="card p-3 flex justify-between items-center bg-white border border-slate-100 hover:border-amber-200 transition-all">
+                            <div class="flex-1 cursor-pointer min-w-0 pr-2" onclick="editLog('${l.id}', 'repostajes')">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <p class="font-bold text-xs text-slate-800 break-words">${l.title || 'Repostaje'}</p>
+                                    ${iconBadge}
+                                </div>
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-tight mt-0.5">
+                                    ${(l.date || '').split('T')[0]} • ${l.km} km ${litersTxt ? '• ' + litersTxt : ''} ${pricePerL}
+                                </p>
+                                ${l.notes ? `<p class="text-[9px] text-slate-500 italic mt-0.5 truncate">${l.notes}</p>` : ''}
+                            </div>
+                            <div class="text-right flex items-center gap-3 shrink-0">
+                                <div>
+                                    <p class="font-mono-num font-black text-xs text-slate-900">${priceDisplay}</p>
+                                    ${l.litros > 0 && l.price > 0 ? `<p class="text-[8px] font-bold text-amber-700">${l.litros.toFixed(1)} L</p>` : ''}
+                                </div>
+                                <button onclick="deleteLog('${l.id}', 'repostajes')" class="text-slate-300 hover:text-red-500 p-1 transition-colors" title="Eliminar"><i class="fas fa-trash-alt text-xs"></i></button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Botón Ver más para Combustible
+            if (sortedFuel.length > 5) {
+                fuelToggleEl.innerHTML = fuelHistoryExpanded 
+                    ? `<button onclick="toggleFuelHistory(false)" class="text-[10px] font-black uppercase text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl border border-amber-200 transition-all active:scale-95"><i class="fas fa-chevron-up mr-1"></i>Ver menos (solo 5)</button>`
+                    : `<button onclick="toggleFuelHistory(true)" class="text-[10px] font-black uppercase text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl border border-amber-200 transition-all active:scale-95"><i class="fas fa-chevron-down mr-1"></i>Ver todos (${sortedFuel.length} repostajes)</button>`;
+            } else {
+                fuelToggleEl.innerHTML = '';
+            }
+
+            // 2. RENDER HISTORIAL MANTENIMIENTO & TALLER (5 visibles por defecto)
+            const visibleMaint = maintHistoryExpanded ? maintList : maintList.slice(0, 5);
+            if (maintList.length === 0) {
+                maintListEl.innerHTML = `<div class="p-3 bg-slate-50 rounded-xl text-center text-slate-400 font-semibold">Sin gastos de mantenimiento registrados</div>`;
+            } else {
+                maintListEl.innerHTML = visibleMaint.map(m => {
+                    const priceDisplay = m.price > 0 ? `${m.price.toFixed(2)} €` : '0.00 €';
+                    const kmTxt = m.km !== undefined && m.km > 0 ? ` • ${m.km} km` : '';
+                    return `
+                        <div class="card p-3 flex justify-between items-center bg-white border border-slate-100 hover:border-orange-200 transition-all">
+                            <div class="flex-1 cursor-pointer min-w-0 pr-2" onclick="editLog('${m.id}', 'inventario')">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <p class="font-bold text-xs text-slate-800 break-words">${m.title || 'Mantenimiento'}</p>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-orange-100 text-orange-900">🔧 Taller</span>
+                                </div>
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-tight mt-0.5">
+                                    ${(m.date || '').split('T')[0]}${kmTxt}
+                                </p>
+                                ${m.notes ? `<p class="text-[9px] text-slate-500 italic mt-0.5 truncate">${m.notes}</p>` : ''}
+                            </div>
+                            <div class="text-right flex items-center gap-3 shrink-0">
+                                <p class="font-mono-num font-black text-xs text-slate-900">${priceDisplay}</p>
+                                <button onclick="deleteLog('${m.id}', 'inventario')" class="text-slate-300 hover:text-red-500 p-1 transition-colors" title="Eliminar"><i class="fas fa-trash-alt text-xs"></i></button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Botón Ver más para Mantenimiento
+            if (maintList.length > 5) {
+                maintToggleEl.innerHTML = maintHistoryExpanded
+                    ? `<button onclick="toggleMaintHistory(false)" class="text-[10px] font-black uppercase text-orange-900 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-xl border border-orange-200 transition-all active:scale-95"><i class="fas fa-chevron-up mr-1"></i>Ver menos (solo 5)</button>`
+                    : `<button onclick="toggleMaintHistory(true)" class="text-[10px] font-black uppercase text-orange-900 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-xl border border-orange-200 transition-all active:scale-95"><i class="fas fa-chevron-down mr-1"></i>Ver todos (${maintList.length} gastos)</button>`;
+            } else {
+                maintToggleEl.innerHTML = '';
+            }
+
+            // 3. RENDER HISTORIAL PAPELEO & LEGAL (5 visibles por defecto)
+            const visibleLegal = legalHistoryExpanded ? legalList : legalList.slice(0, 5);
+            if (legalList.length === 0) {
+                legalListEl.innerHTML = `<div class="p-3 bg-slate-50 rounded-xl text-center text-slate-400 font-semibold">Sin gastos de papeleo o trámites registrados</div>`;
+            } else {
+                legalListEl.innerHTML = visibleLegal.map(l => {
+                    const priceDisplay = l.price > 0 ? `${l.price.toFixed(2)} €` : '0.00 €';
+                    return `
+                        <div class="card p-3 flex justify-between items-center bg-white border border-slate-100 hover:border-emerald-200 transition-all">
+                            <div class="flex-1 cursor-pointer min-w-0 pr-2" onclick="editLog('${l.id}', 'inventario')">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <p class="font-bold text-xs text-slate-800 break-words">${l.title || 'Trámite Legal'}</p>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900">📋 Legal</span>
+                                </div>
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-tight mt-0.5">
+                                    ${(l.date || '').split('T')[0]}
+                                </p>
+                                ${l.notes ? `<p class="text-[9px] text-slate-500 italic mt-0.5 truncate">${l.notes}</p>` : ''}
+                            </div>
+                            <div class="text-right flex items-center gap-3 shrink-0">
+                                <p class="font-mono-num font-black text-xs text-slate-900">${priceDisplay}</p>
+                                <button onclick="deleteLog('${l.id}', 'inventario')" class="text-slate-300 hover:text-red-500 p-1 transition-colors" title="Eliminar"><i class="fas fa-trash-alt text-xs"></i></button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Botón Ver más para Papeleo
+            if (legalList.length > 5) {
+                legalToggleEl.innerHTML = legalHistoryExpanded
+                    ? `<button onclick="toggleLegalHistory(false)" class="text-[10px] font-black uppercase text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-all active:scale-95"><i class="fas fa-chevron-up mr-1"></i>Ver menos (solo 5)</button>`
+                    : `<button onclick="toggleLegalHistory(true)" class="text-[10px] font-black uppercase text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-all active:scale-95"><i class="fas fa-chevron-down mr-1"></i>Ver todos (${legalList.length} trámites)</button>`;
+            } else {
+                legalToggleEl.innerHTML = '';
+            }
         }
 
         // --- MODAL DE SUSTITUCIONES & CAMBIOS BASADO EN STOCK REAL ---
@@ -2865,25 +3178,7 @@
             if (electricContainer) electricContainer.classList.toggle('hidden', !hasElectricParts);
             if (customPartsCard) customPartsCard.classList.toggle('hidden', !hasCustomParts);
 
-            const logsBox = document.getElementById('logsHistory');
-            logsBox.innerHTML = '<h3 class="text-[10px] font-black uppercase text-slate-400 px-2 mb-3 tracking-widest">Últimos Movimientos</h3>';
-            [...data.repostajes.map(x=>({...x, lName:'repostajes'})), ...data.inventario.map(x=>({...x, lName:'inventario'}))]
-                .sort((a,b)=>new Date(b.date) - new Date(a.date)).slice(0, 15).forEach(l => {
-                    const isFuel = l.lName === 'repostajes';
-                    logsBox.innerHTML += `<div class="card p-4 flex justify-between items-center">
-                        <div class="flex-1 cursor-pointer" onclick="editLog('${l.id}', '${l.lName}')">
-                            <p class="font-bold text-sm text-slate-700">${l.title}</p>
-                            <p class="text-[9px] font-black text-slate-300 uppercase tracking-tighter">${l.date.split('T')[0]} • ${l.km} km ${l.notes ? '• ' + l.notes : ''}</p>
-                        </div>
-                        <div class="text-right flex items-center gap-4">
-                            <div>
-                                <p class="font-black text-slate-800">${l.price > 0 ? l.price.toFixed(2) + '€' : (l.litros > 0 ? (l.litros + 'L') : '0.00€')}</p>
-                                ${l.litros > 0 && isFuel ? `<p class="text-[8px] font-bold text-amber-700">${l.litros}L</p>` : ''}
-                            </div>
-                            <button onclick="deleteLog('${l.id}', '${l.lName}')" class="text-slate-200 hover:text-red-400 transition-colors"><i class="fas fa-times-circle text-lg"></i></button>
-                        </div>
-                    </div>`;
-                });
+            renderLogsHistory();
 
             const bList = document.getElementById('bulbsList');
             if (data.bombillas && data.bombillas.length > 0) {
@@ -3104,7 +3399,7 @@
                 const expNotes = [notes, `Trámite: ${issueDate}`, `Vence: ${expiry}`].filter(Boolean).join(' • ');
                 data.inventario.unshift({
                     id: 'l_doc_' + Date.now(),
-                    logType: 'pieza',
+                    logType: 'papeleo',
                     date: issueDate + 'T12:00',
                     title: expTitle,
                     price: price,
