@@ -150,8 +150,11 @@ def check_proactive_alerts(data):
     alerts = []
     odo = data.get("odometer", 0)
 
-    # 1. ITV
-    itv = data.get("documentacion", {}).get("itv", {})
+    # 1. ITV & Seguro
+    docs = data.get("documentacion", {})
+    if not isinstance(docs, dict):
+        docs = {}
+    itv = docs.get("itv", {})
     if itv.get("expiry"):
         try:
             exp = datetime.strptime(itv["expiry"], "%Y-%m-%d")
@@ -164,7 +167,7 @@ def check_proactive_alerts(data):
             pass
 
     # 2. Seguro
-    seguro = data.get("documentacion", {}).get("seguro", {})
+    seguro = docs.get("seguro", {})
     if seguro.get("expiry"):
         try:
             exp = datetime.strptime(seguro["expiry"], "%Y-%m-%d")

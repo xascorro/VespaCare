@@ -202,7 +202,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'inventario' => [],
             'bombillas' => [],
             'documentos' => [],
-            'documentacion' => [],
+            'documentacion' => (object)[],
+            'stockCasa' => [],
             'homeFuelStock' => 0
         ]);
     }

@@ -76,5 +76,35 @@
             "lastUpdated": "2026-09-01"
         }
     },
+    "documentos": [
+        {
+            "id": "doc_sample_1",
+            "title": "Ficha Técnica ITV",
+            "category": "legal",
+            "filename": "doc_itv_2026.pdf",
+            "date": "2026-09-01",
+            "notes": "Copia digitalizada en guantera"
+        }
+    ],
+    "stockCasa": [
+        {
+            "id": "stk_oil2t",
+            "name": "Aceite 2T Sintético (Tubo 125ml)",
+            "cat": "Fluidos",
+            "qty": 2,
+            "icon": "fa-vial",
+            "color": "text-amber-600",
+            "notes": "Para mezcla en ruta (2%)"
+        },
+        {
+            "id": "stk_bujia",
+            "name": "Bujía NGK B7HS (Rosca Corta)",
+            "cat": "Motor",
+            "qty": 1,
+            "icon": "fa-plug",
+            "color": "text-yellow-600",
+            "notes": "Repuesto en guantera"
+        }
+    ],
     "homeFuelStock": 5.0
 }

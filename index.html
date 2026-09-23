@@ -1717,7 +1717,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v46 • Título Repuestos Completo & Stock</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v47 • Corrección de Incongruencias & Normalización</span>
                     </div>
                 </div>
 
@@ -1762,7 +1762,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=46')
+                navigator.serviceWorker.register('/sw.js?v=47')
                     .then(reg => {
                         reg.update();
                     })
@@ -1973,16 +1973,93 @@
             checkAppLockState();
         }
 
+        let pinModalCallback = null;
+        let currentEnteredPin = '';
+
         function openPinModal(callback = null) {
             pinModalCallback = callback;
             currentEnteredPin = '';
             updatePinDots();
-            document.getElementById('pinErrorMsg').classList.add('hidden');
             document.getElementById('pinModal').classList.add('active');
         }
 
         function closePinModal() {
             document.getElementById('pinModal').classList.remove('active');
+            pinModalCallback = null;
+            currentEnteredPin = '';
+        }
+
+        function pressPin(digit) {
+            if (currentEnteredPin.length < 4) {
+                currentEnteredPin += digit;
+                updatePinDots();
+                if (currentEnteredPin.length === 4) {
+                    setTimeout(validateModalPin, 150);
+                }
+            }
+        }
+
+        function clearPin() {
+            currentEnteredPin = '';
+            updatePinDots();
+        }
+
+        function backspacePin() {
+            if (currentEnteredPin.length > 0) {
+                currentEnteredPin = currentEnteredPin.slice(0, -1);
+                updatePinDots();
+            }
+        }
+
+        function updatePinDots() {
+            for (let i = 0; i < 4; i++) {
+                const dot = document.getElementById('pinDot' + i);
+                if (dot) {
+                    if (i < currentEnteredPin.length) {
+                        dot.className = 'w-4 h-4 rounded-full bg-amber-600 border-2 border-amber-600 transition-all duration-200 shadow-md';
+                    } else {
+                        dot.className = 'w-4 h-4 rounded-full border-2 border-vespa transition-all duration-200';
+                    }
+                }
+            }
+        }
+
+        async function validateModalPin() {
+            document.getElementById('loader').style.display = 'block';
+            try {
+                const res = await fetch('api.php?action=verify_pin', {
+                    headers: { 'X-Vespa-PIN': currentEnteredPin }
+                });
+                if (res.ok) {
+                    sessionStorage.setItem('vespa_pin', currentEnteredPin);
+                    const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
+                    if (!strictLock) {
+                        localStorage.setItem('vespa_pin', currentEnteredPin);
+                    }
+                    closePinModal();
+                    updatePinStatusUI(); initSettingsUI();
+                    showToast('Acceso concedido');
+                    if (typeof pinModalCallback === 'function') {
+                        const cb = pinModalCallback;
+                        pinModalCallback = null;
+                        cb();
+                    }
+                } else {
+                    triggerPinModalShake();
+                }
+            } catch(e) {
+                triggerPinModalShake();
+            }
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function triggerPinModalShake() {
+            const box = document.getElementById('pinBox');
+            if (box) box.classList.add('shake');
+            setTimeout(() => {
+                if (box) box.classList.remove('shake');
+                clearPin();
+            }, 500);
         }
 
         function initSettingsUI() {
@@ -2104,7 +2181,9 @@
                 data.inventario = data.inventario || [];
                 data.bombillas = data.bombillas || [];
                 data.documentos = data.documentos || [];
+                data.stockCasa = data.stockCasa || [];
                 data.homeFuelStock = data.homeFuelStock || 0;
+                data.documentacion = (typeof data.documentacion === 'object' && !Array.isArray(data.documentacion) && data.documentacion !== null) ? data.documentacion : {};
                 
                 data.repostajes.forEach((r, i) => { 
                     if(!r.id) r.id = 'r_' + (Date.now() - i); 
@@ -4579,7 +4658,7 @@
                             <p class="font-black text-slate-800 text-sm font-mono-num mt-0.5">${(data.homeFuelStock || 0).toFixed(1)} <span class="text-xs font-bold text-slate-500">Litros Mezcla 2T</span></p>
                         </div>
                     </div>
-                    <button onclick="openFuelModal(true)" class="text-[10px] font-black bg-white hover:bg-orange-50 text-orange-700 border border-orange-200 px-3 py-1.5 rounded-xl transition-all shadow-xs active:scale-95 shrink-0">
+                    <button onclick="openHomeStockModal()" class="text-[10px] font-black bg-white hover:bg-orange-50 text-orange-700 border border-orange-200 px-3 py-1.5 rounded-xl transition-all shadow-xs active:scale-95 shrink-0">
                         Ajustar
                     </button>
                 </div>
