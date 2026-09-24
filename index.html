@@ -205,6 +205,9 @@
             bottom: 105px;
         }
         
+        body {
+            overscroll-behavior-y: none;
+        }
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: var(--cream); }
@@ -835,7 +838,6 @@
                 <button onclick="togglePinLock()" id="pinStatusBtn" class="bg-slate-100 px-2.5 py-2 rounded-xl hover:bg-slate-200 transition-all text-sm font-bold text-slate-600 flex items-center gap-1.5" title="Estado de Sesión / Bloquear">
                     <i id="pinStatusIcon" class="fas fa-lock text-amber-600"></i>
                 </button>
-                <button onclick="loadData(true)" class="bg-slate-100 p-2 rounded-xl hover:bg-slate-200 transition-all text-slate-600" title="Refrescar datos de la moto"><i class="fas fa-redo-alt"></i></button>
                 <button onclick="showTab('tech')" id="headerSettingsBtn" class="bg-slate-100 p-2 rounded-xl hover:bg-slate-200 transition-all text-slate-600" title="Ajustes & Configuración"><i class="fas fa-cog"></i></button>
             </div>
         </div>
@@ -1915,7 +1917,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v64 • Ajustes en Cabecera & Pull-to-Refresh Táctil</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v65 • Pull-to-Refresh Táctil Ultra-Sensible & Header Limpio</span>
                     </div>
                 </div>
 
@@ -1960,7 +1962,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=64')
+                navigator.serviceWorker.register('/sw.js?v=65')
                     .then(reg => {
                         reg.update();
                     })
@@ -2545,27 +2547,43 @@
             }
         }
 
-        // Soporte de Pull-to-Refresh táctil en móvil
-        let touchStartY = 0;
-        let isPulling = false;
+        // Soporte robusto de Pull-to-Refresh táctil en móvil
+        let pullStartY = 0;
+        let pullMoveY = 0;
+        let isPullingRefresh = false;
 
         window.addEventListener('touchstart', (e) => {
-            if (window.scrollY === 0 && e.touches.length === 1) {
-                touchStartY = e.touches[0].clientY;
-                isPulling = true;
+            const sc = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+            if (sc <= 10 && e.touches.length === 1) {
+                pullStartY = e.touches[0].screenY || e.touches[0].clientY;
+                pullMoveY = pullStartY;
+                isPullingRefresh = true;
             } else {
-                isPulling = false;
+                isPullingRefresh = false;
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isPullingRefresh || !e.touches || e.touches.length === 0) return;
+            pullMoveY = e.touches[0].screenY || e.touches[0].clientY;
+            const dist = pullMoveY - pullStartY;
+            const loader = document.getElementById('loader');
+            if (dist > 30 && loader && loader.style.display !== 'block') {
+                loader.style.display = 'block';
             }
         }, { passive: true });
 
         window.addEventListener('touchend', (e) => {
-            if (!isPulling) return;
-            const touchEndY = e.changedTouches[0].clientY;
-            const distance = touchEndY - touchStartY;
-            if (distance > 75 && window.scrollY === 0) {
+            if (!isPullingRefresh) return;
+            const sc = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+            const dist = pullMoveY - pullStartY;
+            isPullingRefresh = false;
+            if (dist > 50 && sc <= 30) {
                 loadData(true);
+            } else {
+                const loader = document.getElementById('loader');
+                if (loader) loader.style.display = 'none';
             }
-            isPulling = false;
         }, { passive: true });
 
         // --- MAINTENANCES ---
