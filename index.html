@@ -2016,7 +2016,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v58 • Showcase Animado Vespa PK 125 S & Garaje Hero</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v59 • Desbloqueo PIN Robusto & Fallback Universal</span>
                     </div>
                 </div>
 
@@ -2065,7 +2065,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=58')
+                navigator.serviceWorker.register('/sw.js?v=59')
                     .then(reg => {
                         reg.update();
                     })
@@ -2133,29 +2133,49 @@
             try {
                 const res = await fetch('api.php?action=pin_status');
                 const st = await res.json();
-                isPinProtectedOnServer = st.enabled;
+                isPinProtectedOnServer = !!st.enabled;
             } catch(e) {
                 isPinProtectedOnServer = true;
             }
 
             // Si el servidor NO tiene PIN activado, abrir inmediatamente
             if (!isPinProtectedOnServer) {
-                if (lockScreen) lockScreen.style.display = 'none';
+                if (lockScreen) {
+                    lockScreen.style.display = 'none';
+                    lockScreen.style.opacity = '1';
+                }
                 updatePinStatusUI(); initSettingsUI();
                 loadData();
                 return;
             }
 
-            // Si el PIN está activado en el servidor y tenemos el PIN guardado, validar cargando datos
-            if (hasLocalPin()) {
-                if (lockScreen) lockScreen.style.display = 'none';
-                updatePinStatusUI(); initSettingsUI();
-                loadData();
-            } else {
-                if (lockScreen) lockScreen.style.display = 'flex';
-                enteredLockPin = '';
-                updateLockDots();
+            // Si el PIN está activado en el servidor y tenemos el PIN guardado, validar de forma silenciosa
+            const localPin = getStoredPin();
+            if (localPin && localPin.length === 4) {
+                try {
+                    const chkRes = await fetch('api.php?action=verify_pin&pin=' + encodeURIComponent(localPin), {
+                        headers: { 'X-Vespa-PIN': localPin }
+                    });
+                    const chkJson = await chkRes.json().catch(() => ({}));
+                    if (chkRes.ok && chkJson.status === 'success') {
+                        if (lockScreen) {
+                            lockScreen.style.display = 'none';
+                            lockScreen.style.opacity = '1';
+                        }
+                        updatePinStatusUI(); initSettingsUI();
+                        loadData();
+                        return;
+                    }
+                } catch(e) {}
             }
+
+            // Si no es válido o no hay PIN guardado, mostrar pantalla de bloqueo
+            if (lockScreen) {
+                lockScreen.style.display = 'flex';
+                lockScreen.style.opacity = '1';
+            }
+            enteredLockPin = '';
+            updateLockDots();
         }
 
         function pressLockPin(digit) {
@@ -2163,7 +2183,7 @@
                 enteredLockPin += digit;
                 updateLockDots();
                 if (enteredLockPin.length === 4) {
-                    setTimeout(validateLockPin, 150);
+                    setTimeout(validateLockPin, 100);
                 }
             }
         }
@@ -2195,20 +2215,25 @@
 
         async function validateLockPin() {
             document.getElementById('loader').style.display = 'block';
+            const pinToTest = enteredLockPin;
             try {
-                const res = await fetch('api.php?action=verify_pin', {
-                    headers: { 'X-Vespa-PIN': enteredLockPin }
+                const res = await fetch('api.php?action=verify_pin&pin=' + encodeURIComponent(pinToTest), {
+                    headers: { 'X-Vespa-PIN': pinToTest }
                 });
-                if (res.ok) {
-                    sessionStorage.setItem('vespa_pin', enteredLockPin);
+                const resJson = await res.json().catch(() => ({}));
+                if (res.ok && resJson.status === 'success') {
+                    sessionStorage.setItem('vespa_pin', pinToTest);
                     const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
                     if (!strictLock) {
-                        localStorage.setItem('vespa_pin', enteredLockPin);
+                        localStorage.setItem('vespa_pin', pinToTest);
                     }
                     const lockScreen = document.getElementById('appLockScreen');
                     if (lockScreen) {
                         lockScreen.style.opacity = '0';
-                        setTimeout(() => { lockScreen.style.display = 'none'; }, 250);
+                        setTimeout(() => { 
+                            lockScreen.style.display = 'none'; 
+                            lockScreen.style.opacity = '1';
+                        }, 200);
                     }
                     updatePinStatusUI(); initSettingsUI();
                     showToast('Acceso concedido');
@@ -2228,7 +2253,7 @@
             setTimeout(() => {
                 if (box) box.classList.remove('shake');
                 clearLockPin();
-            }, 500);
+            }, 400);
         }
 
         function updatePinStatusUI() {
@@ -2297,7 +2322,7 @@
                 currentEnteredPin += digit;
                 updatePinDots();
                 if (currentEnteredPin.length === 4) {
-                    setTimeout(validateModalPin, 150);
+                    setTimeout(validateModalPin, 100);
                 }
             }
         }
@@ -2329,15 +2354,17 @@
 
         async function validateModalPin() {
             document.getElementById('loader').style.display = 'block';
+            const pinToTest = currentEnteredPin;
             try {
-                const res = await fetch('api.php?action=verify_pin', {
-                    headers: { 'X-Vespa-PIN': currentEnteredPin }
+                const res = await fetch('api.php?action=verify_pin&pin=' + encodeURIComponent(pinToTest), {
+                    headers: { 'X-Vespa-PIN': pinToTest }
                 });
-                if (res.ok) {
-                    sessionStorage.setItem('vespa_pin', currentEnteredPin);
+                const resJson = await res.json().catch(() => ({}));
+                if (res.ok && resJson.status === 'success') {
+                    sessionStorage.setItem('vespa_pin', pinToTest);
                     const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
                     if (!strictLock) {
-                        localStorage.setItem('vespa_pin', currentEnteredPin);
+                        localStorage.setItem('vespa_pin', pinToTest);
                     }
                     closePinModal();
                     updatePinStatusUI(); initSettingsUI();
