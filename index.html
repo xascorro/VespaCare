@@ -853,13 +853,9 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <p id="estRangeDetails" class="text-[10px] font-bold text-slate-400 italic">Cargando datos de telemetría...</p>
-                        <span class="text-[10px] font-black text-orange-500 uppercase">Prox. Bujía: <span id="nextSpark">-</span> km</span>
                     </div>
                 </div>
             </div>
-
-            <!-- BANNER SEGURO & ASISTENCIA EN CARRETERA (GARAJE) -->
-            <div id="garageInsuranceBanner"></div>
 
             <!-- SALUD & ESTADO DE LA MOTO (EN GARAJE) -->
             <div class="card p-4 space-y-3.5 border-l-4 border-emerald-500">
@@ -898,6 +894,9 @@
                         <span class="text-[8px] text-slate-400 font-semibold block mt-0.5">1.25 / 1.80 bar</span>
                     </div>
                 </div>
+
+                <!-- SEGURO & ASISTENCIA EN CARRETERA (INTEGRADO EN SALUD) -->
+                <div id="garageInsuranceBanner"></div>
 
                 <!-- LISTADO DE ALERTAS CRÍTICAS DINÁMICAS (PRE-RODAJE) -->
                 <div id="garageCriticalAlertsList" class="space-y-2"></div>
@@ -1840,7 +1839,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v51 • Corrección Archivos Telegram & Guantera Digital</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v52 • Seguro Integrado en Salud & Autonomía Limpia</span>
                     </div>
                 </div>
 
@@ -1889,7 +1888,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=51')
+                navigator.serviceWorker.register('/sw.js?v=52')
                     .then(reg => {
                         reg.update();
                     })
@@ -3689,7 +3688,7 @@
             }
             
             const spark = data.mantenimientos.find(m => m.id === 'aceite' || m.id === 'bujia');
-            document.getElementById('nextSpark').innerText = spark ? (spark.ultimo + spark.intervalo - data.odometer) : '-';
+            const sparkEl = document.getElementById('nextSpark'); if (sparkEl) sparkEl.innerText = spark ? (spark.ultimo + spark.intervalo - data.odometer) : '-';
 
             // 3. Render Tracker de Presión de Neumáticos (Intervalo 21 días / 3 semanas)
             renderPressureTracker();
@@ -4829,14 +4828,14 @@
             if (!seg.expiry && !seg.entity && !seg.emergencyPhone) {
                 // Tarjeta de configuración rápida si no hay seguro
                 container.innerHTML = `
-                    <div class="card p-3.5 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-slate-50 border border-blue-100 flex items-center justify-between gap-3 cursor-pointer hover:border-blue-300 transition-all" onclick="openDocModal('seguro')">
+                    <div class="p-3 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-slate-50 border border-blue-200/70 rounded-xl flex items-center justify-between gap-3 cursor-pointer hover:border-blue-300 transition-all" onclick="openDocModal('seguro')">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-blue-100/80 text-blue-700 flex items-center justify-center text-sm shadow-xs shrink-0">
+                            <div class="w-8 h-8 rounded-xl bg-blue-100/80 text-blue-700 flex items-center justify-center text-sm shadow-xs shrink-0">
                                 <i class="fas fa-shield-alt"></i>
                             </div>
                             <div>
                                 <div class="flex items-center gap-1.5">
-                                    <h4 class="text-xs font-black text-slate-800">Seguro & Asistencia en Carretera</h4>
+                                    <h4 class="text-xs font-black text-slate-800">Seguro & Asistencia 24h</h4>
                                     <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">Configurar</span>
                                 </div>
                                 <p class="text-[10px] text-slate-500 mt-0.5">Toca para añadir tu póliza y teléfono de asistencia 24h.</p>
@@ -4871,14 +4870,14 @@
             let phoneActionHtml = '';
             if (phone) {
                 phoneActionHtml = `
-                    <a href="tel:${cleanPhone}" class="w-full py-2.5 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all">
+                    <a href="tel:${cleanPhone}" class="w-full py-2 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all">
                         <i class="fas fa-phone-alt animate-bounce text-xs"></i>
                         <span>Llamar Asistencia 24h: <strong class="tracking-wide">${phone}</strong></span>
                     </a>
                 `;
             } else {
                 phoneActionHtml = `
-                    <button onclick="openDocModal('seguro')" class="w-full py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 border border-blue-200/80 transition-all">
+                    <button onclick="openDocModal('seguro')" class="w-full py-1.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 border border-blue-200/80 transition-all">
                         <i class="fas fa-plus-circle text-blue-500"></i> Añadir Teléfono de Asistencia 24h
                     </button>
                 `;
@@ -4890,10 +4889,10 @@
             }
 
             container.innerHTML = `
-                <div class="card p-3.5 bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-slate-50 border border-blue-200/80 shadow-xs space-y-2.5">
+                <div class="p-3 bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-slate-50 border border-blue-200/80 rounded-xl shadow-xs space-y-2">
                     <div class="flex justify-between items-start cursor-pointer" onclick="openDocModal('seguro')">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow-xs shrink-0">
+                            <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow-xs shrink-0">
                                 <i class="fas fa-shield-alt"></i>
                             </div>
                             <div>
@@ -4901,7 +4900,7 @@
                                     <h4 class="text-xs font-black text-slate-800">${entity}</h4>
                                     ${expiryHtml}
                                 </div>
-                                <p class="text-[10px] text-slate-500 font-semibold truncate max-w-[220px]">${notes}</p>
+                                <p class="text-[10px] text-slate-500 font-semibold truncate max-w-[210px]">${notes}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-1">
