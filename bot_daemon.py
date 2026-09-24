@@ -913,10 +913,28 @@ def handle_message(msg):
                 )
                 return
 
-    # 2. GESTIÓN DE FOTOS / TICKETS / DOCUMENTOS
     photos = msg.get("photo")
     document = msg.get("document")
     if photos or document:
+        file_size = (document.get("file_size", 0) if document else (photos[-1].get("file_size", 0) if photos else 0))
+        if file_size > 20 * 1024 * 1024:
+            size_mb = file_size / (1024 * 1024)
+            send_message(
+                f"""⚠️ <b>Archivo grande detectado ({size_mb:.1f} MB)</b>
+
+Telegram no permite a los bots descargar archivos superiores a <b>20 MB</b>.
+
+💡 <b>Solución:</b>
+Sube este manual directamente desde la web:
+👉 <b>Taller / Salud ➔ Guantera Digital ➔ + Añadir</b>
+🌐 <i>https://vespa.pedrodiaz.eu</i>
+
+<i>(El servidor web ya admite archivos de hasta <b>128 MB</b>).</i>""",
+                chat_id,
+                reply_markup=get_status_inline_keyboard()
+            )
+            return
+
         file_id = photos[-1]["file_id"] if photos else document.get("file_id")
         orig_name = document.get("file_name", "ticket.jpg") if document else "foto_vespa.jpg"
         ext = orig_name.split(".")[-1].lower() if "." in orig_name else "jpg"
@@ -924,12 +942,21 @@ def handle_message(msg):
             ext = "jpg"
 
         file_info = get_file_info(file_id)
-        if file_info and "file_path" in file_info:
-            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-            doc_filename = f"doc_{ts}_{int(time.time()%10000)}.{ext}"
-            local_path = os.path.join(DOCS_DIR, doc_filename)
-            
-            if download_telegram_file(file_info["file_path"], local_path):
+        if not file_info or "file_path" not in file_info:
+            send_message(
+                """⚠️ No se ha podido descargar el archivo adjunto desde Telegram.
+
+💡 Puedes subirlo directamente desde la web en <b>Guantera Digital (+ Añadir)</b> en https://vespa.pedrodiaz.eu.""",
+                chat_id,
+                reply_markup=get_status_inline_keyboard()
+            )
+            return
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        doc_filename = f"doc_{ts}_{int(time.time()%10000)}.{ext}"
+        local_path = os.path.join(DOCS_DIR, doc_filename)
+        
+        if download_telegram_file(file_info["file_path"], local_path):
                 # Si viene con texto explicativo (caption), parsearlo
                 if raw_text:
                     if parse_and_execute_user_input(raw_text, chat_id, attached_doc=doc_filename):
