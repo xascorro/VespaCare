@@ -2016,7 +2016,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v59 • Desbloqueo PIN Robusto & Fallback Universal</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v60 • Teclado PIN & Desbloqueo Físico y Táctil</span>
                     </div>
                 </div>
 
@@ -2065,7 +2065,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=59')
+                navigator.serviceWorker.register('/sw.js?v=60')
                     .then(reg => {
                         reg.update();
                     })
@@ -2391,6 +2391,44 @@
                 clearPin();
             }, 500);
         }
+
+        // Soporte global para teclado físico (0-9, Backspace, Escape, C)
+        window.addEventListener('keydown', (e) => {
+            const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+            if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') return;
+
+            const lockScreen = document.getElementById('appLockScreen');
+            const isLockScreenVisible = lockScreen && lockScreen.style.display !== 'none';
+            const pinModal = document.getElementById('pinModal');
+            const isPinModalActive = pinModal && pinModal.classList.contains('active');
+
+            if (isLockScreenVisible) {
+                if (e.key >= '0' && e.key <= '9') {
+                    e.preventDefault();
+                    pressLockPin(e.key);
+                } else if (e.key === 'Backspace') {
+                    e.preventDefault();
+                    backspaceLockPin();
+                } else if (e.key === 'Escape' || e.key.toLowerCase() === 'c') {
+                    e.preventDefault();
+                    clearLockPin();
+                }
+            } else if (isPinModalActive) {
+                if (e.key >= '0' && e.key <= '9') {
+                    e.preventDefault();
+                    pressPin(e.key);
+                } else if (e.key === 'Backspace') {
+                    e.preventDefault();
+                    backspacePin();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closePinModal();
+                } else if (e.key.toLowerCase() === 'c') {
+                    e.preventDefault();
+                    clearPin();
+                }
+            }
+        });
 
         function initSettingsUI() {
             const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
@@ -4337,23 +4375,23 @@
             const entry = data.diario[idx];
             const title = entry.title || 'esta entrada';
             if (!confirm(`⚠️ ¿Deseas eliminar la entrada de bitácora "${title}" (${entry.date}) y sus fotos asociadas?`)) return;
-                // Intentar borrar fotos asociadas
-                if (entry.photos && entry.photos.length > 0) {
-                    for (let p of entry.photos) {
-                        try {
-                            await fetch('api.php?action=delete_doc', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'X-Vespa-PIN': getStoredPin() },
-                                body: JSON.stringify({ filename: p.filename })
-                            });
-                        } catch(e) {}
-                    }
+            
+            // Intentar borrar fotos asociadas
+            if (entry.photos && entry.photos.length > 0) {
+                for (let p of entry.photos) {
+                    try {
+                        await fetch('api.php?action=delete_doc', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-Vespa-PIN': getStoredPin() },
+                            body: JSON.stringify({ filename: p.filename })
+                        });
+                    } catch(e) {}
                 }
-                data.diario.splice(idx, 1);
-                saveData();
-                renderDiario();
-                showToast('Entrada del diario eliminada');
             }
+            data.diario.splice(idx, 1);
+            saveData();
+            renderDiario();
+            showToast('Entrada del diario eliminada');
         }
 
         
