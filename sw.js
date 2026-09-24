@@ -1,9 +1,10 @@
-const CACHE_NAME = "vespacare-v60";
+const CACHE_NAME = "vespacare-v61";
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
-  '/icon.svg'
+  '/icon.svg',
+  '/vespa_anim.gif'
 ];
 
 self.addEventListener('install', (event) => {
