@@ -872,29 +872,6 @@
                     <span id="garageOverallBadge" class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-black uppercase tracking-wider">Todo al día</span>
                 </div>
 
-                <!-- RESUMEN RÁPIDO DE SALUD MECÁNICA -->
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <!-- Bujía -->
-                    <div onclick="showTab('health')" class="p-2.5 bg-slate-50 hover:bg-amber-50/60 rounded-xl border border-slate-100 hover:border-amber-200 cursor-pointer active:scale-95 transition-all">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[9px] font-black uppercase text-slate-400">Bujía NGK</span>
-                            <i class="fas fa-plug text-amber-600 text-xs"></i>
-                        </div>
-                        <p id="garageSparkHealthText" class="font-black text-slate-800 text-sm font-mono-num">- km</p>
-                        <span class="text-[8px] text-slate-400 font-semibold block mt-0.5">Rosca corta B7HS</span>
-                    </div>
-
-                    <!-- Presión Neumáticos -->
-                    <div onclick="openPressureModal('Revisión General de Presiones')" class="p-2.5 bg-slate-50 hover:bg-blue-50/60 rounded-xl border border-slate-100 hover:border-blue-200 cursor-pointer active:scale-95 transition-all">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[9px] font-black uppercase text-slate-400">Presiones</span>
-                            <i class="fas fa-circle-notch text-blue-600 text-xs"></i>
-                        </div>
-                        <p id="garagePressureHealthText" class="font-black text-slate-800 text-sm font-mono-num">-</p>
-                        <span class="text-[8px] text-slate-400 font-semibold block mt-0.5">1.25 / 1.80 bar</span>
-                    </div>
-                </div>
-
                 <!-- LISTADO DE ALERTAS CRÍTICAS DINÁMICAS (PRE-RODAJE) -->
                 <div id="garageCriticalAlertsList" class="space-y-2"></div>
 
@@ -1832,7 +1809,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v54 • Garaje Minimalista & Avisos Preventivos Dinámicos</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v55 • Avisos Preventivos Dinámicos & Taller</span>
                     </div>
                 </div>
 
@@ -1881,7 +1858,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=54')
+                navigator.serviceWorker.register('/sw.js?v=55')
                     .then(reg => {
                         reg.update();
                     })
@@ -4693,6 +4670,7 @@
                 const sTrans = data.odometer - sparkItem.ultimo;
                 const sInterval = sparkItem.intervalo || 2000;
                 const sRest = sInterval - sTrans;
+                const warnLimit = Math.min(300, Math.round(sInterval * 0.2));
                 if (sRest <= 0) {
                     alerts.push({
                         icon: 'fas fa-plug',
@@ -4705,7 +4683,7 @@
                         badge: 'Vencido',
                         badgeCls: 'bg-red-100 text-red-700'
                     });
-                } else if (sRest <= 300) {
+                } else if (sRest <= warnLimit) {
                     alerts.push({
                         icon: 'fas fa-plug',
                         color: 'text-amber-600',
@@ -4726,6 +4704,7 @@
                 if (!m.intervalo || m.intervalo <= 0) return;
                 const trans = data.odometer - m.ultimo;
                 const rest = m.intervalo - trans;
+                const mWarn = Math.min(400, Math.round(m.intervalo * 0.15));
                 if (rest <= 0) {
                     alerts.push({
                         icon: 'fas fa-wrench',
@@ -4738,7 +4717,7 @@
                         badge: 'Mantenimiento',
                         badgeCls: 'bg-red-100 text-red-700'
                     });
-                } else if (rest <= 400) {
+                } else if (rest <= mWarn) {
                     alerts.push({
                         icon: 'fas fa-wrench',
                         color: 'text-amber-600',
@@ -4752,23 +4731,6 @@
                     });
                 }
             });
-
-            // 4. Actualizar indicadores rápidos de Salud en Garaje
-            const sparkEl = document.getElementById('garageSparkHealthText');
-            if (sparkEl && sparkItem) {
-                const sTrans = data.odometer - sparkItem.ultimo;
-                const sRest = Math.max(0, (sparkItem.intervalo || 2000) - sTrans);
-                sparkEl.innerHTML = `<span class="${sRest < 300 ? 'text-red-500 font-bold' : ''}">${sRest} km rest.</span>`;
-            }
-            
-            const pressEl = document.getElementById('garagePressureHealthText');
-            if (pressEl) {
-                if (pDaysLeft <= 0) {
-                    pressEl.innerHTML = `<span class="text-red-500 font-bold">¡Revisar!</span>`;
-                } else {
-                    pressEl.innerHTML = `<span>${pDaysLeft}d rest.</span>`;
-                }
-            }
 
             // 5. Renderizado de la lista de alertas
             if (alerts.length === 0) {
