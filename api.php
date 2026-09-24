@@ -117,13 +117,22 @@ if ($action === 'view_doc') {
     $contentType = $mimeTypes[$ext] ?? 'application/octet-stream';
     $download = !empty($_GET['download']);
 
+    // Nombre amigable para el visor y descarga del navegador
+    $rawTitle = $_GET['title'] ?? $_GET['name'] ?? '';
+    $cleanTitle = !empty($rawTitle) ? trim(preg_replace('/[^a-zA-Z0-9_\-\. ]/', '_', $rawTitle)) : $filename;
+    if (empty($cleanTitle)) $cleanTitle = $filename;
+    if (!str_ends_with(strtolower($cleanTitle), '.' . $ext)) {
+        $cleanTitle .= '.' . $ext;
+    }
+
     header('Content-Type: ' . $contentType);
     header('Content-Length: ' . filesize($filePath));
     if ($download) {
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: attachment; filename="' . $cleanTitle . '"; filename*=UTF-8\'\'' . rawurlencode($cleanTitle));
     } else {
-        header('Content-Disposition: inline; filename="' . $filename . '"');
+        header('Content-Disposition: inline; filename="' . $cleanTitle . '"; filename*=UTF-8\'\'' . rawurlencode($cleanTitle));
     }
+    header('X-Content-Type-Options: nosniff');
     header('Cache-Control: private, max-age=3600');
     readfile($filePath);
     exit;
