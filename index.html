@@ -41,9 +41,27 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .header-bg { 
-            background: var(--vespa-body);
-            background-image: linear-gradient(135deg, var(--vespa-body) 0%, #f1f5f9 100%);
+            background: #ffffff;
+            background-image: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             border-bottom: 4px solid var(--vespa);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .header-bg.header-ok {
+            background: #ffffff;
+            background-image: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-bottom: 4px solid var(--vespa);
+        }
+        .header-bg.header-warning {
+            background: #fffbeb !important;
+            background-image: linear-gradient(135deg, #fffdf5 0%, #fef3c7 100%) !important;
+            border-bottom: 4px solid #f59e0b !important;
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12) !important;
+        }
+        .header-bg.header-alarm {
+            background: #fef2f2 !important;
+            background-image: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%) !important;
+            border-bottom: 4px solid #ef4444 !important;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15) !important;
         }
 
         .card { 
@@ -911,8 +929,8 @@
                     <span id="garageOverallBadge" class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-black uppercase tracking-wider">Todo al día</span>
                 </div>
 
-                <!-- SHOWCASE VINTAGE: ANIMACIÓN VESPA PK 125 S (1984) -->
-                <div id="garageVespaHero" class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-slate-800 shadow-xl p-4 text-white">
+                <!-- SHOWCASE VINTAGE: ANIMACIÓN / VÍDEO VESPA PK 125 S (1984) -->
+                <div id="garageVespaHero" style="display: none;" class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-slate-800 shadow-xl p-4 text-white">
                     <!-- Decoración de fondo -->
                     <div class="absolute -top-10 -right-10 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
                     <div class="absolute -bottom-10 -left-10 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -1896,7 +1914,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v62 • Showcase Cinemático HD Vespa en Marcha</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v63 • Banner Dinámico por Estado & Vídeo 100% OK</span>
                     </div>
                 </div>
 
@@ -1945,7 +1963,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=62')
+                navigator.serviceWorker.register('/sw.js?v=63')
                     .then(reg => {
                         reg.update();
                     })
@@ -4989,26 +5007,42 @@
                 }
             });
 
-            // 5. Renderizado de la lista de alertas
+            // 5. Renderizado de la lista de alertas & Control dinámico de vídeo y color de cabecera
+            const garageVespaHero = document.getElementById('garageVespaHero');
+            const mainHeader = document.getElementById('mainHeader');
+
+            const hasAlarms = alerts.some(a => (a.badgeCls && a.badgeCls.includes('text-red-700')) || (a.color && a.color.includes('text-red-500')));
+            const hasWarnings = alerts.length > 0 && !hasAlarms;
+
+            // Actualizar color dinámico del banner principal de VespaCare / Odómetro
+            if (mainHeader) {
+                mainHeader.classList.remove('header-ok', 'header-warning', 'header-alarm');
+                if (alerts.length === 0) {
+                    mainHeader.classList.add('header-ok');
+                } else if (hasAlarms) {
+                    mainHeader.classList.add('header-alarm');
+                } else {
+                    mainHeader.classList.add('header-warning');
+                }
+            }
+
             if (alerts.length === 0) {
+                // Todo OK: Mostrar vídeo de la moto y badge verde
+                if (garageVespaHero) garageVespaHero.style.display = 'block';
                 if (overallBadge) {
-                    overallBadge.className = 'text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-black uppercase';
+                    overallBadge.className = 'text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full font-black uppercase';
                     overallBadge.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Lista para Rodar';
                 }
-                container.innerHTML = `
-                    <div class="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm">
-                            <i class="fas fa-motorcycle"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="font-bold text-xs text-emerald-950">Vespa PK 125 S al 100%</p>
-                            <p class="text-[10px] text-emerald-800">Presiones, bujía y consumibles dentro de los rangos óptimos.</p>
-                        </div>
-                    </div>
-                `;
+                container.innerHTML = '';
             } else {
+                // Hay avisos o alarmas: Ocultar vídeo para centrar atención en las alertas
+                if (garageVespaHero) garageVespaHero.style.display = 'none';
                 if (overallBadge) {
-                    overallBadge.className = 'text-[9px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-black uppercase animate-pulse';
+                    if (hasAlarms) {
+                        overallBadge.className = 'text-[9px] bg-red-50 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-black uppercase animate-pulse';
+                    } else {
+                        overallBadge.className = 'text-[9px] bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-black uppercase';
+                    }
                     overallBadge.innerHTML = `<i class="fas fa-bell mr-1"></i>${alerts.length} Aviso${alerts.length > 1 ? 's' : ''}`;
                 }
                 container.innerHTML = alerts.map(a => `
