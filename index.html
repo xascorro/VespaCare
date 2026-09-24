@@ -675,6 +675,88 @@
         </div>
     </div>
 
+    <!-- MODAL ENTRADA DIARIO DE A BORDO -->
+    <div id="diarioModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3.5 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center shrink-0">
+                <h3 id="diarioModalTitle" class="text-xl text-slate-800">Nueva Entrada al Diario</h3>
+                <span class="text-[9px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-black uppercase">Bitácora</span>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto space-y-3 text-xs pr-1">
+                <input type="hidden" id="diarioEditId" value="">
+                
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-wider">Título de la Reparación / Nota *</label>
+                    <input type="text" id="diarioTitle" placeholder="Ej: Reparación fuga cuba carburador 19/19" class="font-bold text-xs">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-wider">Categoría</label>
+                        <select id="diarioCategory" class="font-bold text-xs">
+                            <option value="reparacion">🔧 Reparación Mecánica</option>
+                            <option value="mantenimiento">🛢️ Mantenimiento / Revisión</option>
+                            <option value="ajuste">🎛️ Ajuste / Puesta a Punto</option>
+                            <option value="mejora">✨ Mejora / Accesorio</option>
+                            <option value="ruta">🛣️ Ruta / Prueba Carretera</option>
+                            <option value="restauracion">🛵 Restauración / Chasis</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-wider">Kilómetros (Km)</label>
+                        <input type="number" id="diarioKm" step="1" class="font-bold text-xs font-mono-num">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-wider">Fecha & Hora</label>
+                        <input type="datetime-local" id="diarioDate" class="font-bold text-xs">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-wider">Coste (€, opcional)</label>
+                        <input type="number" id="diarioCost" step="0.01" placeholder="0.00" class="font-bold text-xs font-mono-num">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-wider">Notas Técnicas & Detalles</label>
+                    <textarea id="diarioNotes" rows="3" placeholder="Describe qué hiciste, tornillos sustituidos, ajuste de mezcla, sensaciones, etc..." class="font-medium text-xs"></textarea>
+                </div>
+
+                <!-- ADJUNTAR FOTO -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[10px] font-black text-slate-600 uppercase tracking-wider">Foto del Proceso / Reparación</label>
+                        <span class="text-[9px] text-slate-400 font-bold">JPG / PNG / WEBP</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <label class="flex-1 cursor-pointer p-2.5 bg-white border border-dashed border-slate-300 rounded-xl flex items-center justify-center gap-2 text-slate-500 hover:border-amber-500 hover:text-amber-600 transition-colors">
+                            <i class="fas fa-camera text-base text-amber-600"></i>
+                            <span id="diarioPhotoSelectLabel" class="text-[11px] font-bold">Adjuntar foto...</span>
+                            <input type="file" id="diarioPhotoInput" accept="image/*" class="hidden" onchange="onDiarioPhotoSelected(this)">
+                        </label>
+                        <button type="button" id="diarioClearPhotoBtn" onclick="clearDiarioSelectedPhoto()" class="hidden p-2 text-slate-400 hover:text-red-500 transition-colors" title="Quitar foto">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+
+                    <!-- Previsualización de fotos -->
+                    <div id="diarioPhotosPreviewContainer" class="grid grid-cols-3 gap-2 pt-1">
+                        <!-- Miniaturas -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-2 shrink-0">
+                <button onclick="closeDiarioModal()" class="flex-1 p-3 bg-slate-100 rounded-xl font-bold text-slate-500 text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button onclick="submitDiarioEntry()" class="flex-1 btn-primary text-xs shadow-md">Guardar en Diario</button>
+            </div>
+        </div>
+    </div>
+
     <!-- HEADER VINTAGE -->
     <header id="mainHeader" class="header-bg text-slate-800 pt-3 pb-3 px-4 rounded-b-3xl shadow-lg mb-3 relative overflow-hidden transition-all duration-300">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20"></div>
@@ -813,6 +895,34 @@
                 </button>
             </div>
         
+        </section>
+
+        <!-- PESTAÑA: DIARIO DE A BORDO & BITÁCORA DE TALLER -->
+        <section id="tab-diario" class="tab-content space-y-3.5">
+            <div class="flex justify-between items-center px-2">
+                <div>
+                    <h2 class="text-xl text-slate-800">Diario de a Bordo</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Bitácora de Reparaciones, Ajustes & Fotos</p>
+                </div>
+                <button onclick="openDiarioModal()" class="text-[10px] bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1.5">
+                    <i class="fas fa-plus text-amber-400 text-[10px]"></i>+ Entrada
+                </button>
+            </div>
+
+            <!-- BARRA DE FILTROS -->
+            <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+                <button onclick="filterDiario('all')" id="df-all" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-slate-800 text-white shadow-xs shrink-0 diario-filter-btn">Todos (<span id="df-count-all">0</span>)</button>
+                <button onclick="filterDiario('reparacion')" id="df-reparacion" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 diario-filter-btn"><i class="fas fa-wrench text-amber-500 mr-1"></i>Reparaciones (<span id="df-count-reparacion">0</span>)</button>
+                <button onclick="filterDiario('mantenimiento')" id="df-mantenimiento" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 diario-filter-btn"><i class="fas fa-oil-can text-blue-500 mr-1"></i>Mantenimiento (<span id="df-count-mantenimiento">0</span>)</button>
+                <button onclick="filterDiario('ajuste')" id="df-ajuste" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 diario-filter-btn"><i class="fas fa-sliders-h text-purple-500 mr-1"></i>Ajustes (<span id="df-count-ajuste">0</span>)</button>
+                <button onclick="filterDiario('ruta')" id="df-ruta" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 diario-filter-btn"><i class="fas fa-route text-emerald-500 mr-1"></i>Rutas (<span id="df-count-ruta">0</span>)</button>
+                <button onclick="filterDiario('photos')" id="df-photos" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 diario-filter-btn"><i class="fas fa-camera text-orange-500 mr-1"></i>Con Fotos 📷 (<span id="df-count-photos">0</span>)</button>
+            </div>
+
+            <!-- CONTENEDOR DE ENTRADAS DEL DIARIO -->
+            <div id="diarioTimelineContainer" class="space-y-3">
+                <!-- Renderizado dinámico -->
+            </div>
         </section>
 
         <!-- PESTAÑA 2: TALLER & MECÁNICA INTEGRADA -->
@@ -1717,7 +1827,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v47 • Corrección de Incongruencias & Normalización</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v48 • Diario de a Bordo & Bitácora de Taller</span>
                     </div>
                 </div>
 
@@ -1734,27 +1844,31 @@
         </section>
     </main>
 
-    <!-- NAVBAR VINTAGE -->
-    <nav class="fixed bottom-3 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur-xl border border-white/10 p-1.5 flex gap-1 rounded-2xl shadow-2xl z-50 w-[94%] max-w-md">
-        <button onclick="showTab('garage')" id="nav-garage" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all duration-300 nav-active">
-            <i class="fas fa-motorcycle text-lg"></i>
-            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Garaje</span>
+    <!-- NAVBAR VINTAGE (6 PESTAÑAS) -->
+    <nav class="fixed bottom-3 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur-xl border border-white/10 p-1.5 flex gap-1 rounded-2xl shadow-2xl z-50 w-[96%] max-w-lg">
+        <button onclick="showTab('garage')" id="nav-garage" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all duration-300 nav-active">
+            <i class="fas fa-motorcycle text-base"></i>
+            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Garaje</span>
         </button>
-        <button onclick="showTab('health')" id="nav-health" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-tools text-lg"></i>
-            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Taller</span>
+        <button onclick="showTab('diario')" id="nav-diario" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+            <i class="fas fa-book-open text-base"></i>
+            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Diario</span>
         </button>
-        <button onclick="showTab('logs')" id="nav-logs" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-receipt text-lg"></i>
-            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Gastos</span>
+        <button onclick="showTab('health')" id="nav-health" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+            <i class="fas fa-tools text-base"></i>
+            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Taller</span>
         </button>
-        <button onclick="showTab('stats')" id="nav-stats" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-chart-pie text-lg"></i>
-            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Stats</span>
+        <button onclick="showTab('logs')" id="nav-logs" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+            <i class="fas fa-receipt text-base"></i>
+            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Gastos</span>
         </button>
-        <button onclick="showTab('tech')" id="nav-tech" class="flex-1 py-2.5 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-cog text-lg"></i>
-            <span class="text-[8px] font-black mt-1 uppercase tracking-wider">Ajuste</span>
+        <button onclick="showTab('stats')" id="nav-stats" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+            <i class="fas fa-chart-pie text-base"></i>
+            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Stats</span>
+        </button>
+        <button onclick="showTab('tech')" id="nav-tech" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+            <i class="fas fa-cog text-base"></i>
+            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Ajuste</span>
         </button>
     </nav>
 
@@ -1762,7 +1876,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=47')
+                navigator.serviceWorker.register('/sw.js?v=48')
                     .then(reg => {
                         reg.update();
                     })
@@ -2182,6 +2296,7 @@
                 data.bombillas = data.bombillas || [];
                 data.documentos = data.documentos || [];
                 data.stockCasa = data.stockCasa || [];
+                data.diario = data.diario || [];
                 data.homeFuelStock = data.homeFuelStock || 0;
                 data.documentacion = (typeof data.documentacion === 'object' && !Array.isArray(data.documentacion) && data.documentacion !== null) ? data.documentacion : {};
                 
@@ -2323,8 +2438,26 @@
         }
 
         function performMaint(id) {
-            data.mantenimientos.find(x => x.id === id).ultimo = data.odometer;
+            const m = data.mantenimientos.find(x => x.id === id);
+            if (!m) return;
+            m.ultimo = data.odometer;
+
+            // Auto-generar hito en el diario de a bordo
+            data.diario = data.diario || [];
+            data.diario.unshift({
+                id: 'd_maint_' + Date.now(),
+                date: new Date().toISOString().slice(0, 16),
+                km: data.odometer,
+                title: `Mantenimiento: ${m.nombre}`,
+                category: 'mantenimiento',
+                notes: `Revisión / sustitución realizada a los ${data.odometer} km (intervalo: cada ${m.intervalo} km).`,
+                photos: [],
+                cost: 0,
+                autoGenerated: true
+            });
+
             saveData();
+            showToast(`Mantenimiento ${m.nombre} registrado y añadido al diario`);
         }
 
         function updateOdo(val) { 
@@ -2537,6 +2670,21 @@
                 // 'pieza' o 'papeleo'
                 data.inventario.unshift(entry);
                 data.inventario.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                if(!editId && type === 'pieza' && !isLegal) {
+                    data.diario = data.diario || [];
+                    data.diario.unshift({
+                        id: 'd_' + entry.id,
+                        date: entry.date,
+                        km: entry.km,
+                        title: entry.title,
+                        category: 'mantenimiento',
+                        notes: entry.notes || 'Pieza / Mantenimiento registrado',
+                        photos: [],
+                        cost: entry.price,
+                        autoGenerated: true
+                    });
+                }
             }
 
             if(entry.km > data.odometer && type !== 'garrafa_comprar' && !isLegal) data.odometer = entry.km;
@@ -2966,6 +3114,20 @@
             }
 
             if (kmVal > data.odometer) data.odometer = kmVal;
+
+            // Auto-generar hito en el diario de a bordo
+            data.diario = data.diario || [];
+            data.diario.unshift({
+                id: 'd_bulb_' + Date.now(),
+                date: dateVal + 'T12:00',
+                km: kmVal,
+                title: `Sustitución: ${locName}`,
+                category: 'mantenimiento',
+                notes: [typeStr, notesVal].filter(Boolean).join(' • '),
+                photos: [],
+                cost: priceVal,
+                autoGenerated: true
+            });
 
             closeBulbModal();
             renderHomeStock();
@@ -3523,6 +3685,355 @@
             renderGarageCriticalAlerts();
             renderLegalDocs();
             renderHomeStock();
+            renderDiario();
+        }
+
+        // --- DIARIO DE A BORDO & BITÁCORA DE TALLER ---
+        let currentDiarioFilter = 'all';
+        let pendingDiarioPhotoFile = null;
+
+        const DIARIO_CATEGORIES = {
+            'reparacion': { label: 'Reparación', icon: 'fa-wrench', color: 'text-amber-600', badgeClass: 'bg-amber-50 border-amber-200 text-amber-800' },
+            'mantenimiento': { label: 'Mantenimiento', icon: 'fa-oil-can', color: 'text-blue-600', badgeClass: 'bg-blue-50 border-blue-200 text-blue-800' },
+            'ajuste': { label: 'Ajuste / Puesta a Punto', icon: 'fa-sliders-h', color: 'text-purple-600', badgeClass: 'bg-purple-50 border-purple-200 text-purple-800' },
+            'mejora': { label: 'Mejora / Accesorio', icon: 'fa-star', color: 'text-orange-600', badgeClass: 'bg-orange-50 border-orange-200 text-orange-800' },
+            'ruta': { label: 'Ruta / Prueba', icon: 'fa-route', color: 'text-emerald-600', badgeClass: 'bg-emerald-50 border-emerald-200 text-emerald-800' },
+            'restauracion': { label: 'Restauración / Chasis', icon: 'fa-motorcycle', color: 'text-rose-600', badgeClass: 'bg-rose-50 border-rose-200 text-rose-800' }
+        };
+
+        function filterDiario(cat) {
+            currentDiarioFilter = cat;
+            document.querySelectorAll('.diario-filter-btn').forEach(btn => {
+                btn.className = 'px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 diario-filter-btn';
+            });
+            const activeBtn = document.getElementById('df-' + cat);
+            if (activeBtn) {
+                activeBtn.className = 'px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-slate-800 text-white shadow-xs shrink-0 diario-filter-btn';
+            }
+            renderDiario();
+        }
+
+        function renderDiario() {
+            const container = document.getElementById('diarioTimelineContainer');
+            if (!container) return;
+
+            data.diario = data.diario || [];
+            
+            // Actualizar contadores
+            const allCount = data.diario.length;
+            const repCount = data.diario.filter(x => x.category === 'reparacion').length;
+            const mantCount = data.diario.filter(x => x.category === 'mantenimiento').length;
+            const ajCount = data.diario.filter(x => x.category === 'ajuste').length;
+            const rutCount = data.diario.filter(x => x.category === 'ruta').length;
+            const photoCount = data.diario.filter(x => x.photos && x.photos.length > 0).length;
+
+            const cAll = document.getElementById('df-count-all'); if (cAll) cAll.innerText = allCount;
+            const cRep = document.getElementById('df-count-reparacion'); if (cRep) cRep.innerText = repCount;
+            const cMant = document.getElementById('df-count-mantenimiento'); if (cMant) cMant.innerText = mantCount;
+            const cAj = document.getElementById('df-count-ajuste'); if (cAj) cAj.innerText = ajCount;
+            const cRut = document.getElementById('df-count-ruta'); if (cRut) cRut.innerText = rutCount;
+            const cPh = document.getElementById('df-count-photos'); if (cPh) cPh.innerText = photoCount;
+
+            // Filtrar entradas
+            let filtered = [...data.diario];
+            if (currentDiarioFilter === 'photos') {
+                filtered = filtered.filter(x => x.photos && x.photos.length > 0);
+            } else if (currentDiarioFilter !== 'all') {
+                filtered = filtered.filter(x => x.category === currentDiarioFilter);
+            }
+
+            // Ordenar por fecha / km descendente
+            filtered.sort((a, b) => {
+                const dateA = new Date(a.date || 0);
+                const dateB = new Date(b.date || 0);
+                return dateB - dateA;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center space-y-2.5">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto text-xl">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <p class="font-bold text-slate-700 text-sm">Sin entradas en el diario</p>
+                        <p class="text-xs text-slate-400 max-w-xs mx-auto">Registra reparaciones, ajustes en el carburador, puestas a punto y añade fotos del proceso.</p>
+                        <button onclick="openDiarioModal()" class="mt-2 text-xs font-bold bg-slate-900 text-white px-4 py-2 rounded-xl active:scale-95 shadow-xs">
+                            + Añadir Primera Entrada
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => {
+                const catDef = DIARIO_CATEGORIES[item.category] || DIARIO_CATEGORIES['reparacion'];
+                const formattedDate = item.date ? (new Date(item.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })) : 'Fecha no registrada';
+                const costBadge = (item.cost && item.cost > 0) ? `<span class="text-[9px] font-mono-num font-black bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md">${Number(item.cost).toFixed(2)} €</span>` : '';
+                const autoBadge = item.autoGenerated ? `<span class="text-[8px] font-black uppercase bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md" title="Generado automáticamente">Auto</span>` : '';
+                
+                // Renderizar fotos
+                let photosHtml = '';
+                if (item.photos && item.photos.length > 0) {
+                    photosHtml = `
+                        <div class="pt-2">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                ${item.photos.map(p => `
+                                    <div class="relative group cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-slate-100 aspect-video flex items-center justify-center" onclick="openDocViewer('${p.filename}', '${(item.title || 'Foto').replace(/'/g, "\\'")}')">
+                                        <img src="api.php?action=view_doc&file=${encodeURIComponent(p.filename)}&pin=${encodeURIComponent(getStoredPin())}" alt="${p.original_name || 'Foto'}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" onerror="this.parentElement.innerHTML='<div class=\\'p-2 text-[10px] text-slate-400 text-center\\'>Foto guardada en servidor</div>'">
+                                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                                            <i class="fas fa-search-plus text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity drop-shadow"></i>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="card p-4 space-y-2.5 border-l-4 border-slate-700 hover:border-amber-500 transition-all shadow-xs">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md border shadow-2xs flex items-center gap-1 ${catDef.badgeClass}">
+                                    <i class="fas ${catDef.icon} text-[10px]"></i> ${catDef.label}
+                                </span>
+                                <span class="text-[10px] font-mono-num font-black bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200">
+                                    📍 ${item.km || 0} km
+                                </span>
+                                ${costBadge}
+                                ${autoBadge}
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="editDiarioEntry('${item.id}')" class="text-slate-300 hover:text-amber-600 p-1 transition-colors" title="Editar">
+                                    <i class="fas fa-pen text-xs"></i>
+                                </button>
+                                <button onclick="deleteDiarioEntry('${item.id}')" class="text-slate-300 hover:text-red-500 p-1 transition-colors" title="Eliminar">
+                                    <i class="fas fa-trash-alt text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-black text-slate-800 text-sm tracking-tight">${item.title}</h4>
+                            <p class="text-[10px] text-slate-400 font-medium mt-0.5">${formattedDate}</p>
+                        </div>
+
+                        ${item.notes ? `<p class="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50/70 p-2.5 rounded-xl border border-slate-100 whitespace-pre-line">${item.notes}</p>` : ''}
+
+                        ${photosHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openDiarioModal(entryId = null) {
+            document.getElementById('diarioEditId').value = entryId || '';
+            const isEdit = !!entryId;
+            
+            document.getElementById('diarioModalTitle').innerText = isEdit ? 'Editar Entrada del Diario' : 'Nueva Entrada al Diario';
+            document.getElementById('diarioPhotoSelectLabel').innerText = 'Adjuntar foto...';
+            document.getElementById('diarioPhotoInput').value = '';
+            document.getElementById('diarioClearPhotoBtn').classList.add('hidden');
+            pendingDiarioPhotoFile = null;
+
+            const previewContainer = document.getElementById('diarioPhotosPreviewContainer');
+            previewContainer.innerHTML = '';
+
+            if (isEdit) {
+                const entry = (data.diario || []).find(x => x.id === entryId);
+                if (entry) {
+                    document.getElementById('diarioTitle').value = entry.title || '';
+                    document.getElementById('diarioCategory').value = entry.category || 'reparacion';
+                    document.getElementById('diarioKm').value = entry.km !== undefined ? entry.km : data.odometer;
+                    document.getElementById('diarioDate').value = entry.date ? entry.date.slice(0, 16) : '';
+                    document.getElementById('diarioCost').value = (entry.cost !== undefined && entry.cost !== null && entry.cost > 0) ? entry.cost : '';
+                    document.getElementById('diarioNotes').value = entry.notes || '';
+
+                    if (entry.photos && entry.photos.length > 0) {
+                        previewContainer.innerHTML = entry.photos.map((p, idx) => `
+                            <div class="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-video flex items-center justify-center">
+                                <img src="api.php?action=view_doc&file=${encodeURIComponent(p.filename)}&pin=${encodeURIComponent(getStoredPin())}" class="w-full h-full object-cover">
+                                <button type="button" onclick="removeExistingDiarioPhoto('${entry.id}', ${idx})" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] flex items-center justify-center shadow-md hover:bg-red-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } else {
+                document.getElementById('diarioTitle').value = '';
+                document.getElementById('diarioCategory').value = 'reparacion';
+                document.getElementById('diarioKm').value = data.odometer || 0;
+                
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('diarioDate').value = now.toISOString().slice(0, 16);
+                document.getElementById('diarioCost').value = '';
+                document.getElementById('diarioNotes').value = '';
+            }
+
+            document.getElementById('diarioModal').classList.add('active');
+        }
+
+        function closeDiarioModal() {
+            document.getElementById('diarioModal').classList.remove('active');
+            pendingDiarioPhotoFile = null;
+        }
+
+        function onDiarioPhotoSelected(input) {
+            if (input.files && input.files[0]) {
+                pendingDiarioPhotoFile = input.files[0];
+                document.getElementById('diarioPhotoSelectLabel').innerText = pendingDiarioPhotoFile.name;
+                document.getElementById('diarioClearPhotoBtn').classList.remove('hidden');
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewContainer = document.getElementById('diarioPhotosPreviewContainer');
+                    const previewEl = document.createElement('div');
+                    previewEl.id = 'newPhotoPreviewThumb';
+                    previewEl.className = 'relative rounded-xl overflow-hidden border-2 border-amber-500 bg-slate-100 aspect-video';
+                    previewEl.innerHTML = `
+                        <img src="${e.target.result}" class="w-full h-full object-cover">
+                        <span class="absolute bottom-1 left-1 text-[8px] font-black bg-amber-600 text-white px-1.5 py-0.5 rounded-md shadow">NUEVA</span>
+                    `;
+                    const existingNewThumb = document.getElementById('newPhotoPreviewThumb');
+                    if (existingNewThumb) existingNewThumb.remove();
+                    previewContainer.appendChild(previewEl);
+                };
+                reader.readAsDataURL(pendingDiarioPhotoFile);
+            }
+        }
+
+        function clearDiarioSelectedPhoto() {
+            pendingDiarioPhotoFile = null;
+            document.getElementById('diarioPhotoInput').value = '';
+            document.getElementById('diarioPhotoSelectLabel').innerText = 'Adjuntar foto...';
+            document.getElementById('diarioClearPhotoBtn').classList.add('hidden');
+            const newThumb = document.getElementById('newPhotoPreviewThumb');
+            if (newThumb) newThumb.remove();
+        }
+
+        function removeExistingDiarioPhoto(entryId, photoIndex) {
+            const entry = (data.diario || []).find(x => x.id === entryId);
+            if (entry && entry.photos) {
+                entry.photos.splice(photoIndex, 1);
+                openDiarioModal(entryId);
+            }
+        }
+
+        async function submitDiarioEntry() {
+            const editId = document.getElementById('diarioEditId').value;
+            const title = document.getElementById('diarioTitle').value.trim();
+            const cat = document.getElementById('diarioCategory').value;
+            const km = parseFloat(document.getElementById('diarioKm').value) || data.odometer;
+            const date = document.getElementById('diarioDate').value || new Date().toISOString().slice(0, 16);
+            const cost = parseFloat(document.getElementById('diarioCost').value) || 0;
+            const notes = document.getElementById('diarioNotes').value.trim();
+
+            if (!title) {
+                alert("Por favor, introduce un título para la entrada");
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'block';
+            data.diario = data.diario || [];
+
+            try {
+                let newPhotoObj = null;
+
+                // Subir foto si hay un archivo seleccionado
+                if (pendingDiarioPhotoFile) {
+                    const fd = new FormData();
+                    fd.append('file', pendingDiarioPhotoFile);
+                    fd.append('category', 'diario');
+                    const res = await fetch('api.php?action=upload_doc', {
+                        method: 'POST',
+                        headers: { 'X-Vespa-PIN': getStoredPin() },
+                        body: fd
+                    });
+                    const uploadRes = await res.json();
+                    if (uploadRes.status === 'success') {
+                        newPhotoObj = {
+                            filename: uploadRes.filename,
+                            original_name: uploadRes.original_name,
+                            caption: title
+                        };
+                    } else {
+                        alert("Aviso: No se pudo subir la foto (" + (uploadRes.message || 'Error') + "), se guardará solo el texto.");
+                    }
+                }
+
+                if (editId) {
+                    const idx = data.diario.findIndex(x => x.id === editId);
+                    if (idx !== -1) {
+                        data.diario[idx].title = title;
+                        data.diario[idx].category = cat;
+                        data.diario[idx].km = km;
+                        data.diario[idx].date = date;
+                        data.diario[idx].cost = cost;
+                        data.diario[idx].notes = notes;
+                        if (newPhotoObj) {
+                            data.diario[idx].photos = data.diario[idx].photos || [];
+                            data.diario[idx].photos.push(newPhotoObj);
+                        }
+                    }
+                } else {
+                    const photosList = newPhotoObj ? [newPhotoObj] : [];
+                    data.diario.unshift({
+                        id: 'd_' + Date.now(),
+                        date: date,
+                        km: km,
+                        title: title,
+                        category: cat,
+                        notes: notes,
+                        photos: photosList,
+                        cost: cost,
+                        autoGenerated: false
+                    });
+                }
+
+                // Actualizar odómetro si el km de la reparación es superior
+                if (km > data.odometer) {
+                    data.odometer = km;
+                }
+
+                closeDiarioModal();
+                saveData();
+                renderDiario();
+                showToast(editId ? 'Entrada actualizada' : 'Entrada guardada en el diario');
+            } catch(e) {
+                alert("Error al guardar entrada de diario: " + e.message);
+            }
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function editDiarioEntry(id) {
+            openDiarioModal(id);
+        }
+
+        async function deleteDiarioEntry(id) {
+            if (!confirm('¿Deseas eliminar esta entrada del diario?')) return;
+            data.diario = data.diario || [];
+            const idx = data.diario.findIndex(x => x.id === id);
+            if (idx !== -1) {
+                const entry = data.diario[idx];
+                // Intentar borrar fotos asociadas
+                if (entry.photos && entry.photos.length > 0) {
+                    for (let p of entry.photos) {
+                        try {
+                            await fetch('api.php?action=delete_doc', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-Vespa-PIN': getStoredPin() },
+                                body: JSON.stringify({ filename: p.filename })
+                            });
+                        } catch(e) {}
+                    }
+                }
+                data.diario.splice(idx, 1);
+                saveData();
+                renderDiario();
+                showToast('Entrada del diario eliminada');
+            }
         }
 
         
