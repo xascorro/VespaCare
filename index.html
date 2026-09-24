@@ -302,7 +302,46 @@
         </div>
     </div>
 
-        <!-- MODAL REGISTRO DOCUMENTACIÓN (ITV & SEGURO) -->
+    <!-- MODAL REVERSIÓN / AJUSTE DE ODÓMETRO A LA BAJA -->
+    <div id="odoRollbackModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3.5 border-l-4 border-amber-500">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-sm shadow-xs">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Ajuste de Odómetro</h3>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">Corrección de kilometraje a la baja</p>
+                    </div>
+                </div>
+                <span class="text-[8px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-black uppercase">Revisión</span>
+            </div>
+
+            <div class="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl space-y-2 text-xs">
+                <p class="text-slate-700 font-semibold leading-relaxed">
+                    Has introducido <b id="odoRollbackNewVal" class="text-amber-900 font-mono-num font-black">0 km</b>, que es inferior al odómetro actual (<span id="odoRollbackOldVal" class="font-mono-num font-bold">0 km</span>).
+                </p>
+                <div id="odoRollbackRecordsWarning" class="p-2.5 bg-white/90 rounded-lg border border-amber-200 text-[10px] space-y-1 text-slate-600">
+                    <!-- Se listan los registros superiores -->
+                </div>
+            </div>
+
+            <div class="space-y-2 pt-1">
+                <button onclick="confirmOdoRollback(true)" class="w-full py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all">
+                    <i class="fas fa-broom text-[10px]"></i> Ajustar a <span id="odoRollbackBtnKm">0</span> km y Limpiar Posteriores
+                </button>
+                <button onclick="confirmOdoRollback(false)" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
+                    <i class="fas fa-pen text-[10px]"></i> Solo Cambiar Odómetro (Conservar Todo)
+                </button>
+                <button onclick="cancelOdoRollback()" class="w-full py-2 text-slate-400 hover:text-slate-600 font-bold text-xs transition-colors">
+                    Cancelar y Mantener <span id="odoRollbackCancelKm">0</span> km
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRO DOCUMENTACIÓN (ITV & SEGURO) -->
     <div id="docModal" class="modal">
         <div class="card p-5 w-full max-w-sm space-y-3.5">
             <div class="flex justify-between items-center">
@@ -1809,7 +1848,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v56 • Garaje Limpio & Intervalos de Taller Calibrados</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v57 • Rollback Seguro de Odómetro & Confirmaciones Reforzadas</span>
                     </div>
                 </div>
 
@@ -1858,7 +1897,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=56')
+                navigator.serviceWorker.register('/sw.js?v=57')
                     .then(reg => {
                         reg.update();
                     })
@@ -2413,10 +2452,12 @@
         }
 
         function deleteMaint(id) {
-            if(confirm('¿Eliminar esta pieza?')) {
-                data.mantenimientos = data.mantenimientos.filter(x => x.id !== id);
-                saveData();
-            }
+            const m = (data.mantenimientos || []).find(x => x.id === id);
+            const name = m ? m.nombre : 'esta pieza';
+            if (!confirm(`⚠️ ¿Estás seguro de que deseas eliminar la pieza "${name}" del plan de mantenimiento?`)) return;
+            data.mantenimientos = (data.mantenimientos || []).filter(x => x.id !== id);
+            saveData();
+            showToast(`Pieza "${name}" eliminada`);
         }
 
         function performMaint(id) {
@@ -2442,9 +2483,105 @@
             showToast(`Mantenimiento ${m.nombre} registrado y añadido al diario`);
         }
 
-        function updateOdo(val) { 
-            data.odometer = parseFloat(val) || 0; 
-            saveData(); 
+        let pendingOdoRollback = null;
+
+        function updateOdo(val) {
+            const newKm = parseFloat(val);
+            const oldKm = data.odometer || 0;
+
+            if (isNaN(newKm) || newKm < 0) {
+                document.getElementById('mainOdo').value = oldKm;
+                return;
+            }
+
+            if (newKm === oldKm) return;
+
+            if (newKm < oldKm) {
+                // Comprobar si hay registros por encima del nuevo kilometraje
+                const repostajesAbove = (data.repostajes || []).filter(r => (r.km || 0) > newKm);
+                const gastosAbove = (data.inventario || []).filter(i => (i.km || 0) > newKm && i.logType !== 'papeleo');
+                const maintAbove = (data.mantenimientos || []).filter(m => (m.ultimo || 0) > newKm);
+                const bulbAbove = (data.bombillas || []).filter(b => (b.km || 0) > newKm);
+                const diarioAbove = (data.diario || []).filter(d => (d.km || 0) > newKm);
+
+                const totalAbove = repostajesAbove.length + gastosAbove.length + maintAbove.length + bulbAbove.length + diarioAbove.length;
+
+                pendingOdoRollback = {
+                    oldKm,
+                    newKm,
+                    repostajesAbove,
+                    gastosAbove,
+                    maintAbove,
+                    bulbAbove,
+                    diarioAbove,
+                    totalAbove
+                };
+
+                document.getElementById('odoRollbackOldVal').innerText = `${oldKm} km`;
+                document.getElementById('odoRollbackNewVal').innerText = `${newKm} km`;
+                document.getElementById('odoRollbackBtnKm').innerText = `${newKm}`;
+                document.getElementById('odoRollbackCancelKm').innerText = `${oldKm}`;
+
+                const warnBox = document.getElementById('odoRollbackRecordsWarning');
+                if (totalAbove > 0) {
+                    let details = [];
+                    if (repostajesAbove.length) details.push(`⛽ ${repostajesAbove.length} repostaje${repostajesAbove.length > 1 ? 's' : ''}`);
+                    if (gastosAbove.length) details.push(`🧾 ${gastosAbove.length} gasto${gastosAbove.length > 1 ? 's' : ''}`);
+                    if (maintAbove.length) details.push(`🔧 ${maintAbove.length} mantenimiento${maintAbove.length > 1 ? 's' : ''}`);
+                    if (bulbAbove.length) details.push(`💡 ${bulbAbove.length} sustitución${bulbAbove.length > 1 ? 'es' : ''}`);
+                    if (diarioAbove.length) details.push(`📖 ${diarioAbove.length} entrada${diarioAbove.length > 1 ? 's' : ''} de diario`);
+
+                    warnBox.innerHTML = `
+                        <p class="font-bold text-amber-900">⚠️ Se encontraron ${totalAbove} registro${totalAbove > 1 ? 's' : ''} con km > ${newKm}:</p>
+                        <p class="text-slate-600">${details.join(' • ')}</p>
+                        <p class="text-[9px] text-slate-500 italic mt-1">Limpiar estos registros elimina anomalías y restaura la coherencia de la autonomía y telemetría.</p>
+                    `;
+                } else {
+                    warnBox.innerHTML = `
+                        <p class="font-bold text-emerald-800">✅ No hay registros registrados con km superior a ${newKm} km.</p>
+                    `;
+                }
+
+                document.getElementById('odoRollbackModal').classList.add('active');
+                return;
+            }
+
+            // Si newKm > oldKm: actualización directa normal
+            data.odometer = newKm;
+            saveData();
+            showToast(`Odómetro actualizado a ${newKm} km`);
+        }
+
+        function confirmOdoRollback(cleanRecords = false) {
+            if (!pendingOdoRollback) return;
+            const { newKm, totalAbove } = pendingOdoRollback;
+
+            if (cleanRecords && totalAbove > 0) {
+                // Limpiar registros superiores
+                if (data.repostajes) data.repostajes = data.repostajes.filter(r => (r.km || 0) <= newKm);
+                if (data.inventario) data.inventario = data.inventario.filter(i => (i.km || 0) <= newKm || i.logType === 'papeleo');
+                if (data.bombillas) data.bombillas = data.bombillas.filter(b => (b.km || 0) <= newKm);
+                if (data.diario) data.diario = data.diario.filter(d => (d.km || 0) <= newKm);
+                if (data.mantenimientos) {
+                    data.mantenimientos.forEach(m => {
+                        if ((m.ultimo || 0) > newKm) m.ultimo = newKm;
+                    });
+                }
+            }
+
+            data.odometer = newKm;
+            document.getElementById('odoRollbackModal').classList.remove('active');
+            pendingOdoRollback = null;
+            saveData();
+            showToast(cleanRecords ? `Odómetro ajustado a ${newKm} km y registros superiores limpiados` : `Odómetro cambiado a ${newKm} km`);
+        }
+
+        function cancelOdoRollback() {
+            if (pendingOdoRollback) {
+                document.getElementById('mainOdo').value = pendingOdoRollback.oldKm;
+            }
+            document.getElementById('odoRollbackModal').classList.remove('active');
+            pendingOdoRollback = null;
         }
 
         // --- CALCULADORA DE MEZCLA ---
@@ -2594,16 +2731,19 @@
         }
 
         function deleteLog(id, listName) {
-            if(!confirm('¿Eliminar este registro?')) return;
             const list = data[listName];
             if (!list) return;
             const idx = list.findIndex(x => x.id === id);
-            if(idx === -1) return;
+            if (idx === -1) return;
             const entry = list[idx];
-            if(entry.logType === 'garrafa_comprar') data.homeFuelStock -= (entry.litros || 0);
-            if(entry.logType === 'garrafa_repostar') data.homeFuelStock += (entry.litros || 0);
+            const title = entry.title || (entry.logType === 'combustible' ? `Repostaje ${entry.litros || ''}L` : 'este registro');
+            const priceTxt = (entry.price !== undefined && entry.price > 0) ? ` (${entry.price.toFixed(2)}€)` : '';
+            if (!confirm(`⚠️ ¿Deseas eliminar el registro "${title}"${priceTxt}?\n\nEsta acción no se puede deshacer.`)) return;
+            if (entry.logType === 'garrafa_comprar') data.homeFuelStock = Math.max(0, (data.homeFuelStock || 0) - (entry.litros || 0));
+            if (entry.logType === 'garrafa_repostar') data.homeFuelStock = (data.homeFuelStock || 0) + (entry.litros || 0);
             list.splice(idx, 1);
             saveData();
+            showToast(`Registro "${title}" eliminado`);
         }
 
         function addLog() {
@@ -3126,10 +3266,12 @@
         }
 
         function deleteBulb(id) {
-            if (confirm('¿Eliminar este registro de sustitución?')) {
-                data.bombillas = data.bombillas.filter(b => b.id !== id && (b.type + b.date + b.km) !== id);
-                saveData();
-            }
+            const bulb = (data.bombillas || []).find(b => b.id === id || (b.type + b.date + b.km) === id);
+            const name = bulb ? `${bulb.type} (${bulb.date})` : 'este registro';
+            if (!confirm(`⚠️ ¿Deseas eliminar el registro de sustitución "${name}"?`)) return;
+            data.bombillas = (data.bombillas || []).filter(b => b.id !== id && (b.type + b.date + b.km) !== id);
+            saveData();
+            showToast(`Registro de sustitución eliminado`);
         }
 
         // --- BACKUP ACTIONS ---
@@ -3994,11 +4136,12 @@
         }
 
         async function deleteDiarioEntry(id) {
-            if (!confirm('¿Deseas eliminar esta entrada del diario?')) return;
             data.diario = data.diario || [];
             const idx = data.diario.findIndex(x => x.id === id);
-            if (idx !== -1) {
-                const entry = data.diario[idx];
+            if (idx === -1) return;
+            const entry = data.diario[idx];
+            const title = entry.title || 'esta entrada';
+            if (!confirm(`⚠️ ¿Deseas eliminar la entrada de bitácora "${title}" (${entry.date}) y sus fotos asociadas?`)) return;
                 // Intentar borrar fotos asociadas
                 if (entry.photos && entry.photos.length > 0) {
                     for (let p of entry.photos) {
@@ -4114,7 +4257,8 @@
         }
 
         async function deleteCurrentDocFile() {
-            if (!confirm("¿Deseas eliminar este documento adjunto?")) return;
+            const docType = currentEditingDocType || 'trámite';
+            if (!confirm(`⚠️ ¿Deseas eliminar el archivo adjunto actual de este trámite (${docType.toUpperCase()})?`)) return;
             data.documentacion = data.documentacion || {};
             const docInfo = data.documentacion[currentEditingDocType];
             if (docInfo && docInfo.file) {
@@ -4130,8 +4274,8 @@
                 document.getElementById('docCurrentFileContainer').classList.add('hidden');
                 saveData();
                 renderLegalDocs();
-            renderHomeStock();
-                showToast('Archivo eliminado');
+                renderHomeStock();
+                showToast('Archivo adjunto eliminado');
             }
         }
 
@@ -4277,7 +4421,7 @@
                     closeGeneralDocModal();
                     saveData();
                     renderLegalDocs();
-            renderHomeStock();
+                    renderHomeStock();
                     showToast('Documento añadido a la guantera');
                 } else {
                     alert("Error: " + (uploadRes.message || 'No se pudo subir'));
@@ -4289,26 +4433,26 @@
         }
 
         async function deleteGeneralDoc(docId) {
-            if (!confirm("¿Deseas eliminar este documento?")) return;
             data.documentos = data.documentos || [];
             const idx = data.documentos.findIndex(d => d.id === docId);
-            if (idx !== -1) {
-                const doc = data.documentos[idx];
-                if (doc.filename) {
-                    try {
-                        await fetch('api.php?action=delete_doc', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'X-Vespa-PIN': getStoredPin() },
-                            body: JSON.stringify({ filename: doc.filename })
-                        });
-                    } catch(e) {}
-                }
-                data.documentos.splice(idx, 1);
-                saveData();
-                renderLegalDocs();
-            renderHomeStock();
-                showToast('Documento eliminado');
+            if (idx === -1) return;
+            const doc = data.documentos[idx];
+            const title = doc.title || doc.filename || 'este documento';
+            if (!confirm(`⚠️ ¿Deseas eliminar el documento "${title}" de la guantera digital?`)) return;
+            if (doc.filename) {
+                try {
+                    await fetch('api.php?action=delete_doc', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Vespa-PIN': getStoredPin() },
+                        body: JSON.stringify({ filename: doc.filename })
+                    });
+                } catch(e) {}
             }
+            data.documentos.splice(idx, 1);
+            saveData();
+            renderLegalDocs();
+            renderHomeStock();
+            showToast(`Documento "${title}" eliminado`);
         }
 
         // --- VISOR DE DOCUMENTOS SEGURO ---
@@ -4882,12 +5026,14 @@
         }
 
         function deleteStockItem(itemId) {
-            if (!confirm("¿Deseas eliminar este artículo de la estantería?")) return;
+            const item = getHomeStockList().find(x => x.id === itemId);
+            const name = item ? item.name : 'este artículo';
+            if (!confirm(`⚠️ ¿Deseas eliminar el recambio "${name}" de la estantería de taller?`)) return;
             data.stockCasa = getHomeStockList().filter(x => x.id !== itemId);
             renderHomeStock();
             renderHomeStockModalList();
             saveData();
-            showToast('Artículo eliminado de la estantería');
+            showToast(`"${name}" eliminado de la estantería`);
         }
 
         function addNewStockItem() {

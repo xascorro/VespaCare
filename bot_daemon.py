@@ -446,14 +446,40 @@ def parse_and_execute_user_input(text, chat_id, attached_doc=None):
     km_match = re.search(r'(?:^/km|^km|^actualizar\s*km|odometro)\s*[:=]?\s*(\d+)', lower)
     if km_match:
         new_km = int(km_match.group(1))
-        data["odometer"] = new_km
-        save_data(data)
-        send_message(
-            f"✅ <b>Cuentakilómetros actualizado:</b> <code>{new_km} km</code>\n\nSincronizado con la PWA.",
-            chat_id,
-            reply_markup=get_status_inline_keyboard()
-        )
-        return True
+        old_km = int(data.get("odometer", 0))
+        if new_km < old_km:
+            reps_above = len([r for r in data.get("repostajes", []) if (r.get("km") or 0) > new_km])
+            inv_above = len([i for i in data.get("inventario", []) if (i.get("km") or 0) > new_km and i.get("logType") != "papeleo"])
+            total_above = reps_above + inv_above
+
+            warning_txt = f"⚠️ <b>Aviso: Reducción de Odómetro</b>\n\nEl nuevo kilometraje (<code>{new_km} km</code>) es inferior al actual (<code>{old_km} km</code>)."
+            if total_above > 0:
+                warning_txt += f"\n\nSe han detectado <b>{total_above} registros</b> con kilometraje superior a {new_km} km.\n¿Deseas ajustar el odómetro y limpiar los registros posteriores para mantener la coherencia?"
+            else:
+                warning_txt += "\n\n¿Confirmas el cambio de odómetro?"
+
+            keyboard = {
+                "inline_keyboard": [
+                    [
+                        {"text": f"🧹 Ajustar {new_km}km y Limpiar", "callback_data": f"odo_clean_{new_km}"},
+                        {"text": f"⚡ Solo {new_km}km", "callback_data": f"odo_only_{new_km}"}
+                    ],
+                    [
+                        {"text": "❌ Cancelar", "callback_data": "odo_cancel"}
+                    ]
+                ]
+            }
+            send_message(warning_txt, chat_id, reply_markup=keyboard)
+            return True
+        else:
+            data["odometer"] = new_km
+            save_data(data)
+            send_message(
+                f"✅ <b>Cuentakilómetros actualizado:</b> <code>{new_km} km</code>\n\nSincronizado con la PWA.",
+                chat_id,
+                reply_markup=get_status_inline_keyboard()
+            )
+            return True
 
     # 2. ACTUALIZAR GARRAFA / STOCK GASOLINA (/garrafa 5L o /stockgasolina 5)
     garrafa_match = re.search(r'(?:^/garrafa|^garrafa|^gasolina garaje|^stock gasolina)\s*[:=]?\s*([\d\.,]+)\s*l?', lower)
@@ -877,6 +903,57 @@ def handle_callback_query(cq):
             msg_id,
             reply_markup=get_status_inline_keyboard()
         )
+        return
+
+    if data_cb.startswith("odo_clean_"):
+        new_km = int(data_cb.split("_")[-1])
+        data = load_data()
+        data["odometer"] = new_km
+        if "repostajes" in data:
+            data["repostajes"] = [r for r in data["repostajes"] if (r.get("km") or 0) <= new_km]
+        if "inventario" in data:
+            data["inventario"] = [i for i in data["inventario"] if (i.get("km") or 0) <= new_km or i.get("logType") == "papeleo"]
+        if "diario" in data:
+            data["diario"] = [d for d in data["diario"] if (d.get("km") or 0) <= new_km]
+        if "bombillas" in data:
+            data["bombillas"] = [b for b in data["bombillas"] if (b.get("km") or 0) <= new_km]
+        if "mantenimientos" in data:
+            for m in data["mantenimientos"]:
+                if (m.get("ultimo") or 0) > new_km:
+                    m["ultimo"] = new_km
+        save_data(data)
+        answer_callback_query(cq_id, "Odómetro y registros actualizados")
+        edit_message_text(
+            f"✅ <b>Odómetro ajustado:</b> <code>{new_km} km</code>\n🧹 Se han limpiado los registros con km superior para restaurar la coherencia.",
+            chat_id,
+            msg_id,
+            reply_markup=get_status_inline_keyboard()
+        )
+        return
+
+    if data_cb.startswith("odo_only_"):
+        new_km = int(data_cb.split("_")[-1])
+        data = load_data()
+        data["odometer"] = new_km
+        save_data(data)
+        answer_callback_query(cq_id, f"Odómetro cambiado a {new_km} km")
+        edit_message_text(
+            f"✅ <b>Odómetro cambiado a:</b> <code>{new_km} km</code>\n(Registros existentes conservados).",
+            chat_id,
+            msg_id,
+            reply_markup=get_status_inline_keyboard()
+        )
+        return
+
+    if data_cb == "odo_cancel":
+        answer_callback_query(cq_id, "Operación cancelada")
+        edit_message_text(
+            "❌ <b>Ajuste de odómetro cancelado.</b> Se mantiene el kilometraje actual.",
+            chat_id,
+            msg_id,
+            reply_markup=get_status_inline_keyboard()
+        )
+        return
 
 def handle_message(msg):
     chat_id = msg.get("chat", {}).get("id")
