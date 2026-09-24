@@ -130,6 +130,11 @@ def build_status_report(data):
         except:
             seguro_txt = seguro["expiry"]
 
+    seg_entity = seguro.get("entity", "")
+    seg_phone = seguro.get("emergencyPhone", "")
+    seg_detail = f" ({seg_entity})" if seg_entity else ""
+    phone_line = f"\n• 📞 <b>Asistencia 24h:</b> <code>{seg_phone}</code>" if seg_phone else ""
+
     msg = f"""🛵 <b>VespaCare — Estado General</b>
 🏛️ <i>Homelands Labs by Pedro Díaz</i>
 ━━━━━━━━━━━━━━━━━━
@@ -138,9 +143,9 @@ def build_status_report(data):
 🏠 <b>Garrafa en Casa:</b> <code>{fuel_stock:.1f} L</code>
 🔌 <b>Próx. Bujía (NGK B7HS):</b> <code>{spark_txt}</code>
 
-📋 <b>Control Legal:</b>
+📋 <b>Control Legal & Asistencia:</b>
 • <b>ITV:</b> <code>{itv_txt}</code>
-• <b>Seguro:</b> <code>{seguro_txt}</code>
+• <b>Seguro:</b> <code>{seguro_txt}</code>{seg_detail}{phone_line}
 ━━━━━━━━━━━━━━━━━━
 🔗 <a href="https://vespa.pedrodiaz.eu">Abrir VespaCare PWA</a>"""
     return msg

@@ -339,7 +339,14 @@
                 </div>
                 <div>
                     <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Nº Póliza / Notas</label>
-                    <input type="text" id="docNotes" placeholder="Detalles, cobertura, etc.">
+                    <input type="text" id="docNotes" placeholder="Detalles, número de póliza, cobertura...">
+                </div>
+                <div id="docEmergencyPhoneContainer" class="p-2.5 bg-blue-50/80 rounded-xl border border-blue-200/80 space-y-1">
+                    <label class="text-[10px] font-black text-blue-900 uppercase ml-1 tracking-widest flex items-center gap-1.5">
+                        <i class="fas fa-phone-alt text-blue-600"></i> Teléfono Asistencia 24h / Emergencias
+                    </label>
+                    <input type="tel" id="docEmergencyPhone" placeholder="Ej: 900 123 456 / 91 555 55 55" class="font-bold text-slate-800 font-mono-num bg-white">
+                    <p class="text-[9px] text-blue-700/80 ml-1">Aparecerá con llamada directa en el panel principal para emergencias en ruta.</p>
                 </div>
                 <div>
                     <label class="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-widest">Documento Adjunto (PDF o Foto)</label>
@@ -847,6 +854,9 @@
                     </div>
                 </div>
             </div>
+
+            <!-- BANNER SEGURO & ASISTENCIA EN CARRETERA (GARAJE) -->
+            <div id="garageInsuranceBanner"></div>
 
             <!-- SALUD & ESTADO DE LA MOTO (EN GARAJE) -->
             <div class="card p-4 space-y-3.5 border-l-4 border-emerald-500">
@@ -1827,7 +1837,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v48 • Diario de a Bordo & Bitácora de Taller</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v49 • Teléfono de Asistencia 24h & Seguro en Garaje</span>
                     </div>
                 </div>
 
@@ -1876,7 +1886,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=48')
+                navigator.serviceWorker.register('/sw.js?v=49')
                     .then(reg => {
                         reg.update();
                     })
@@ -3681,8 +3691,9 @@
             // 3. Render Tracker de Presión de Neumáticos (Intervalo 21 días / 3 semanas)
             renderPressureTracker();
 
-            // 4. Render Checklist / Alertas Críticas en Garaje
+            // 4. Render Checklist / Alertas Críticas & Seguro en Garaje
             renderGarageCriticalAlerts();
+            renderGarageInsuranceBanner();
             renderLegalDocs();
             renderHomeStock();
             renderDiario();
@@ -4055,6 +4066,7 @@
             document.getElementById('docPrice').value = docInfo.price || '';
             document.getElementById('docEntity').value = docInfo.entity || '';
             document.getElementById('docNotes').value = docInfo.notes || '';
+            document.getElementById('docEmergencyPhone').value = docInfo.emergencyPhone || (docType === 'seguro' && data.documentacion.seguro ? data.documentacion.seguro.emergencyPhone : '') || '';
             document.getElementById('docAddExpense').checked = false;
             
             clearDocFileSelection();
@@ -4086,8 +4098,16 @@
             document.getElementById('docExpiryDateLabel').innerText = isItv ? "Vencimiento ITV" : "Vencimiento Seguro";
             document.getElementById('docEntity').placeholder = isItv ? "Ej: ITV Alhama, Applus..." : "Ej: Mapfre, Allianz, Verti...";
             
+            const phoneContainer = document.getElementById('docEmergencyPhoneContainer');
+            if (phoneContainer) {
+                phoneContainer.classList.toggle('hidden', isItv);
+            }
+
             data.documentacion = data.documentacion || {};
             const docInfo = data.documentacion[val] || {};
+            if (!isItv && docInfo.emergencyPhone) {
+                document.getElementById('docEmergencyPhone').value = docInfo.emergencyPhone;
+            }
             const curFileCont = document.getElementById('docCurrentFileContainer');
             const curFileName = document.getElementById('docCurrentFileName');
             if (docInfo.file) {
@@ -4167,6 +4187,10 @@
             data.documentacion[type].price = price;
             data.documentacion[type].entity = entity;
             data.documentacion[type].notes = notes;
+            if (type === 'seguro') {
+                const phoneInput = document.getElementById('docEmergencyPhone');
+                data.documentacion[type].emergencyPhone = phoneInput ? phoneInput.value.trim() : '';
+            }
             data.documentacion[type].lastUpdated = new Date().toISOString().slice(0, 10);
 
             // Subir archivo si fue seleccionado
@@ -4413,7 +4437,11 @@
                 const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
                 segDateEl.innerText = `Vence: ${segInfo.expiry}`;
                 if (segPeriodEl) {
-                    segPeriodEl.innerText = segInfo.issueDate ? `Inicio: ${segInfo.issueDate}` : '';
+                    const extraParts = [];
+                    if (segInfo.entity) extraParts.push(segInfo.entity);
+                    if (segInfo.emergencyPhone) extraParts.push(`📞 ${segInfo.emergencyPhone}`);
+                    else if (segInfo.issueDate) extraParts.push(`Inicio: ${segInfo.issueDate}`);
+                    segPeriodEl.innerText = extraParts.join(' • ');
                 }
 
                 if (diffDays < 0) {
@@ -4763,6 +4791,105 @@
                     </div>
                 `).join('');
             }
+        }
+
+        function renderGarageInsuranceBanner() {
+            const container = document.getElementById('garageInsuranceBanner');
+            if (!container) return;
+
+            data.documentacion = data.documentacion || {};
+            const seg = data.documentacion.seguro || {};
+            const now = new Date();
+            now.setHours(0,0,0,0);
+
+            if (!seg.expiry && !seg.entity && !seg.emergencyPhone) {
+                // Tarjeta de configuración rápida si no hay seguro
+                container.innerHTML = `
+                    <div class="card p-3.5 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-slate-50 border border-blue-100 flex items-center justify-between gap-3 cursor-pointer hover:border-blue-300 transition-all" onclick="openDocModal('seguro')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-blue-100/80 text-blue-700 flex items-center justify-center text-sm shadow-xs shrink-0">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <h4 class="text-xs font-black text-slate-800">Seguro & Asistencia en Carretera</h4>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">Configurar</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-0.5">Toca para añadir tu póliza y teléfono de asistencia 24h.</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-400 text-xs shrink-0"></i>
+                    </div>
+                `;
+                return;
+            }
+
+            // Indicador de vencimiento
+            let expiryHtml = '';
+            if (seg.expiry) {
+                const exp = new Date(seg.expiry);
+                exp.setHours(0,0,0,0);
+                const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+                if (diffDays < 0) {
+                    expiryHtml = `<span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-red-100 text-red-700 animate-pulse">¡Caducado hace ${Math.abs(diffDays)}d!</span>`;
+                } else if (diffDays <= 30) {
+                    expiryHtml = `<span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">Vence en ${diffDays}d</span>`;
+                } else {
+                    expiryHtml = `<span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">En Vigor (${diffDays}d)</span>`;
+                }
+            }
+
+            const phone = seg.emergencyPhone ? seg.emergencyPhone.trim() : '';
+            const cleanPhone = phone.replace(/[^0-9+]/g, '');
+            const entity = seg.entity || 'Seguro de Moto';
+            const notes = seg.notes ? seg.notes : (seg.expiry ? `Vence: ${seg.expiry}` : 'Póliza activa');
+
+            let phoneActionHtml = '';
+            if (phone) {
+                phoneActionHtml = `
+                    <a href="tel:${cleanPhone}" class="w-full py-2.5 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all">
+                        <i class="fas fa-phone-alt animate-bounce text-xs"></i>
+                        <span>Llamar Asistencia 24h: <strong class="tracking-wide">${phone}</strong></span>
+                    </a>
+                `;
+            } else {
+                phoneActionHtml = `
+                    <button onclick="openDocModal('seguro')" class="w-full py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 border border-blue-200/80 transition-all">
+                        <i class="fas fa-plus-circle text-blue-500"></i> Añadir Teléfono de Asistencia 24h
+                    </button>
+                `;
+            }
+
+            let docFileBtn = '';
+            if (seg.file) {
+                docFileBtn = `<button onclick="event.stopPropagation(); openDocViewer('${seg.file}', 'Póliza Seguro Vespa')" class="px-2 py-0.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded font-black text-[9px] uppercase tracking-wider flex items-center gap-1"><i class="fas fa-file-pdf text-[9px]"></i>Ver Póliza</button>`;
+            }
+
+            container.innerHTML = `
+                <div class="card p-3.5 bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-slate-50 border border-blue-200/80 shadow-xs space-y-2.5">
+                    <div class="flex justify-between items-start cursor-pointer" onclick="openDocModal('seguro')">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow-xs shrink-0">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <h4 class="text-xs font-black text-slate-800">${entity}</h4>
+                                    ${expiryHtml}
+                                </div>
+                                <p class="text-[10px] text-slate-500 font-semibold truncate max-w-[220px]">${notes}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            ${docFileBtn}
+                            <button onclick="event.stopPropagation(); openDocModal('seguro')" class="p-1 text-slate-400 hover:text-blue-600 transition-colors" title="Editar Seguro">
+                                <i class="fas fa-pen text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                    ${phoneActionHtml}
+                </div>
+            `;
         }
 
         function renderPressureTracker() {

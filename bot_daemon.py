@@ -282,6 +282,35 @@ def get_status_text():
     if last_presion and "T" in str(last_presion):
         last_presion = str(last_presion)[:10]
 
+    # Estado de ITV y Seguro
+    now = datetime.now()
+    itv_exp_str = itv.get("expiry") or itv.get("fecha_vencimiento") or ""
+    itv_txt = "No conf."
+    if itv_exp_str:
+        try:
+            exp_date = datetime.strptime(itv_exp_str[:10], "%Y-%m-%d")
+            diff = (exp_date - now).days
+            itv_txt = f"{itv_exp_str[:10]} ({'Vence en ' + str(diff) + 'd' if diff >= 0 else '¡Caducada hace ' + str(abs(diff)) + 'd!'})"
+        except:
+            itv_txt = itv_exp_str[:10]
+
+    seg_exp_str = seguro.get("expiry") or seguro.get("fecha_vencimiento") or ""
+    seg_txt = "No conf."
+    if seg_exp_str:
+        try:
+            exp_date = datetime.strptime(seg_exp_str[:10], "%Y-%m-%d")
+            diff = (exp_date - now).days
+            seg_txt = f"{seg_exp_str[:10]} ({'Vence en ' + str(diff) + 'd' if diff >= 0 else '¡Caducado hace ' + str(abs(diff)) + 'd!'})"
+        except:
+            seg_txt = seg_exp_str[:10]
+
+    seg_entity = seguro.get("entity") or seguro.get("compania") or "Aseguradora"
+    seg_poliza = seguro.get("notes") or seguro.get("poliza") or ""
+    seg_phone = seguro.get("emergencyPhone") or ""
+    
+    phone_line = f"\n• 📞 <b>Asistencia 24h:</b> <code>{seg_phone}</code>" if seg_phone else ""
+    poliza_line = f"\n• 📄 <b>Póliza:</b> <code>{seg_poliza}</code>" if seg_poliza else ""
+
     return f"""🛵 <b>Vespa PK 125 S Elestart (1984)</b>
 🏢 <i>Homelands Labs by Pedro Díaz</i>
 
@@ -292,12 +321,54 @@ def get_status_text():
 🛞 <b>Última revisión presiones:</b> <code>{last_presion}</code>
 ⛽ <b>Último repostaje:</b> {last_rep_txt}
 ━━━━━━━━━━━━━━━━━━━━━━━━
-📋 <b>Control Legal & Vencimientos:</b>
-• <b>ITV:</b> <code>{itv.get('fecha_vencimiento', 'No conf.')}</code> ({itv.get('estado', 'Vigente')})
-• <b>Seguro:</b> <code>{seguro.get('fecha_vencimiento', 'No conf.')}</code> ({seguro.get('compania', 'Mutua Madrileña')})
-• <b>Póliza:</b> <code>{seguro.get('poliza', 'S/N')}</code>
+📋 <b>Control Legal & Asistencia:</b>
+• <b>ITV:</b> <code>{itv_txt}</code>
+• <b>Seguro:</b> <code>{seg_txt}</code> ({seg_entity}){poliza_line}{phone_line}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>PWA Live:</b> https://vespa.pedrodiaz.eu"""
+
+def get_insurance_text():
+    data = load_data()
+    docs = data.get("documentacion", {})
+    if not isinstance(docs, dict):
+        docs = {}
+    seguro = docs.get("seguro", {})
+    now = datetime.now()
+
+    seg_exp_str = seguro.get("expiry") or seguro.get("fecha_vencimiento") or "No configurado"
+    seg_entity = seguro.get("entity") or seguro.get("compania") or "No configurada"
+    seg_poliza = seguro.get("notes") or seguro.get("poliza") or "Sin notas adicionales"
+    seg_phone = seguro.get("emergencyPhone") or "No configurado"
+    seg_price = seguro.get("price") or seguro.get("precio")
+
+    status_str = "Vigente"
+    if seg_exp_str and seg_exp_str != "No configurado":
+        try:
+            exp_date = datetime.strptime(seg_exp_str[:10], "%Y-%m-%d")
+            diff = (exp_date - now).days
+            if diff < 0:
+                status_str = f"🚨 Caducado hace {abs(diff)} días"
+            elif diff <= 30:
+                status_str = f"⚠️ Vence en {diff} días"
+            else:
+                status_str = f"✅ En vigor (faltan {diff} días)"
+        except:
+            pass
+
+    price_str = f"\n💶 <b>Precio Anual:</b> <code>{seg_price:.2f} €</code>" if seg_price else ""
+
+    return f"""🛡️ <b>Póliza de Seguro & Asistencia en Carretera 24h</b>
+🛵 <i>Vespa PK 125 S Elestart (1984)</i>
+━━━━━━━━━━━━━━━━━━━━━━━━
+🏢 <b>Compañía:</b> <code>{seg_entity}</code>
+📅 <b>Vencimiento:</b> <code>{seg_exp_str}</code> ({status_str})
+📝 <b>Póliza / Notas:</b> <code>{seg_poliza}</code>{price_str}
+━━━━━━━━━━━━━━━━━━━━━━━━
+📞 <b>Teléfono Asistencia 24h:</b>
+<code>{seg_phone}</code>
+━━━━━━━━━━━━━━━━━━━━━━━━
+🌐 <b>Gestionar Póliza en VespaCare:</b>
+https://vespa.pedrodiaz.eu"""
 
 def get_stock_text():
     data = load_data()
@@ -340,6 +411,7 @@ def get_help_text():
 
 📊 <b>Consultas Rápidas:</b>
 • /estado — Telemetría actual, cuentakilómetros y legal
+• /seguro — Póliza, vencimiento y teléfono de asistencia 24h
 • /stock — Recambios y gasolina en garaje
 • /presion — Presiones recomendadas en frío
 • /web — Enlace directo a la PWA
@@ -881,6 +953,10 @@ Puedes usar los botones táctiles inferiores o escribir directamente tus reposta
 
     if text in ["/estado", "estado", "📊 estado", "/resumen", "resumen"]:
         send_message(get_status_text(), chat_id, reply_markup=get_status_inline_keyboard())
+        return
+
+    if text in ["/seguro", "seguro", "/asistencia", "asistencia", "emergencia", "asistencia 24h", "telefono seguro", "teléfono seguro", "asistencia carretera"]:
+        send_message(get_insurance_text(), chat_id, reply_markup=get_status_inline_keyboard())
         return
 
     if text in ["/stock", "stock", "📦 stock taller", "recambios"]:
