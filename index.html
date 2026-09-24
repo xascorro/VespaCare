@@ -191,6 +191,56 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: var(--cream); }
         ::-webkit-scrollbar-thumb { background: var(--vespa-light); border-radius: 10px; }
+
+        /* --- ANIMACIONES VESPA GARAJE SHOWCASE --- */
+        @keyframes vespaCruising {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-3.5px) rotate(-0.5deg); }
+            75% { transform: translateY(-1px) rotate(0.4deg); }
+        }
+        @keyframes headlightBeam {
+            0%, 100% { opacity: 0.55; filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.45)); }
+            50% { opacity: 0.95; filter: drop-shadow(0 0 22px rgba(251, 191, 36, 0.9)); }
+        }
+        @keyframes exhaustSmoke {
+            0% { transform: translate(0, 0) scale(0.4); opacity: 0.8; }
+            40% { opacity: 0.5; }
+            100% { transform: translate(-30px, -18px) scale(2.2); opacity: 0; }
+        }
+        @keyframes roadSpeed {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -48; }
+        }
+        @keyframes sparkPlugPulse {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8)); }
+        }
+        .anim-vespa-body {
+            animation: vespaCruising 2.8s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+        .anim-headlight-beam {
+            animation: headlightBeam 2.2s ease-in-out infinite;
+        }
+        .anim-exhaust-p1 {
+            animation: exhaustSmoke 2s ease-out infinite;
+            transform-origin: 38px 94px;
+        }
+        .anim-exhaust-p2 {
+            animation: exhaustSmoke 2s ease-out infinite 0.65s;
+            transform-origin: 38px 94px;
+        }
+        .anim-exhaust-p3 {
+            animation: exhaustSmoke 2s ease-out infinite 1.3s;
+            transform-origin: 38px 94px;
+        }
+        .anim-road-dash {
+            stroke-dasharray: 12, 12;
+            animation: roadSpeed 1s linear infinite;
+        }
+        .anim-pulse-badge {
+            animation: sparkPlugPulse 2s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="pb-24">
@@ -909,6 +959,124 @@
                         </div>
                     </div>
                     <span id="garageOverallBadge" class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-black uppercase tracking-wider">Todo al día</span>
+                </div>
+
+                <!-- SHOWCASE VINTAGE: ANIMACIÓN VESPA PK 125 S (1984) -->
+                <div id="garageVespaHero" class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-slate-800 shadow-xl p-4 text-white">
+                    <!-- Decoración de fondo -->
+                    <div class="absolute -top-10 -right-10 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="absolute -bottom-10 -left-10 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <!-- Header de la tarjeta con placa italiana -->
+                    <div class="flex justify-between items-start relative z-10 mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1 bg-white/10 border border-white/15 px-2 py-0.5 rounded-md text-[9px] font-black tracking-widest uppercase">
+                                <span class="w-1.5 h-3 bg-emerald-500 rounded-xs"></span>
+                                <span class="w-1.5 h-3 bg-white rounded-xs"></span>
+                                <span class="w-1.5 h-3 bg-red-500 rounded-xs"></span>
+                                <span class="text-amber-400 ml-0.5">PK 125 S</span>
+                            </span>
+                            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Elestart • 1984</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider anim-pulse-badge">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span>100% Operativa</span>
+                        </div>
+                    </div>
+
+                    <!-- ESCENARIO VECTORIAL ANIMADO -->
+                    <div class="relative w-full h-32 flex items-center justify-center my-0.5">
+                        <svg class="w-full h-full max-w-xs" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="headlightGradient" x1="230" y1="42" x2="315" y2="60" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.85" />
+                                    <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.3" />
+                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0" />
+                                </linearGradient>
+                                <linearGradient id="vespaBodyGradient" x1="70" y1="20" x2="230" y2="100" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#38bdf8" />
+                                    <stop offset="50%" stop-color="#0284c7" />
+                                    <stop offset="100%" stop-color="#0369a1" />
+                                </linearGradient>
+                                <linearGradient id="chromeGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#f8fafc" />
+                                    <stop offset="50%" stop-color="#cbd5e1" />
+                                    <stop offset="100%" stop-color="#64748b" />
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Haz de luz del faro -->
+                            <polygon points="230,42 318,18 318,85 230,52" fill="url(#headlightGradient)" class="anim-headlight-beam" />
+
+                            <!-- Humo de escape 2T -->
+                            <circle cx="38" cy="94" r="3.5" fill="#94a3b8" class="anim-exhaust-p1" />
+                            <circle cx="38" cy="94" r="4.5" fill="#cbd5e1" class="anim-exhaust-p2" />
+                            <circle cx="38" cy="94" r="3" fill="#64748b" class="anim-exhaust-p3" />
+
+                            <!-- Línea de asfalto y velocidad -->
+                            <line x1="10" y1="106" x2="310" y2="106" stroke="#475569" stroke-width="2" stroke-linecap="round" />
+                            <line x1="20" y1="112" x2="300" y2="112" stroke="#38bdf8" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round" class="anim-road-dash" />
+
+                            <!-- CUERPO DE LA VESPA ANIMADA -->
+                            <g class="anim-vespa-body">
+                                <!-- Rueda Trasera (10") -->
+                                <circle cx="82" cy="94" r="14" fill="#0f172a" stroke="#334155" stroke-width="2.5" />
+                                <circle cx="82" cy="94" r="8" fill="#1e293b" stroke="#cbd5e1" stroke-width="1.5" />
+                                <circle cx="82" cy="94" r="3" fill="#94a3b8" />
+
+                                <!-- Tubo de Escape y Colector -->
+                                <path d="M72,96 L50,96 C46,96 42,93 42,89 L42,88 C42,84 46,81 50,81 L75,81" stroke="url(#chromeGradient)" stroke-width="3" stroke-linecap="round" fill="none" />
+
+                                <!-- Rueda Delantera (10") -->
+                                <circle cx="218" cy="94" r="14" fill="#0f172a" stroke="#334155" stroke-width="2.5" />
+                                <circle cx="218" cy="94" r="8" fill="#1e293b" stroke="#cbd5e1" stroke-width="1.5" />
+                                <circle cx="218" cy="94" r="3" fill="#94a3b8" />
+
+                                <!-- Horquilla Monobrazo Delantera & Guardabarros -->
+                                <path d="M218,94 L212,65" stroke="url(#chromeGradient)" stroke-width="3" stroke-linecap="round" />
+                                <path d="M200,82 C200,68 212,64 226,64 C230,70 230,82 228,84" fill="#0284c7" stroke="#0369a1" stroke-width="1.5" />
+
+                                <!-- Chasis Central, Suelo y Cófanos PK -->
+                                <path d="M120,86 L185,86 C190,86 195,82 197,76 L205,48" stroke="#0369a1" stroke-width="3.5" stroke-linecap="round" fill="none" />
+                                <path d="M68,84 C64,74 72,56 95,54 C120,54 135,65 138,82 C138,86 130,88 120,88 C95,88 72,88 68,84 Z" fill="url(#vespaBodyGradient)" stroke="#38bdf8" stroke-width="1.5" />
+                                <!-- Branquias de refrigeración cófano -->
+                                <line x1="88" y1="68" x2="104" y2="68" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" />
+                                <line x1="86" y1="73" x2="106" y2="73" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" />
+                                <line x1="88" y1="78" x2="104" y2="78" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" />
+
+                                <!-- Escudo Delantero PK Angular -->
+                                <path d="M178,84 L196,44 C198,40 203,38 208,38 L214,38 C216,42 216,56 212,74 C208,82 200,86 192,86 Z" fill="url(#vespaBodyGradient)" stroke="#38bdf8" stroke-width="1.5" />
+                                <path d="M210,42 L216,42 L214,64 L209,64 Z" fill="#0f172a" stroke="#cbd5e1" stroke-width="0.8" />
+
+                                <!-- Asiento Biplaza Clásico PK -->
+                                <path d="M85,54 C82,48 90,44 110,44 C132,44 148,46 154,54 C152,57 145,58 120,58 C95,58 87,57 85,54 Z" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+                                <line x1="120" y1="44" x2="120" y2="58" stroke="#cbd5e1" stroke-width="1.5" />
+
+                                <!-- Manillar con Faro Cuadrado PK -->
+                                <path d="M198,38 L222,34 C228,34 230,38 228,42 L206,44 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5" />
+                                <rect x="224" y="35" width="6" height="8" rx="1.5" fill="#fef08a" stroke="#f59e0b" stroke-width="1" />
+                                <rect x="210" y="48" width="3" height="5" rx="1" fill="#f59e0b" />
+                                <line x1="202" y1="36" x2="190" y2="38" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+                                <line x1="198" y1="38" x2="192" y2="44" stroke="url(#chromeGradient)" stroke-width="1.5" stroke-linecap="round" />
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Footer con telemetría viva -->
+                    <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80 text-center text-xs relative z-10">
+                        <div class="p-1.5 bg-slate-900/60 rounded-xl border border-slate-800/60">
+                            <span class="text-[8px] font-black uppercase text-slate-400 block">Motor</span>
+                            <span class="font-extrabold text-amber-400 text-[11px]">121 cc • 2T</span>
+                        </div>
+                        <div class="p-1.5 bg-slate-900/60 rounded-xl border border-slate-800/60">
+                            <span class="text-[8px] font-black uppercase text-slate-400 block">Encendido</span>
+                            <span class="font-extrabold text-sky-400 text-[11px]">Ducati 12V</span>
+                        </div>
+                        <div class="p-1.5 bg-slate-900/60 rounded-xl border border-slate-800/60">
+                            <span class="text-[8px] font-black uppercase text-slate-400 block">Mezcla</span>
+                            <span class="font-extrabold text-emerald-400 text-[11px]">2.0% Sintético</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- LISTADO DE ALERTAS CRÍTICAS DINÁMICAS (PRE-RODAJE) -->
@@ -1848,7 +2016,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v57 • Rollback Seguro de Odómetro & Confirmaciones Reforzadas</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v58 • Showcase Animado Vespa PK 125 S & Garaje Hero</span>
                     </div>
                 </div>
 
@@ -1897,7 +2065,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=57')
+                navigator.serviceWorker.register('/sw.js?v=58')
                     .then(reg => {
                         reg.update();
                     })
