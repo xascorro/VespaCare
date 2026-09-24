@@ -829,13 +829,14 @@
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20"></div>
         <div class="flex justify-between items-center relative z-10 mb-2.5">
             <div>
-                <h1 class="text-2xl tracking-tight">Vespa<span style="color:var(--vespa);">Care</span></h1>
+                <h1 class="text-2xl tracking-tight cursor-pointer" onclick="showTab('garage')" title="Ir a Garaje">Vespa<span style="color:var(--vespa);">Care</span></h1>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="togglePinLock()" id="pinStatusBtn" class="bg-slate-100 px-2.5 py-2 rounded-xl hover:bg-slate-200 transition-all text-sm font-bold text-slate-600 flex items-center gap-1.5" title="Estado de Sesión">
+            <div class="flex items-center gap-1.5">
+                <button onclick="togglePinLock()" id="pinStatusBtn" class="bg-slate-100 px-2.5 py-2 rounded-xl hover:bg-slate-200 transition-all text-sm font-bold text-slate-600 flex items-center gap-1.5" title="Estado de Sesión / Bloquear">
                     <i id="pinStatusIcon" class="fas fa-lock text-amber-600"></i>
                 </button>
-                <button onclick="loadData()" class="bg-slate-100 p-2 rounded-xl hover:bg-slate-200 transition-all text-slate-600" title="Recargar"><i class="fas fa-redo-alt"></i></button>
+                <button onclick="loadData(true)" class="bg-slate-100 p-2 rounded-xl hover:bg-slate-200 transition-all text-slate-600" title="Refrescar datos de la moto"><i class="fas fa-redo-alt"></i></button>
+                <button onclick="showTab('tech')" id="headerSettingsBtn" class="bg-slate-100 p-2 rounded-xl hover:bg-slate-200 transition-all text-slate-600" title="Ajustes & Configuración"><i class="fas fa-cog"></i></button>
             </div>
         </div>
         <div id="headerOdometerSection" class="flex flex-col items-center relative z-10">
@@ -1914,7 +1915,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v63 • Banner Dinámico por Estado & Vídeo 100% OK</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v64 • Ajustes en Cabecera & Pull-to-Refresh Táctil</span>
                     </div>
                 </div>
 
@@ -1931,31 +1932,27 @@
         </section>
     </main>
 
-    <!-- NAVBAR VINTAGE (6 PESTAÑAS) -->
+    <!-- NAVBAR VINTAGE (5 PESTAÑAS OPERATIVAS) -->
     <nav class="fixed bottom-3 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur-xl border border-white/10 p-1.5 flex gap-1 rounded-2xl shadow-2xl z-50 w-[96%] max-w-lg">
         <button onclick="showTab('garage')" id="nav-garage" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all duration-300 nav-active">
-            <i class="fas fa-motorcycle text-base"></i>
-            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Garaje</span>
+            <i class="fas fa-motorcycle text-lg"></i>
+            <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Garaje</span>
         </button>
         <button onclick="showTab('diario')" id="nav-diario" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-book-open text-base"></i>
-            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Diario</span>
+            <i class="fas fa-book-open text-lg"></i>
+            <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Diario</span>
         </button>
         <button onclick="showTab('health')" id="nav-health" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-tools text-base"></i>
-            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Taller</span>
+            <i class="fas fa-tools text-lg"></i>
+            <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Taller</span>
         </button>
         <button onclick="showTab('logs')" id="nav-logs" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-receipt text-base"></i>
-            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Gastos</span>
+            <i class="fas fa-receipt text-lg"></i>
+            <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Gastos</span>
         </button>
         <button onclick="showTab('stats')" id="nav-stats" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-chart-pie text-base"></i>
-            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Stats</span>
-        </button>
-        <button onclick="showTab('tech')" id="nav-tech" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
-            <i class="fas fa-cog text-base"></i>
-            <span class="text-[7.5px] font-black mt-1 uppercase tracking-wider">Ajuste</span>
+            <i class="fas fa-chart-pie text-lg"></i>
+            <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Stats</span>
         </button>
     </nav>
 
@@ -1963,7 +1960,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=63')
+                navigator.serviceWorker.register('/sw.js?v=64')
                     .then(reg => {
                         reg.update();
                     })
@@ -2426,9 +2423,9 @@
         }
 
         // --- DATA LOAD & SAVE (ZERO-TRUST AUTHENTICATED) ---
-        async function loadData() {
+        async function loadData(isManual = false) {
             if (!isPinUnlocked()) {
-                openPinModal(() => loadData());
+                openPinModal(() => loadData(isManual));
                 return;
             }
             document.getElementById('loader').style.display = 'block';
@@ -2437,7 +2434,7 @@
                 if (res.status === 401) {
                     sessionStorage.removeItem('vespa_pin');
                     updatePinStatusUI(); initSettingsUI();
-                    openPinModal(() => loadData());
+                    openPinModal(() => loadData(isManual));
                     return;
                 }
                 data = await res.json();
@@ -2464,8 +2461,12 @@
                 renderAll();
                 toggleFuelFields('repostaje');
                 updatePinStatusUI(); initSettingsUI();
+                if (isManual) {
+                    showToast('Datos actualizados de la moto');
+                }
             } catch (e) {
                 console.error("Error al cargar:", e);
+                if (isManual) showToast('Error al conectar con la moto');
             }
             document.getElementById('loader').style.display = 'none';
         }
@@ -2505,8 +2506,19 @@
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById('tab-'+id).classList.add('active');
-            document.getElementById('nav-'+id).classList.add('nav-active');
+            const targetTab = document.getElementById('tab-'+id);
+            if (targetTab) targetTab.classList.add('active');
+            const navBtn = document.getElementById('nav-'+id);
+            if (navBtn) navBtn.classList.add('nav-active');
+
+            const headerSettingsBtn = document.getElementById('headerSettingsBtn');
+            if (headerSettingsBtn) {
+                if (id === 'tech') {
+                    headerSettingsBtn.className = 'bg-amber-100 p-2 rounded-xl text-amber-700 transition-all font-bold shadow-xs';
+                } else {
+                    headerSettingsBtn.className = 'bg-slate-100 p-2 rounded-xl hover:bg-slate-200 transition-all text-slate-600';
+                }
+            }
             
             // Mostrar odómetro y límite exclusivamente en la pestaña principal (Garaje)
             const odoSection = document.getElementById('headerOdometerSection');
@@ -2532,6 +2544,29 @@
                 setTimeout(renderCharts, 100);
             }
         }
+
+        // Soporte de Pull-to-Refresh táctil en móvil
+        let touchStartY = 0;
+        let isPulling = false;
+
+        window.addEventListener('touchstart', (e) => {
+            if (window.scrollY === 0 && e.touches.length === 1) {
+                touchStartY = e.touches[0].clientY;
+                isPulling = true;
+            } else {
+                isPulling = false;
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', (e) => {
+            if (!isPulling) return;
+            const touchEndY = e.changedTouches[0].clientY;
+            const distance = touchEndY - touchStartY;
+            if (distance > 75 && window.scrollY === 0) {
+                loadData(true);
+            }
+            isPulling = false;
+        }, { passive: true });
 
         // --- MAINTENANCES ---
         function openModal(id = null, defaultCat = 'Motor') {
