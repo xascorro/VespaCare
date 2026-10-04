@@ -756,6 +756,8 @@
                 </div>
             </div>
         </div>
+    </div>
+
     <!-- MODAL MODO GASOLINERA RÁPIDA / GUANTES (HUD HIGH CONTRAST) -->
     <div id="quickFuelModal" class="modal">
         <div class="card p-5 w-full max-w-md space-y-4 max-h-[92vh] flex flex-col bg-slate-950 text-white border border-slate-800 rounded-3xl shadow-2xl">
@@ -2322,7 +2324,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v73 • Modo Gasolinera HUD & Micro-hápticos</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v74 • Modo Gasolinera HUD & Micro-hápticos</span>
                     </div>
                 </div>
 
@@ -2368,7 +2370,7 @@
         if ('serviceWorker' in navigator) {
             const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=73')
+                navigator.serviceWorker.register('/sw.js?v=74')
                     .then(reg => {
                         reg.update();
                     })
