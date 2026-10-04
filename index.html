@@ -1191,20 +1191,10 @@
         
         <!-- PESTAÑA 1: GARAJE -->
         <section id="tab-garage" class="tab-content active space-y-3.5">
-            <!-- BOTÓN MODO GASOLINERA RÁPIDA / GUANTES (HUD) -->
-            <button type="button" onclick="openQuickFuelModal()" class="w-full py-2.5 px-3.5 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-700 hover:to-amber-700 text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-between shadow-md active:scale-95 transition-all group">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center text-sm shadow-xs group-hover:scale-110 transition-transform">
-                        <i class="fas fa-gas-pump"></i>
-                    </div>
-                    <div class="text-left">
-                        <span class="block text-xs font-black tracking-wide leading-tight">Modo Gasolinera Rápida</span>
-                        <span class="block text-[8.5px] text-amber-100 font-semibold leading-tight">HUD Pantalla Grande & Dosificador 2T</span>
-                    </div>
-                </div>
-                <span class="text-[9px] bg-white/25 px-2 py-0.5 rounded-lg font-black uppercase tracking-widest flex items-center gap-1">
-                    Abrir <i class="fas fa-chevron-right text-[7px]"></i>
-                </span>
+            <!-- BOTÓN REPOSTAJE RÁPIDO -->
+            <button type="button" onclick="openQuickFuelModal()" class="w-full py-3 px-4 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-700 hover:to-amber-700 text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md active:scale-95 transition-all group">
+                <i class="fas fa-gas-pump text-base group-hover:scale-110 transition-transform"></i>
+                <span class="font-black text-xs tracking-wider">Repostaje Rápido</span>
             </button>
 
             <!-- Quick Actions -->
@@ -2324,7 +2314,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v74 • Modo Gasolinera HUD & Micro-hápticos</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v75 • Repostaje Rápido & Micro-hápticos</span>
                     </div>
                 </div>
 
@@ -2370,7 +2360,7 @@
         if ('serviceWorker' in navigator) {
             const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=74')
+                navigator.serviceWorker.register('/sw.js?v=75')
                     .then(reg => {
                         reg.update();
                     })
