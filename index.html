@@ -705,7 +705,60 @@
         </div>
     </div>
 
-        <!-- MODAL GESTIÓN COMPLETA DE STOCK EN CASA / TALLER -->
+    <!-- MODAL EDITAR DOCUMENTO DE LA GUANTERA -->
+    <div id="editDocModal" class="modal">
+        <div class="card p-5 w-full max-w-sm space-y-3.5 flex flex-col">
+            <div class="sheet-handle sm:hidden"></div>
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-sm shadow-xs">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Editar Documento</h3>
+                        <p class="text-[9.5px] text-slate-400 font-semibold">Corregir título, categoría o notas</p>
+                    </div>
+                </div>
+                <button onclick="closeEditDocModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+            <input type="hidden" id="editDocId">
+            <div class="space-y-2.5 text-xs">
+                <div>
+                    <label class="text-[9.5px] font-black uppercase text-slate-400 tracking-wider">Nombre / Título del Documento</label>
+                    <input type="text" id="editDocTitle" placeholder="Ej: Seguro Mutua Información, Manual de Taller..." class="font-bold text-xs mt-1">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[9.5px] font-black uppercase text-slate-400 tracking-wider">Categoría</label>
+                        <select id="editDocCat" class="font-bold text-xs mt-1">
+                            <option value="seguro">🛡️ Seguro</option>
+                            <option value="itv">📋 ITV / Ficha</option>
+                            <option value="manual">📖 Manual / Taller</option>
+                            <option value="factura">🧾 Factura / Recambio</option>
+                            <option value="legal">🏛️ Legal / Permiso</option>
+                            <option value="otro">📁 Otro Documento</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9.5px] font-black uppercase text-slate-400 tracking-wider">Fecha</label>
+                        <input type="date" id="editDocDate" class="font-bold text-xs mt-1">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9.5px] font-black uppercase text-slate-400 tracking-wider">Notas / Referencia</label>
+                    <input type="text" id="editDocNotes" placeholder="Póliza, taller, número..." class="text-xs mt-1">
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeEditDocModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl active:scale-95 transition-all">Cancelar</button>
+                    <button type="button" onclick="saveEditedDoc()" class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-xl active:scale-95 transition-all shadow-sm">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL GESTIÓN COMPLETA DE STOCK EN CASA / TALLER -->
     <div id="homeStockModal" class="modal">
         <div class="card p-5 w-full max-w-sm space-y-3.5 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center pb-2 border-b border-slate-100">
@@ -2132,7 +2185,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v68 • Breathing Pulse Alerts & Live Data</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v69 • Edición Documentos & Gráficos Fluídos</span>
                     </div>
                 </div>
 
@@ -2177,7 +2230,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=68')
+                navigator.serviceWorker.register('/sw.js?v=69')
                     .then(reg => {
                         reg.update();
                     })
@@ -3908,7 +3961,12 @@
             // 2. GRÁFICO EVOLUCIÓN COSTE / 100 KM
             if (ctxCost100El) {
                 if (cost100ChartInstance) cost100ChartInstance.destroy();
-                cost100ChartInstance = new Chart(ctxCost100El.getContext('2d'), {
+                const ctx = ctxCost100El.getContext('2d');
+                const grad = ctx.createLinearGradient(0, 0, 0, 160);
+                grad.addColorStop(0, 'rgba(5, 150, 105, 0.25)');
+                grad.addColorStop(1, 'rgba(5, 150, 105, 0.0)');
+
+                cost100ChartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labelsCost100,
@@ -3916,17 +3974,21 @@
                             label: '€ / 100 km',
                             data: costsPer100,
                             borderColor: '#059669',
-                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            backgroundColor: grad,
                             fill: true,
-                            tension: 0.3,
+                            tension: 0.4,
                             pointRadius: 4,
-                            pointBackgroundColor: '#059669'
+                            pointBackgroundColor: '#059669',
+                            borderWidth: 2.5
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { backgroundColor: '#0f172a', padding: 10, cornerRadius: 10, displayColors: false }
+                        },
                         scales: { y: { grid: { color: '#f1f5f9' }, title: { display: true, text: '€ / 100 km', font: { size: 9, weight: 'bold' } } }, x: { grid: { display: false } } }
                     }
                 });
@@ -3943,13 +4005,16 @@
                             label: 'Gasto Anual (€)',
                             data: yearlyValues,
                             backgroundColor: '#9333ea',
-                            borderRadius: 8
+                            borderRadius: 10
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { backgroundColor: '#0f172a', padding: 10, cornerRadius: 10, displayColors: false }
+                        },
                         scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
                     }
                 });
@@ -3957,7 +4022,12 @@
 
             // 4. GRÁFICO KM
             if (kmChartInstance) kmChartInstance.destroy();
-            kmChartInstance = new Chart(ctxKmEl.getContext('2d'), {
+            const ctxKm = ctxKmEl.getContext('2d');
+            const gradKm = ctxKm.createLinearGradient(0, 0, 0, 160);
+            gradKm.addColorStop(0, 'rgba(2, 132, 199, 0.25)');
+            gradKm.addColorStop(1, 'rgba(2, 132, 199, 0.0)');
+
+            kmChartInstance = new Chart(ctxKm, {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -3965,14 +4035,23 @@
                         label: 'Km',
                         data: kms,
                         borderColor: '#0284c7',
-                        backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                        backgroundColor: gradKm,
                         fill: true,
-                        tension: 0.3,
+                        tension: 0.4,
                         pointRadius: 4,
-                        pointBackgroundColor: '#0284c7'
+                        pointBackgroundColor: '#0284c7',
+                        borderWidth: 2.5
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: '#0f172a', padding: 10, cornerRadius: 10, displayColors: false }
+                    },
+                    scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                }
             });
 
             // 5. GRÁFICO CONSUMO
@@ -3985,15 +4064,28 @@
                         label: 'km/L',
                         data: consumos,
                         backgroundColor: '#d97706',
-                        borderRadius: 8
+                        borderRadius: 10
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: '#0f172a', padding: 10, cornerRadius: 10, displayColors: false }
+                    },
+                    scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                }
             });
 
             // 6. GRÁFICO PRECIO SURTIDOR
             if (precioChartInstance) precioChartInstance.destroy();
-            precioChartInstance = new Chart(ctxPrecioEl.getContext('2d'), {
+            const ctxPrecio = ctxPrecioEl.getContext('2d');
+            const gradPrecio = ctxPrecio.createLinearGradient(0, 0, 0, 160);
+            gradPrecio.addColorStop(0, 'rgba(37, 99, 235, 0.25)');
+            gradPrecio.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+
+            precioChartInstance = new Chart(ctxPrecio, {
                 type: 'line',
                 data: {
                     labels: labelsPrecio,
@@ -4001,14 +4093,23 @@
                         label: '€/L',
                         data: preciosPorLitro,
                         borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                        backgroundColor: gradPrecio,
                         fill: true,
-                        tension: 0.3,
+                        tension: 0.4,
                         pointRadius: 4,
-                        pointBackgroundColor: '#2563eb'
+                        pointBackgroundColor: '#2563eb',
+                        borderWidth: 2.5
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: '#0f172a', padding: 10, cornerRadius: 10, displayColors: false }
+                    },
+                    scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                }
             });
 
             // TABLA HISTÓRICA CON COSTE POR 100 KM
@@ -4863,6 +4964,48 @@
             showToast(`Documento "${title}" eliminado`);
         }
 
+        function openEditDocModal(docId) {
+            data.documentos = data.documentos || [];
+            const doc = data.documentos.find(d => d.id === docId);
+            if (!doc) return;
+            document.getElementById('editDocId').value = doc.id;
+            document.getElementById('editDocTitle').value = doc.title || '';
+            document.getElementById('editDocCat').value = doc.category || 'otro';
+            document.getElementById('editDocDate').value = doc.date || '';
+            document.getElementById('editDocNotes').value = doc.notes || '';
+            document.getElementById('editDocModal').classList.add('active');
+        }
+
+        function closeEditDocModal() {
+            document.getElementById('editDocModal').classList.remove('active');
+        }
+
+        function saveEditedDoc() {
+            const id = document.getElementById('editDocId').value;
+            const title = document.getElementById('editDocTitle').value.trim();
+            const cat = document.getElementById('editDocCat').value;
+            const date = document.getElementById('editDocDate').value;
+            const notes = document.getElementById('editDocNotes').value.trim();
+
+            if (!title) {
+                alert("Por favor, introduce un título o nombre para el documento.");
+                return;
+            }
+
+            data.documentos = data.documentos || [];
+            const doc = data.documentos.find(d => d.id === id);
+            if (doc) {
+                doc.title = title;
+                doc.category = cat;
+                if (date) doc.date = date;
+                doc.notes = notes;
+                saveData();
+                renderLegalDocs();
+                closeEditDocModal();
+                showToast(`Documento "${title}" actualizado`);
+            }
+        }
+
         // --- VISOR DE DOCUMENTOS SEGURO ---
         function openDocViewer(filename, title = 'Documento') {
             const viewer = document.getElementById('docViewerModal');
@@ -5054,8 +5197,11 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-1.5 shrink-0">
-                                    <button onclick="openDocViewer('${doc.filename}', '${doc.title.replace(/'/g, "\'")}')" class="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold" title="Visualizar">
+                                    <button onclick="openDocViewer('${doc.filename}', '${doc.title.replace(/'/g, "\\'")}')" class="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold" title="Visualizar">
                                         <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="openEditDocModal('${doc.id}')" class="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-bold" title="Editar Nombre / Categoría">
+                                        <i class="fas fa-pen text-xs"></i>
                                     </button>
                                     <button onclick="deleteGeneralDoc('${doc.id}')" class="p-1.5 text-slate-300 hover:text-red-500 rounded-lg text-xs transition-colors" title="Eliminar">
                                         <i class="fas fa-trash-alt"></i>
