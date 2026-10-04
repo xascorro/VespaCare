@@ -1,8 +1,7 @@
 # Resumen de Sesión - VespaCare
 Fecha: 2026-10-04
 
-- Inspeccionados datos reales de producción en blue (/var/www/html/vespa/data.json) y sincronizados localmente.
-- Odómetro real en producción: 984.3 km.
-- Integrado el micropulso 'pulse-breathing' directamente en las tarjetas de alerta de salud y badges del Garaje.
-- Versión PWA actualizada a v68 (sw.js e index.html).
+- Añadida funcionalidad de edición completa de documentos en la Guantera Digital (botón de lápiz, modal responsivo editDocModal para corregir título, categoría y notas sin resubir).
+- Renovados los gráficos de la sección Stats (Chart.js con gradientes translúcidos, tensión de curva 0.4, barras redondeadas y tooltips esmerilados).
+- Versión PWA actualizada a v69 (sw.js e index.html).
 - Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
