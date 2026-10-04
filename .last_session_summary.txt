@@ -1,9 +1,7 @@
 # Resumen de Sesión - VespaCare
 Fecha: 2026-10-04
 
-- Resuelto el problema de pantalla en blanco (v74):
-  - **Causa raíz identificada**: Faltaba la etiqueta de cierre `</div>` en `<div id="editDocModal" class="modal">` (creado para editar títulos de documentos). Al quedar sin cerrar, todo el contenido posterior (`quickFuelModal`, `header`, `main`, `tab-garage` y `nav`) quedó anidado dentro de ese modal oculto (`display: none`), por lo que al desaparecer la pantalla del PIN la página quedaba completamente en blanco.
-  - **Corrección**: Añadida la etiqueta de cierre `</div>` correspondiente, validada la estructura HTML al 100% libre de etiquetas desparejadas, y verificado que el `<header>`, `<main>` y `<nav>` están en el nivel raíz del `<body>`.
-- Versión PWA actualizada a v74 (sw.js e index.html).
+- Simplificado el botón en la pestaña Garaje a un formato limpio y directo: **"Repostaje Rápido"** con icono de surtidor, eliminando los subtítulos explicativos y el badge lateral (v75).
+- Versión PWA actualizada a v75 (sw.js e index.html).
 - Purgada la caché de Cloudflare para pedrodiaz.eu.
 - Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
