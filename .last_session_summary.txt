@@ -1,7 +1,10 @@
 # Resumen de Sesión - VespaCare
 Fecha: 2026-10-04
 
-- Implementado Modo Gasolinera Rápida / Guantes (HUD): modal táctil de alto contraste con selector XXL de litros (1L, 2L, 3L, 4L, 5L ⛽ y pasos de 0.5L), ajuste de odómetro con botones XXL (-10, -1, +1, +10), dosificador gigante de mezcla 2T al 2.0% (JASO FD) y guardado directo en repostajes.
-- Implementada Vibración Háptica Táctica Nativa (navigator.vibrate) con conmutador en la pestaña Ajustes para activar/desactivar, conectada a cambios de pestaña, teclado PIN, selector de mezcla y filtros.
-- Versión PWA actualizada a v71 (sw.js e index.html).
+- Corregido error de carga inicial:
+  1. Protegido el listener `controllerchange` del Service Worker con comprobación `hadController` y guardas de tiempo en `sessionStorage` para evitar bucles de recarga infinitos.
+  2. Protegida la inicialización de `data` y `renderAll()` con validación estricta de propiedades nulas/indefinidas (`data.homeFuelStock`, `data.mantenimientos`, `data.repostajes`, etc.) evitando que `toFixed` o `find` arrojen excepciones en el primer renderizado.
+  3. Protegido el acceso a `localStorage` y `sessionStorage` en bloques `try/catch` para evitar bloqueos por políticas estrictas de privacidad del navegador/PWA.
+- Versión PWA actualizada a v72 (sw.js e index.html).
+- Purgada la caché de Cloudflare para el dominio pedrodiaz.eu.
 - Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
