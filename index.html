@@ -1864,8 +1864,16 @@
                 </div>
             </div>
 
+            <!-- BARRA DE FILTROS RÁPIDOS DE GASTOS (PILLS) -->
+            <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+                <button type="button" onclick="filterGastos('all')" id="gf-all" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-slate-800 text-white shadow-xs shrink-0 gastos-filter-btn transition-all active:scale-95">Todos</button>
+                <button type="button" onclick="filterGastos('fuel')" id="gf-fuel" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 gastos-filter-btn transition-all active:scale-95"><i class="fas fa-gas-pump text-amber-500 mr-1"></i>Gasolina</button>
+                <button type="button" onclick="filterGastos('maint')" id="gf-maint" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 gastos-filter-btn transition-all active:scale-95"><i class="fas fa-wrench text-orange-500 mr-1"></i>Taller/Piezas</button>
+                <button type="button" onclick="filterGastos('legal')" id="gf-legal" class="px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 gastos-filter-btn transition-all active:scale-95"><i class="fas fa-file-invoice-dollar text-emerald-500 mr-1"></i>Papeleo</button>
+            </div>
+
             <!-- SECCIÓN 1: GASTOS DE COMBUSTIBLE & SURTIDOR -->
-            <div class="card p-4 space-y-3 border-l-4 border-amber-600">
+            <div id="expenseFuelCard" class="card p-4 space-y-3 border-l-4 border-amber-600">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs">
@@ -1885,7 +1893,7 @@
             </div>
 
             <!-- SECCIÓN 2: GASTOS DE MANTENIMIENTO & RECAMBIOS -->
-            <div class="card p-4 space-y-3 border-l-4 border-orange-500">
+            <div id="expenseMaintCard" class="card p-4 space-y-3 border-l-4 border-orange-500">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-xs">
@@ -1905,7 +1913,7 @@
             </div>
 
             <!-- SECCIÓN 3: GASTOS DE PAPELEO & LEGAL -->
-            <div class="card p-4 space-y-3 border-l-4 border-emerald-600">
+            <div id="expenseLegalCard" class="card p-4 space-y-3 border-l-4 border-emerald-600">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs">
@@ -1927,34 +1935,53 @@
             <div id="logsHistory" class="hidden"></div>
         </section>
 
-        <!-- PESTAÑA 4: STATS (COSTE €/100KM, EVOLUCIÓN Y CONSUMO) -->
         <!-- PESTAÑA 4: STATS (COSTE €/100KM, EVOLUCIÓN, CONSUMO & DESGLOSE FINANCIERO) -->
         <section id="tab-stats" class="tab-content space-y-3.5">
             
-            <!-- TARJETAS DE COSTES Y TELEMETRÍA FINANCIERA (4 TARJETAS) -->
+            <!-- TARJETAS DE COSTES Y TELEMETRÍA FINANCIERA (4 TARJETAS CON PILLS) -->
             <div class="grid grid-cols-2 gap-3">
-                <div class="card p-3.5 border-l-4 border-amber-500">
-                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Coste Gasolina / 100km</p>
-                    <p id="statCostPer100" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
-                    <p id="statCostPerKm" class="text-[9px] font-bold text-amber-700 mt-1">- € / km en ruta</p>
+                <div class="card p-3.5 border-l-4 border-amber-500 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Gasolina / 100km</p>
+                            <span id="statCostTrendPill" class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800">⛽ Ruta</span>
+                        </div>
+                        <p id="statCostPer100" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
+                    </div>
+                    <p id="statCostPerKm" class="text-[9px] font-bold text-amber-700 mt-1 font-mono-num">- € / km en ruta</p>
                 </div>
-                <div class="card p-3.5 border-l-4 border-emerald-600">
-                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Coste Operativo Total</p>
-                    <p id="statTotalTcoPer100" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
-                    <p id="statTotalCostPerKm" class="text-[9px] font-bold text-emerald-700 mt-1">- € / 100km (TCO Global)</p>
+                <div class="card p-3.5 border-l-4 border-emerald-600 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Coste Total</p>
+                            <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">TCO Real</span>
+                        </div>
+                        <p id="statTotalTcoPer100" class="text-2xl font-black text-slate-800 font-mono-num">- €</p>
+                    </div>
+                    <p id="statTotalCostPerKm" class="text-[9px] font-bold text-emerald-700 mt-1 font-mono-num">- € / 100km</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <div class="card p-3.5 border-l-4 border-blue-500">
-                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Consumo Medio</p>
-                    <p id="avgConsumo" class="text-xl font-black text-slate-800 font-mono-num">- km/L</p>
-                    <p id="avgConsumoL100" class="text-[9px] font-bold text-blue-700 mt-1">- L / 100 km</p>
+                <div class="card p-3.5 border-l-4 border-blue-500 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Consumo Medio</p>
+                            <span id="statEfficiencyPill" class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">~16.5 km/L</span>
+                        </div>
+                        <p id="avgConsumo" class="text-xl font-black text-slate-800 font-mono-num">- km/L</p>
+                    </div>
+                    <p id="avgConsumoL100" class="text-[9px] font-bold text-blue-700 mt-1 font-mono-num">- L / 100 km</p>
                 </div>
-                <div class="card p-3.5 border-l-4 border-purple-500">
-                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Gasto Acumulado Total</p>
-                    <p id="statTotalSpent" class="text-xl font-black text-slate-800 font-mono-num">- €</p>
-                    <p id="statYearlySpent" class="text-[9px] font-bold text-purple-700 mt-1">- € este año</p>
+                <div class="card p-3.5 border-l-4 border-purple-500 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Gasto Total</p>
+                            <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-800">Inversión</span>
+                        </div>
+                        <p id="statTotalSpent" class="text-xl font-black text-slate-800 font-mono-num">- €</p>
+                    </div>
+                    <p id="statYearlySpent" class="text-[9px] font-bold text-purple-700 mt-1 font-mono-num">- € este año</p>
                 </div>
             </div>
 
@@ -2185,7 +2212,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v69 • Edición Documentos & Gráficos Fluídos</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v70 • Pills de Tendencia en Stats & Filtros en Gastos</span>
                     </div>
                 </div>
 
@@ -2230,7 +2257,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=69')
+                navigator.serviceWorker.register('/sw.js?v=70')
                     .then(reg => {
                         reg.update();
                     })
@@ -3871,11 +3898,34 @@
             const statTotalSpentEl = document.getElementById('statTotalSpent');
             const statYearlySpentEl = document.getElementById('statYearlySpent');
 
+            const statCostTrendPill = document.getElementById('statCostTrendPill');
+            const statEfficiencyPill = document.getElementById('statEfficiencyPill');
+
             if (totalKmDiff > 0 && totalFuelPriceSpent > 0) {
                 const cost100 = (totalFuelPriceSpent / totalKmDiff) * 100;
                 const costKm = totalFuelPriceSpent / totalKmDiff;
                 if (statCost100El) statCost100El.innerText = cost100.toFixed(2) + ' €';
                 if (statCostKmEl) statCostKmEl.innerText = `${costKm.toFixed(3)} € / km en ruta`;
+                if (statCostTrendPill) {
+                    if (costsPer100.length >= 2) {
+                        const lastCost = parseFloat(costsPer100[costsPer100.length - 1]) || 0;
+                        const prevCost = parseFloat(costsPer100[costsPer100.length - 2]) || 0;
+                        const diff = lastCost - prevCost;
+                        if (diff < -0.05) {
+                            statCostTrendPill.className = 'text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+                            statCostTrendPill.innerHTML = `↓ ${Math.abs(diff).toFixed(2)}€`;
+                        } else if (diff > 0.05) {
+                            statCostTrendPill.className = 'text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800';
+                            statCostTrendPill.innerHTML = `↑ ${diff.toFixed(2)}€`;
+                        } else {
+                            statCostTrendPill.className = 'text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600';
+                            statCostTrendPill.innerHTML = `Estable`;
+                        }
+                    } else {
+                        statCostTrendPill.className = 'text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800';
+                        statCostTrendPill.innerHTML = `⛽ Ruta`;
+                    }
+                }
             } else {
                 if (statCost100El) statCost100El.innerText = '- €';
                 if (statCostKmEl) statCostKmEl.innerText = '- € / km';
@@ -3896,6 +3946,18 @@
                 const l100 = 100 / avgCons;
                 if (avgConsumoEl) avgConsumoEl.innerText = avgCons.toFixed(2) + ' km/L';
                 if (avgConsumoL100El) avgConsumoL100El.innerText = `${l100.toFixed(2)} L / 100 km`;
+                if (statEfficiencyPill) {
+                    if (avgCons >= 16.0) {
+                        statEfficiencyPill.className = 'text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+                        statEfficiencyPill.innerHTML = `🟢 Óptimo`;
+                    } else if (avgCons >= 14.0) {
+                        statEfficiencyPill.className = 'text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800';
+                        statEfficiencyPill.innerHTML = `🔵 Normal`;
+                    } else {
+                        statEfficiencyPill.className = 'text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800';
+                        statEfficiencyPill.innerHTML = `🟡 Revisar`;
+                    }
+                }
             } else {
                 if (avgConsumoEl) avgConsumoEl.innerText = '- km/L';
                 if (avgConsumoL100El) avgConsumoL100El.innerText = '- L / 100 km';
@@ -4333,6 +4395,27 @@
             'ruta': { label: 'Ruta / Prueba', icon: 'fa-route', color: 'text-emerald-600', badgeClass: 'bg-emerald-50 border-emerald-200 text-emerald-800' },
             'restauracion': { label: 'Restauración / Chasis', icon: 'fa-motorcycle', color: 'text-rose-600', badgeClass: 'bg-rose-50 border-rose-200 text-rose-800' }
         };
+
+        function filterGastos(cat) {
+            ['all', 'fuel', 'maint', 'legal'].forEach(c => {
+                const btn = document.getElementById('gf-' + c);
+                if (btn) {
+                    if (c === cat) {
+                        btn.className = 'px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-slate-800 text-white shadow-xs shrink-0 gastos-filter-btn transition-all active:scale-95';
+                    } else {
+                        btn.className = 'px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 gastos-filter-btn transition-all active:scale-95';
+                    }
+                }
+            });
+
+            const fuelCard = document.getElementById('expenseFuelCard');
+            const maintCard = document.getElementById('expenseMaintCard');
+            const legalCard = document.getElementById('expenseLegalCard');
+
+            if (fuelCard) fuelCard.style.display = (cat === 'all' || cat === 'fuel') ? 'block' : 'none';
+            if (maintCard) maintCard.style.display = (cat === 'all' || cat === 'maint') ? 'block' : 'none';
+            if (legalCard) legalCard.style.display = (cat === 'all' || cat === 'legal') ? 'block' : 'none';
+        }
 
         function filterDiario(cat) {
             currentDiarioFilter = cat;
