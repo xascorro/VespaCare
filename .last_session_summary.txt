@@ -1,7 +1,7 @@
 # Resumen de Sesión - VespaCare
 Fecha: 2026-10-04
 
-- Implementadas las micro-pills de tendencia dinámica en las 4 tarjetas de Stats (comparador de coste/100km, rendimiento óptimo/normal de consumo 16.5 km/L, TCO y gasto).
-- Implementada la barra de filtros rápidos tipo cápsula (Pills) en la pestaña Gastos (Todos, Gasolina, Taller/Piezas, Papeleo).
-- Versión PWA actualizada a v70 (sw.js e index.html).
+- Implementado Modo Gasolinera Rápida / Guantes (HUD): modal táctil de alto contraste con selector XXL de litros (1L, 2L, 3L, 4L, 5L ⛽ y pasos de 0.5L), ajuste de odómetro con botones XXL (-10, -1, +1, +10), dosificador gigante de mezcla 2T al 2.0% (JASO FD) y guardado directo en repostajes.
+- Implementada Vibración Háptica Táctica Nativa (navigator.vibrate) con conmutador en la pestaña Ajustes para activar/desactivar, conectada a cambios de pestaña, teclado PIN, selector de mezcla y filtros.
+- Versión PWA actualizada a v71 (sw.js e index.html).
 - Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
