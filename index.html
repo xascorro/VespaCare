@@ -2322,7 +2322,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v72 • Modo Gasolinera HUD & Micro-hápticos</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v73 • Modo Gasolinera HUD & Micro-hápticos</span>
                     </div>
                 </div>
 
@@ -2368,7 +2368,7 @@
         if ('serviceWorker' in navigator) {
             const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=72')
+                navigator.serviceWorker.register('/sw.js?v=73')
                     .then(reg => {
                         reg.update();
                     })
@@ -2928,6 +2928,7 @@
                 });
 
                 renderAll();
+                showTab('garage');
                 toggleFuelFields('repostaje');
                 updatePinStatusUI(); initSettingsUI();
                 if (isManual) {

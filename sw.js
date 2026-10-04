@@ -1,4 +1,4 @@
-const CACHE_NAME = "vespacare-v72";
+const CACHE_NAME = "vespacare-v73";
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-192.png',
@@ -31,10 +31,16 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // API y navegación/HTML siempre Network-First (fresco de red)
-  if (url.pathname.endsWith('api.php') || event.request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+  // Todo HTML, navegación, raíz y API siempre Network-First (fresco directo del servidor)
+  if (
+    event.request.mode === 'navigate' ||
+    url.pathname === '/' ||
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('api.php') ||
+    url.pathname.includes('index.html')
+  ) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: 'no-store' })
         .then((response) => {
           return response;
         })
@@ -46,9 +52,7 @@ self.addEventListener('fetch', (event) => {
   // Assets estáticos (iconos, manifest): Cache-First con fallback a red
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request).then((response) => {
-        return response;
-      });
+      return cached || fetch(event.request);
     })
   );
 });
