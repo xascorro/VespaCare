@@ -1,7 +1,9 @@
 # Resumen de Sesión - VespaCare
 Fecha: 2026-10-04
 
-- Creada rama 'feature/design-system' para pruebas del sistema de diseño Emil Kowalski + Impeccable (Fase 1).
-- Implementado sistema base: tipografía óptica con números tabulares (tnum), sombras multicapa cálidas (layered shadows), físicas de muelles (--spring-bounce, --spring-smooth) y microinteracciones táctiles elásticas.
-- Actualizada versión PWA a v66 (sw.js y index.html).
+- Implementadas Fase 1, Fase 2 y Fase 3 del sistema de diseño Emil Kowalski + Impeccable en la rama 'feature/design-system':
+  - Fase 1: Físicas de muelles (--spring-bounce, --spring-smooth), tipografía tabular (tnum), sombras multicapa cálidas y micro-pulsaciones táctiles.
+  - Fase 2: Barra de navegación flotante tipo cápsula (.navbar-capsule), calculadora 2T con selector rápido táctil (1L, 2L, 3L, 5L Lleno) y barra de autonomía con indicador de reserva a 1.2L.
+  - Fase 3: Modales responsivos en formato Bottom-Sheet móvil con barra de agarre y animación deslizante fluida, alertas de mantenimiento con micropulso "breathing".
+- Versión PWA actualizada a v67 (sw.js e index.html).
 - Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
