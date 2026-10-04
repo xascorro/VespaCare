@@ -756,6 +756,88 @@
                 </div>
             </div>
         </div>
+    <!-- MODAL MODO GASOLINERA RÁPIDA / GUANTES (HUD HIGH CONTRAST) -->
+    <div id="quickFuelModal" class="modal">
+        <div class="card p-5 w-full max-w-md space-y-4 max-h-[92vh] flex flex-col bg-slate-950 text-white border border-slate-800 rounded-3xl shadow-2xl">
+            <div class="sheet-handle sm:hidden !bg-slate-700"></div>
+            
+            <!-- Cabecera HUD -->
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center text-lg font-black shadow-lg">
+                        <i class="fas fa-gas-pump"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-white tracking-wide uppercase">Modo Gasolinera</h3>
+                        <p class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">HUD Rápido / Guantes</p>
+                    </div>
+                </div>
+                <button onclick="closeQuickFuelModal()" class="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-900 border border-slate-800">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-4 pr-0.5">
+                <!-- 1. Odómetro con Botones XXL -->
+                <div class="p-3.5 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Odómetro en Surtidor:</span>
+                        <span class="text-[10px] font-bold text-amber-400">km actuales</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="adjustQuickOdo(-10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm active:scale-90 transition-all border border-slate-700">-10</button>
+                        <button type="button" onclick="adjustQuickOdo(-1)" class="w-10 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm active:scale-90 transition-all border border-slate-700">-1</button>
+                        <input type="number" id="quickOdoInput" step="0.1" class="flex-1 h-12 bg-black border-2 border-amber-500/80 rounded-xl text-2xl font-black text-center font-mono-num text-amber-400 focus:border-amber-400">
+                        <button type="button" onclick="adjustQuickOdo(+1)" class="w-10 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm active:scale-90 transition-all border border-slate-700">+1</button>
+                        <button type="button" onclick="adjustQuickOdo(+10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm active:scale-90 transition-all border border-slate-700">+10</button>
+                    </div>
+                </div>
+
+                <!-- 2. Selector de Litros XXL -->
+                <div class="p-3.5 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-2.5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Litros de Gasolina:</span>
+                        <span id="quickLitrosDisplay" class="text-xl font-black text-white font-mono-num">4.0 <span class="text-xs text-amber-400">L</span></span>
+                    </div>
+                    <!-- Presets XXL -->
+                    <div class="grid grid-cols-5 gap-1.5">
+                        <button type="button" onclick="setQuickLitros(1.0)" class="py-3 bg-slate-800 hover:bg-slate-700 active:scale-90 text-sm font-black rounded-xl border border-slate-700 quick-litro-btn">1L</button>
+                        <button type="button" onclick="setQuickLitros(2.0)" class="py-3 bg-slate-800 hover:bg-slate-700 active:scale-90 text-sm font-black rounded-xl border border-slate-700 quick-litro-btn">2L</button>
+                        <button type="button" onclick="setQuickLitros(3.0)" class="py-3 bg-slate-800 hover:bg-slate-700 active:scale-90 text-sm font-black rounded-xl border border-slate-700 quick-litro-btn">3L</button>
+                        <button type="button" onclick="setQuickLitros(4.0)" class="py-3 bg-slate-800 hover:bg-slate-700 active:scale-90 text-sm font-black rounded-xl border border-slate-700 quick-litro-btn">4L</button>
+                        <button type="button" onclick="setQuickLitros(5.0)" class="py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-90 text-sm font-black rounded-xl shadow-md quick-litro-btn">5L ⛽</button>
+                    </div>
+                    <div class="flex items-center gap-2 pt-1">
+                        <button type="button" onclick="adjustQuickLitros(-0.5)" class="flex-1 py-2 bg-slate-800 text-xs font-black rounded-lg border border-slate-700 active:scale-95">-0.5 L</button>
+                        <button type="button" onclick="adjustQuickLitros(+0.5)" class="flex-1 py-2 bg-slate-800 text-xs font-black rounded-lg border border-slate-700 active:scale-95">+0.5 L</button>
+                    </div>
+                </div>
+
+                <!-- 3. Tarjeta Gigante de Mezcla 2T (JASO FD) -->
+                <div class="p-4 bg-gradient-to-br from-amber-500/20 via-slate-900 to-amber-500/10 rounded-2xl border-2 border-amber-500/60 text-center space-y-1">
+                    <div class="flex items-center justify-center gap-2 text-amber-400">
+                        <i class="fas fa-vial text-base"></i>
+                        <span class="text-xs font-black uppercase tracking-widest">Dosificador Aceite 2T (2.0%)</span>
+                    </div>
+                    <p id="quickOilResult" class="text-5xl font-black text-amber-400 tracking-tight font-mono-num py-1">80 <span class="text-xl text-slate-300 font-sans">ml</span></p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Mezcla exacta 1:50 Sintético</p>
+                </div>
+
+                <!-- 4. Importe Total (€ opcional) -->
+                <div class="p-3 bg-slate-900/90 rounded-2xl border border-slate-800 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-300">Coste Total Repostaje:</span>
+                    <div class="flex items-center gap-1.5">
+                        <input type="number" id="quickFuelPrice" placeholder="0.00" step="0.01" class="w-24 h-10 bg-black border border-slate-700 rounded-xl text-right font-black font-mono-num text-white px-2.5 text-base">
+                        <span class="text-sm font-bold text-slate-400">€</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón Guardar XXL -->
+            <button type="button" onclick="saveQuickFuel()" class="w-full py-4 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-sm uppercase tracking-widest rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-check-circle text-lg"></i> Confirmar & Guardar en la Moto
+            </button>
+        </div>
     </div>
 
     <!-- MODAL GESTIÓN COMPLETA DE STOCK EN CASA / TALLER -->
@@ -1107,6 +1189,22 @@
         
         <!-- PESTAÑA 1: GARAJE -->
         <section id="tab-garage" class="tab-content active space-y-3.5">
+            <!-- BOTÓN MODO GASOLINERA RÁPIDA / GUANTES (HUD) -->
+            <button type="button" onclick="openQuickFuelModal()" class="w-full py-2.5 px-3.5 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-700 hover:to-amber-700 text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-between shadow-md active:scale-95 transition-all group">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center text-sm shadow-xs group-hover:scale-110 transition-transform">
+                        <i class="fas fa-gas-pump"></i>
+                    </div>
+                    <div class="text-left">
+                        <span class="block text-xs font-black tracking-wide leading-tight">Modo Gasolinera Rápida</span>
+                        <span class="block text-[8.5px] text-amber-100 font-semibold leading-tight">HUD Pantalla Grande & Dosificador 2T</span>
+                    </div>
+                </div>
+                <span class="text-[9px] bg-white/25 px-2 py-0.5 rounded-lg font-black uppercase tracking-widest flex items-center gap-1">
+                    Abrir <i class="fas fa-chevron-right text-[7px]"></i>
+                </span>
+            </button>
+
             <!-- Quick Actions -->
             <div class="grid grid-cols-2 gap-3">
                 <div class="card p-3.5 border-b-4 border-vespa flex flex-col justify-between">
@@ -2122,6 +2220,18 @@
                             <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                         </label>
                     </div>
+
+                    <!-- Vibración Háptica Táctil -->
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Vibración Háptica Táctil</p>
+                            <p class="text-[10px] text-slate-400">Micro-vibración nativa al pulsar botones, cambio de pestañas y teclado.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="settingHaptics" checked onchange="toggleHaptics(this.checked)" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -2212,7 +2322,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v70 • Pills de Tendencia en Stats & Filtros en Gastos</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v71 • Modo Gasolinera HUD & Micro-hápticos</span>
                     </div>
                 </div>
 
@@ -2257,7 +2367,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=70')
+                navigator.serviceWorker.register('/sw.js?v=71')
                     .then(reg => {
                         reg.update();
                     })
@@ -2296,6 +2406,27 @@
         const COLORS = ['bg-amber-600', 'bg-blue-500', 'bg-orange-500', 'bg-purple-500', 'bg-pink-500'];
         let currentMixRatio = 2.0;
         let isPinProtectedOnServer = true;
+
+        // --- MICRO-HÁPTICOS TÁCTILES NATIVOS ---
+        let hapticsEnabled = localStorage.getItem('vespa_haptics') !== 'false';
+
+        function triggerHaptic(type = 'light') {
+            if (!hapticsEnabled || !navigator.vibrate) return;
+            try {
+                if (type === 'light') navigator.vibrate(10);
+                else if (type === 'medium') navigator.vibrate(25);
+                else if (type === 'success') navigator.vibrate([15, 30, 25]);
+                else if (type === 'error') navigator.vibrate([40, 50, 40]);
+                else if (type === 'heavy') navigator.vibrate(40);
+            } catch(e) {}
+        }
+
+        function toggleHaptics(checked) {
+            hapticsEnabled = !!checked;
+            localStorage.setItem('vespa_haptics', hapticsEnabled ? 'true' : 'false');
+            if (hapticsEnabled) triggerHaptic('light');
+            showToast(hapticsEnabled ? 'Vibración háptica activada' : 'Vibración háptica desactivada');
+        }
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -2371,6 +2502,7 @@
         }
 
         function pressLockPin(digit) {
+            triggerHaptic('light');
             if (enteredLockPin.length < 4) {
                 enteredLockPin += digit;
                 updateLockDots();
@@ -2381,11 +2513,13 @@
         }
 
         function clearLockPin() {
+            triggerHaptic('light');
             enteredLockPin = '';
             updateLockDots();
         }
 
         function backspaceLockPin() {
+            triggerHaptic('light');
             if (enteredLockPin.length > 0) {
                 enteredLockPin = enteredLockPin.slice(0, -1);
                 updateLockDots();
@@ -2414,6 +2548,7 @@
                 });
                 const resJson = await res.json().catch(() => ({}));
                 if (res.ok && resJson.status === 'success') {
+                    triggerHaptic('success');
                     sessionStorage.setItem('vespa_pin', pinToTest);
                     const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
                     if (!strictLock) {
@@ -2440,6 +2575,7 @@
         }
 
         function triggerLockShake() {
+            triggerHaptic('error');
             const box = document.querySelector('#appLockScreen .card');
             if (box) box.classList.add('shake');
             setTimeout(() => {
@@ -2510,6 +2646,7 @@
         }
 
         function pressPin(digit) {
+            triggerHaptic('light');
             if (currentEnteredPin.length < 4) {
                 currentEnteredPin += digit;
                 updatePinDots();
@@ -2520,11 +2657,13 @@
         }
 
         function clearPin() {
+            triggerHaptic('light');
             currentEnteredPin = '';
             updatePinDots();
         }
 
         function backspacePin() {
+            triggerHaptic('light');
             if (currentEnteredPin.length > 0) {
                 currentEnteredPin = currentEnteredPin.slice(0, -1);
                 updatePinDots();
@@ -2553,6 +2692,7 @@
                 });
                 const resJson = await res.json().catch(() => ({}));
                 if (res.ok && resJson.status === 'success') {
+                    triggerHaptic('success');
                     sessionStorage.setItem('vespa_pin', pinToTest);
                     const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
                     if (!strictLock) {
@@ -2576,6 +2716,7 @@
         }
 
         function triggerPinModalShake() {
+            triggerHaptic('error');
             const box = document.getElementById('pinBox');
             if (box) box.classList.add('shake');
             setTimeout(() => {
@@ -2626,6 +2767,8 @@
             const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
             const chk = document.getElementById('settingStrictLock');
             if (chk) chk.checked = strictLock;
+            const hapticToggle = document.getElementById('settingHaptics');
+            if (hapticToggle) hapticToggle.checked = hapticsEnabled;
             const tankInput = document.getElementById('settingTankCapacity');
             if (tankInput) tankInput.value = data.tankCapacity || 5.0;
             const specCap = document.getElementById('specTankCapacity');
@@ -2791,9 +2934,11 @@
                     throw new Error('PIN incorrecto o sesión expirada');
                 }
                 if (!res.ok) throw new Error('Error en el servidor');
+                triggerHaptic('success');
                 showToast('Cambios guardados con éxito');
                 renderAll();
             } catch (e) {
+                triggerHaptic('error');
                 alert("No se pudo guardar: " + e.message);
             }
             document.getElementById('loader').style.display = 'none';
@@ -2801,6 +2946,7 @@
 
         // --- TABS & NAVIGATION ---
         function showTab(id) {
+            triggerHaptic('light');
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
             const targetTab = document.getElementById('tab-'+id);
@@ -3070,6 +3216,7 @@
         }
 
         function setMixLitros(l) {
+            triggerHaptic('light');
             const input = document.getElementById('calcLitros');
             if (input) {
                 input.value = l;
@@ -3078,6 +3225,7 @@
         }
 
         function setMixRatio(ratio) {
+            triggerHaptic('light');
             currentMixRatio = ratio;
             [2.0, 2.5, 3.0].forEach(r => {
                 const btn = document.getElementById('mixBtn' + (r * 10));
@@ -3109,6 +3257,103 @@
                 notesField.value = mixNote;
             }
             showToast('Mezcla añadida a las notas');
+        }
+
+        // --- MODO GASOLINERA RÁPIDA / GUANTES (HUD HIGH CONTRAST) ---
+        let quickFuelLitros = 4.0;
+
+        function openQuickFuelModal() {
+            triggerHaptic('medium');
+            quickFuelLitros = 4.0;
+            const odoInput = document.getElementById('quickOdoInput');
+            if (odoInput) odoInput.value = data.odometer || 0;
+            const priceInput = document.getElementById('quickFuelPrice');
+            if (priceInput) priceInput.value = '';
+            updateQuickFuelUI();
+            const m = document.getElementById('quickFuelModal');
+            if (m) m.classList.add('active');
+        }
+
+        function closeQuickFuelModal() {
+            triggerHaptic('light');
+            const m = document.getElementById('quickFuelModal');
+            if (m) m.classList.remove('active');
+        }
+
+        function adjustQuickOdo(delta) {
+            triggerHaptic('light');
+            const input = document.getElementById('quickOdoInput');
+            if (input) {
+                let cur = parseFloat(input.value) || 0;
+                cur = Math.max(0, parseFloat((cur + delta).toFixed(1)));
+                input.value = cur;
+            }
+        }
+
+        function setQuickLitros(l) {
+            triggerHaptic('light');
+            quickFuelLitros = parseFloat(l) || 1.0;
+            updateQuickFuelUI();
+        }
+
+        function adjustQuickLitros(delta) {
+            triggerHaptic('light');
+            quickFuelLitros = Math.max(0.5, Math.min(10.0, parseFloat((quickFuelLitros + delta).toFixed(1))));
+            updateQuickFuelUI();
+        }
+
+        function updateQuickFuelUI() {
+            const disp = document.getElementById('quickLitrosDisplay');
+            if (disp) disp.innerHTML = `${quickFuelLitros.toFixed(1)} <span class="text-xs text-amber-400">L</span>`;
+            const oil = document.getElementById('quickOilResult');
+            if (oil) oil.innerHTML = `${Math.round(quickFuelLitros * 20)} <span class="text-xl text-slate-300 font-sans">ml</span>`;
+
+            // Resaltar presets
+            const presetBtns = document.querySelectorAll('.quick-litro-btn');
+            presetBtns.forEach((btn, idx) => {
+                const presetVal = idx + 1; // 1, 2, 3, 4, 5
+                if (Math.abs(quickFuelLitros - presetVal) < 0.05) {
+                    btn.className = 'py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-90 text-sm font-black rounded-xl shadow-md quick-litro-btn transition-all';
+                } else {
+                    btn.className = 'py-3 bg-slate-800 hover:bg-slate-700 text-white active:scale-90 text-sm font-black rounded-xl border border-slate-700 quick-litro-btn transition-all';
+                }
+            });
+        }
+
+        async function saveQuickFuel() {
+            const odoInput = document.getElementById('quickOdoInput');
+            const odoVal = parseFloat(odoInput ? odoInput.value : 0) || (data.odometer || 0);
+            const priceInput = document.getElementById('quickFuelPrice');
+            const priceVal = parseFloat(priceInput ? priceInput.value : 0) || 0;
+
+            const now = new Date();
+            const localIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            const oilMl = Math.round(quickFuelLitros * 20);
+
+            const entry = {
+                id: 'r_' + Date.now(),
+                date: localIso,
+                km: odoVal,
+                litros: quickFuelLitros,
+                price: priceVal,
+                fullTank: quickFuelLitros >= 4.0,
+                title: 'Repostaje Gasolinera HUD',
+                logType: 'repostaje',
+                notes: `Mezcla 2T 2.0% (${oilMl}ml JASO FD)`
+            };
+
+            data.repostajes = data.repostajes || [];
+            data.repostajes.unshift(entry);
+            data.repostajes.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (odoVal > (data.odometer || 0)) {
+                data.odometer = odoVal;
+            }
+
+            closeQuickFuelModal();
+            await saveData();
+            triggerHaptic('success');
+            showToast(`⛽ Repostaje HUD guardado: ${quickFuelLitros}L + ${oilMl}ml Aceite 2T`);
         }
 
         // --- LOGS, GASTOS & EXPENSES SECTION ---
@@ -4397,6 +4642,7 @@
         };
 
         function filterGastos(cat) {
+            triggerHaptic('light');
             ['all', 'fuel', 'maint', 'legal'].forEach(c => {
                 const btn = document.getElementById('gf-' + c);
                 if (btn) {
@@ -4418,6 +4664,7 @@
         }
 
         function filterDiario(cat) {
+            triggerHaptic('light');
             currentDiarioFilter = cat;
             document.querySelectorAll('.diario-filter-btn').forEach(btn => {
                 btn.className = 'px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0 diario-filter-btn';
