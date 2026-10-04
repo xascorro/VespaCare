@@ -17,78 +17,155 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --vespa: #c19a6b; /* Camel principal */
-            --vespa-light: #d4b483; /* Camel claro */
-            --vespa-dark: #8b5a2b; /* Cuero oscuro */
-            --cream: #f8f9fa; /* Fondo muy claro */
-            --vespa-body: #ffffff; /* Blanco Vespa */
-            --chrome: #cbd5e1; /* Detalle cromado */
+            /* Paleta Artesanal Vespa PK 125 S (1984) */
+            --vespa: #b88b58; /* Camel Cuero Cálido */
+            --vespa-light: #dfc7a7; /* Camel Claro / Arena */
+            --vespa-dark: #7c4e24; /* Cuero Oscuro Profundo */
+            --vespa-glow: rgba(184, 139, 88, 0.22);
+            --cream: #f9f8f6; /* Fondo Marfil Cálido */
+            --surface: #ffffff;
+            --surface-elevated: #ffffff;
+            --surface-border: rgba(184, 139, 88, 0.14);
+            --surface-hairline: rgba(0, 0, 0, 0.05);
+            --vespa-body: #ffffff;
+            --chrome: #cbd5e1;
+
+            /* Tipografía y Jerarquía */
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+
+            /* Físicas de Muelles (Emil Kowalski Spring Physics) */
+            --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --spring-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+            --spring-fast: cubic-bezier(0.16, 1, 0.3, 1);
+
+            /* Elevación Multicapa Artesanal (Impeccable Shadows) */
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(124, 78, 36, 0.03);
+            --shadow-sm: 0 3px 8px -1px rgba(124, 78, 36, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 8px 20px -3px rgba(124, 78, 36, 0.08), 0 3px 8px -2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 16px 36px -6px rgba(124, 78, 36, 0.12), 0 6px 14px -3px rgba(0, 0, 0, 0.05);
+            --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 8px 24px -4px rgba(124, 78, 36, 0.07);
         }
+
+        /* Renderizado tipográfico óptico */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
         body { 
             background-color: var(--cream); 
-            font-family: 'Inter', sans-serif; 
-            color: #334155;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            color: var(--text-main);
             -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
         }
-        h1, h2, h3 { font-family: 'DM Serif Display', serif; }
-        .font-mono-num { font-family: 'JetBrains Mono', monospace; }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        h1, h2, h3 { 
+            font-family: 'DM Serif Display', serif; 
+            letter-spacing: -0.01em;
+        }
+
+        .font-mono-num { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-feature-settings: "tnum" 1, "zero" 1;
+        }
+        
+        /* Transición fluida de pestañas con física de muelle */
+        .tab-content { display: none; }
+        .tab-content.active { 
+            display: block; 
+            animation: tabSpringIn 0.35s var(--spring-smooth) forwards; 
+        }
+        @keyframes tabSpringIn { 
+            from { 
+                opacity: 0; 
+                transform: translateY(8px) scale(0.995); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            } 
+        }
+
+        /* Cabecera dinámica con reflejo */
         .header-bg { 
             background: #ffffff;
-            background-image: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border-bottom: 4px solid var(--vespa);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background-image: linear-gradient(180deg, #ffffff 0%, #faf8f5 100%);
+            border-bottom: 3px solid var(--vespa);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.4s var(--spring-smooth);
         }
         .header-bg.header-ok {
             background: #ffffff;
-            background-image: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border-bottom: 4px solid var(--vespa);
+            background-image: linear-gradient(180deg, #ffffff 0%, #faf8f5 100%);
+            border-bottom: 3px solid var(--vespa);
         }
         .header-bg.header-warning {
-            background: #fffbeb !important;
-            background-image: linear-gradient(135deg, #fffdf5 0%, #fef3c7 100%) !important;
-            border-bottom: 4px solid #f59e0b !important;
-            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12) !important;
+            background: #fffdf7 !important;
+            background-image: linear-gradient(180deg, #fffef9 0%, #fef3c7 100%) !important;
+            border-bottom: 3px solid #f59e0b !important;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.15) !important;
         }
         .header-bg.header-alarm {
-            background: #fef2f2 !important;
-            background-image: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%) !important;
-            border-bottom: 4px solid #ef4444 !important;
-            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15) !important;
+            background: #fffafa !important;
+            background-image: linear-gradient(180deg, #fffbfb 0%, #fee2e2 100%) !important;
+            border-bottom: 3px solid #ef4444 !important;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.16) !important;
         }
 
+        /* Tarjetas con acabado artesanal e iluminación de contorno */
         .card { 
-            background: white; 
-            border-radius: 1.15rem; 
-            box-shadow: 0 3px 14px rgba(139, 90, 43, 0.05); 
-            border: 1px solid rgba(193, 154, 107, 0.15); 
+            background: var(--surface); 
+            border-radius: 1.25rem; 
+            box-shadow: var(--shadow-glass); 
+            border: 1px solid var(--surface-border);
+            position: relative;
+            transition: transform 0.25s var(--spring-bounce), box-shadow 0.25s var(--spring-smooth);
+        }
+        .card:hover {
+            box-shadow: var(--shadow-md);
         }
 
+        /* Odómetro Veglia Borletti (1984) Retro-Moderno */
         .odometer-container {
-            background: #18181b;
+            background: linear-gradient(180deg, #111114 0%, #1e1e24 100%);
             padding: 8px 18px;
             border-radius: 1.25rem;
-            border: 3px solid #3f3f46;
-            box-shadow: inset 0 3px 8px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.1);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #383842;
+            box-shadow: inset 0 3px 8px rgba(0,0,0,0.7), 0 6px 16px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.06);
+            transition: all 0.3s var(--spring-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+        .odometer-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+            pointer-events: none;
+            border-radius: 1.15rem 1.15rem 0 0;
         }
         .odometer-container:focus-within {
             background: #ffffff !important;
             border-color: var(--vespa) !important;
-            box-shadow: 0 0 0 4px rgba(193, 154, 107, 0.3), 0 8px 25px rgba(0,0,0,0.15) !important;
+            box-shadow: 0 0 0 4px var(--vespa-glow), var(--shadow-lg) !important;
+            transform: scale(1.02);
         }
         .odometer, input.odometer, input#mainOdo { 
             background: transparent !important; 
             color: #ffffff !important; 
-            font-family: 'JetBrains Mono', 'Courier New', monospace !important; 
+            font-family: 'JetBrains Mono', monospace !important; 
             font-weight: 800 !important;
+            font-feature-settings: "tnum" 1;
             letter-spacing: 5px; 
             font-size: 1.85rem !important; 
             text-align: center; 
@@ -112,61 +189,109 @@
         .nav-active { 
             background: var(--vespa); 
             color: white !important; 
-            box-shadow: 0 4px 12px rgba(139, 90, 43, 0.3);
+            box-shadow: 0 4px 14px var(--vespa-glow);
+            transform: translateY(-1px);
         }
         
+        /* Inputs táctiles con respuesta elástica */
         input, select, textarea { 
             border: 1px solid #e2e8f0 !important; 
-            border-radius: 0.75rem !important; 
-            padding: 0.6rem 0.75rem !important; 
+            border-radius: 0.85rem !important; 
+            padding: 0.65rem 0.85rem !important; 
             width: 100%; 
             outline: none; 
-            transition: all 0.2s; 
-            background: #f8fafc; 
+            transition: all 0.2s var(--spring-smooth); 
+            background: #fafaf9; 
+            font-feature-settings: "tnum" 1;
         }
         input:focus, select:focus, textarea:focus { 
             border-color: var(--vespa) !important; 
             background: white; 
-            box-shadow: 0 0 0 4px rgba(193, 154, 107, 0.15); 
+            box-shadow: 0 0 0 4px var(--vespa-glow); 
+            transform: translateY(-1px);
         }
         
+        /* Botones táctiles interactivos con microcompresión (Emil Kowalski) */
         .btn-primary { 
-            background: var(--vespa); 
+            background: linear-gradient(180deg, #c19a6b 0%, #b88b58 100%); 
             color: white; 
-            padding: 0.75rem 1rem; 
-            border-radius: 0.85rem; 
+            padding: 0.8rem 1.1rem; 
+            border-radius: 0.95rem; 
             font-weight: 800; 
             width: 100%; 
             text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.2s;
+            letter-spacing: 0.8px;
+            box-shadow: 0 4px 12px var(--vespa-glow), inset 0 1px 0 rgba(255,255,255,0.25);
+            transition: all 0.2s var(--spring-bounce);
+            cursor: pointer;
+            border: 1px solid rgba(124, 78, 36, 0.15);
         }
-        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:active { 
+            transform: scale(0.965); 
+            box-shadow: 0 2px 6px var(--vespa-glow);
+        }
 
-        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: #e2e8f0; z-index: 1000; display: none; }
-        .loading-bar { height: 100%; background: var(--vespa); width: 30%; animation: load 1.5s infinite linear; }
+        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: #e2e8f0; z-index: 1000; display: none; }
+        .loading-bar { height: 100%; background: var(--vespa); width: 30%; animation: load 1.2s infinite ease-in-out; }
         @keyframes load { from { left: -30%; } to { left: 100%; } }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(26, 26, 26, 0.75); backdrop-filter: blur(6px); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
-        .modal.active { display: flex; }
+        /* Modales con desenfoque de fondo y física fluida */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(15, 23, 42, 0.65); 
+            backdrop-filter: blur(12px) saturate(160%); 
+            -webkit-backdrop-filter: blur(12px) saturate(160%);
+            z-index: 100; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 1rem; 
+            transition: opacity 0.25s ease-out;
+        }
+        .modal.active { 
+            display: flex; 
+            animation: modalFadeIn 0.25s var(--spring-smooth) forwards;
+        }
+        .modal.active > .card {
+            animation: modalPopIn 0.3s var(--spring-bounce) forwards;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes modalPopIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
-        .maint-badge { font-size: 9px; padding: 2px 8px; border-radius: 99px; font-weight: 800; text-transform: uppercase; }
+        .maint-badge { 
+            font-size: 9px; 
+            padding: 3px 9px; 
+            border-radius: 99px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            font-feature-settings: "tnum" 1;
+        }
         
-        /* Keypad Styles */
+        /* Keypad Styles con micro-pulsación */
         .keypad-btn {
-            background: #f8fafc;
+            background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 0.85rem;
-            font-size: 1.15rem;
+            border-radius: 1rem;
+            font-size: 1.2rem;
             font-weight: 800;
-            color: #1e293b;
-            padding: 0.65rem;
-            transition: all 0.1s ease;
+            color: #0f172a;
+            padding: 0.75rem;
+            box-shadow: var(--shadow-xs);
+            transition: all 0.15s var(--spring-bounce);
             user-select: none;
         }
         .keypad-btn:active {
-            background: #e2e8f0;
-            transform: scale(0.95);
+            background: #f1f5f9;
+            transform: scale(0.92);
+            box-shadow: none;
         }
 
         .shake {
@@ -179,36 +304,34 @@
             40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
-        /* Toast notification */
+        /* Toast notification con micro-muelle */
         #toast {
             visibility: hidden;
             min-width: 250px;
-            background-color: #1e293b;
-            color: #fff;
+            background-color: #0f172a;
+            color: #ffffff;
             text-align: center;
-            border-radius: 1rem;
-            padding: 12px 20px;
+            border-radius: 1.15rem;
+            padding: 12px 22px;
             position: fixed;
             z-index: 150;
             left: 50%;
             bottom: 90px;
-            transform: translateX(-50%);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateX(-50%) scale(0.95);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.1);
             font-size: 0.85rem;
             font-weight: 700;
             opacity: 0;
-            transition: opacity 0.3s, bottom 0.3s;
+            transition: opacity 0.3s var(--spring-smooth), bottom 0.3s var(--spring-bounce), transform 0.3s var(--spring-bounce);
         }
         #toast.show {
             visibility: visible;
             opacity: 1;
             bottom: 105px;
+            transform: translateX(-50%) scale(1);
         }
         
-        body {
-            overscroll-behavior-y: none;
-        }
-        /* Custom scrollbar */
+        /* Custom scrollbar artesanal */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: var(--cream); }
         ::-webkit-scrollbar-thumb { background: var(--vespa-light); border-radius: 10px; }
