@@ -1,7 +1,7 @@
 # Resumen de Sesión - VespaCare
 Fecha: 2026-10-04
 
-- Añadida funcionalidad de edición completa de documentos en la Guantera Digital (botón de lápiz, modal responsivo editDocModal para corregir título, categoría y notas sin resubir).
-- Renovados los gráficos de la sección Stats (Chart.js con gradientes translúcidos, tensión de curva 0.4, barras redondeadas y tooltips esmerilados).
-- Versión PWA actualizada a v69 (sw.js e index.html).
+- Implementadas las micro-pills de tendencia dinámica en las 4 tarjetas de Stats (comparador de coste/100km, rendimiento óptimo/normal de consumo 16.5 km/L, TCO y gasto).
+- Implementada la barra de filtros rápidos tipo cápsula (Pills) en la pestaña Gastos (Todos, Gasolina, Taller/Piezas, Papeleo).
+- Versión PWA actualizada a v70 (sw.js e index.html).
 - Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
