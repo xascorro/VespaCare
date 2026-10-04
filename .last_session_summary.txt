@@ -1,6 +1,7 @@
 # Resumen de Sesión - VespaCare
 Fecha: 2026-10-04
 
-- Actualizadas directrices operativas en AGENTS.md (reglas de trabajo para AGY y auto-resumen de sesión).
-- Añadida skill vespa-data-guard (.agents/skills/vespa-data-guard/SKILL.md).
-- Commit y push al repositorio remoto en GitHub.
+- Creada rama 'feature/design-system' para pruebas del sistema de diseño Emil Kowalski + Impeccable (Fase 1).
+- Implementado sistema base: tipografía óptica con números tabulares (tnum), sombras multicapa cálidas (layered shadows), físicas de muelles (--spring-bounce, --spring-smooth) y microinteracciones táctiles elásticas.
+- Actualizada versión PWA a v66 (sw.js y index.html).
+- Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
