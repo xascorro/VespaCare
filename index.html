@@ -770,8 +770,8 @@
                         <i class="fas fa-gas-pump"></i>
                     </div>
                     <div>
-                        <h3 class="text-base font-black text-white tracking-wide uppercase">Modo Gasolinera</h3>
-                        <p class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">HUD Rápido / Guantes</p>
+                        <h3 class="text-base font-black text-white tracking-wide uppercase">Repostaje Rápido</h3>
+                        <p class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">HUD Gasolinera / Guantes</p>
                     </div>
                 </div>
                 <button onclick="closeQuickFuelModal()" class="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-900 border border-slate-800">
@@ -780,18 +780,16 @@
             </div>
 
             <div class="flex-1 overflow-y-auto space-y-4 pr-0.5">
-                <!-- 1. Odómetro con Botones XXL -->
+                <!-- 1. Odómetro con Botones XXL (+1, +10) -->
                 <div class="p-3.5 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Odómetro en Surtidor:</span>
                         <span class="text-[10px] font-bold text-amber-400">km actuales</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button type="button" onclick="adjustQuickOdo(-10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm active:scale-90 transition-all border border-slate-700">-10</button>
-                        <button type="button" onclick="adjustQuickOdo(-1)" class="w-10 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm active:scale-90 transition-all border border-slate-700">-1</button>
-                        <input type="number" id="quickOdoInput" step="0.1" class="flex-1 h-12 bg-black border-2 border-amber-500/80 rounded-xl text-2xl font-black text-center font-mono-num text-amber-400 focus:border-amber-400">
-                        <button type="button" onclick="adjustQuickOdo(+1)" class="w-10 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm active:scale-90 transition-all border border-slate-700">+1</button>
-                        <button type="button" onclick="adjustQuickOdo(+10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm active:scale-90 transition-all border border-slate-700">+10</button>
+                    <div class="flex items-center gap-2.5">
+                        <input type="number" id="quickOdoInput" step="0.1" class="flex-1 h-14 bg-black border-2 border-amber-500/80 rounded-2xl text-2xl font-black text-center font-mono-num text-amber-400 focus:border-amber-400">
+                        <button type="button" onclick="adjustQuickOdo(+1)" class="w-14 h-14 bg-slate-800 hover:bg-slate-700 active:bg-amber-600 text-white rounded-2xl font-black text-base active:scale-90 transition-all border border-slate-700 shadow-md flex items-center justify-center">+1</button>
+                        <button type="button" onclick="adjustQuickOdo(+10)" class="w-14 h-14 bg-slate-800 hover:bg-slate-700 active:bg-amber-600 text-white rounded-2xl font-black text-base active:scale-90 transition-all border border-slate-700 shadow-md flex items-center justify-center">+10</button>
                     </div>
                 </div>
 
@@ -2314,7 +2312,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v75 • Repostaje Rápido & Micro-hápticos</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v76 • Repostaje Rápido & Micro-hápticos</span>
                     </div>
                 </div>
 
@@ -2360,7 +2358,7 @@
         if ('serviceWorker' in navigator) {
             const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=75')
+                navigator.serviceWorker.register('/sw.js?v=76')
                     .then(reg => {
                         reg.update();
                     })
