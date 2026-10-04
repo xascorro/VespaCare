@@ -2132,7 +2132,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v67 • Floating Navbar, Bottom Sheets & 2T Táctil</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v68 • Breathing Pulse Alerts & Live Data</span>
                     </div>
                 </div>
 
@@ -2177,7 +2177,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=67')
+                navigator.serviceWorker.register('/sw.js?v=68')
                     .then(reg => {
                         reg.update();
                     })
@@ -5316,27 +5316,27 @@
                 if (garageVespaHero) garageVespaHero.style.display = 'none';
                 if (overallBadge) {
                     if (hasAlarms) {
-                        overallBadge.className = 'text-[9px] bg-red-50 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-black uppercase animate-pulse';
+                        overallBadge.className = 'text-[9px] bg-red-50 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-black uppercase pulse-breathing';
                     } else {
-                        overallBadge.className = 'text-[9px] bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-black uppercase';
+                        overallBadge.className = 'text-[9px] bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-black uppercase pulse-breathing';
                     }
                     overallBadge.innerHTML = `<i class="fas fa-bell mr-1"></i>${alerts.length} Aviso${alerts.length > 1 ? 's' : ''}`;
                 }
                 container.innerHTML = alerts.map(a => `
-                    <div class="p-2.5 rounded-xl border ${a.bg} flex justify-between items-center gap-2">
+                    <div class="p-3 rounded-2xl border ${a.bg} flex justify-between items-center gap-2 pulse-breathing shadow-xs">
                         <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                            <div class="w-7 h-7 rounded-lg bg-white/80 ${a.color} flex items-center justify-center text-xs shrink-0 shadow-xs">
+                            <div class="w-8 h-8 rounded-xl bg-white/90 ${a.color} flex items-center justify-center text-sm shrink-0 shadow-xs">
                                 <i class="${a.icon}"></i>
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <p class="font-bold text-xs text-slate-800 break-words">${a.title}</p>
-                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded ${a.badgeCls}">${a.badge}</span>
+                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md ${a.badgeCls}">${a.badge}</span>
                                 </div>
-                                <p class="text-[10px] text-slate-500 break-words mt-0.5 leading-snug">${a.desc}</p>
+                                <p class="text-[10.5px] text-slate-500 break-words mt-0.5 leading-snug">${a.desc}</p>
                             </div>
                         </div>
-                        <button onclick="${a.action}" class="bg-slate-900 hover:bg-slate-800 text-white px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider shrink-0 shadow-xs active:scale-95 transition-all">
+                        <button onclick="${a.action}" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-xl text-[9.5px] font-black uppercase tracking-wider shrink-0 shadow-xs active:scale-95 transition-all">
                             ${a.btnText}
                         </button>
                     </div>
