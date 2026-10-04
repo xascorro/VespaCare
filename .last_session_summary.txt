@@ -1,7 +1,9 @@
 # Resumen de Sesión - VespaCare
 Fecha: 2026-10-04
 
-- Simplificado el botón en la pestaña Garaje a un formato limpio y directo: **"Repostaje Rápido"** con icono de surtidor, eliminando los subtítulos explicativos y el badge lateral (v75).
-- Versión PWA actualizada a v75 (sw.js e index.html).
+- Ajustado el HUD de **Repostaje Rápido**:
+  - Eliminados los botones `-1` y `-10` del odómetro.
+  - Ampliado el campo numérico central del odómetro y agrandados los botones de incremento rápido (`+1` y `+10`) con tamaño XXL para facilitar la pulsación con guantes (v76).
+- Versión PWA actualizada a v76 (sw.js e index.html).
 - Purgada la caché de Cloudflare para pedrodiaz.eu.
 - Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
