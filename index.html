@@ -235,14 +235,14 @@
         .loading-bar { height: 100%; background: var(--vespa); width: 30%; animation: load 1.2s infinite ease-in-out; }
         @keyframes load { from { left: -30%; } to { left: 100%; } }
 
-        /* Modales con desenfoque de fondo y física fluida */
+        /* Modales con desenfoque de fondo y formato Bottom-Sheet móvil nativo */
         .modal { 
             display: none; 
             position: fixed; 
             inset: 0; 
             background: rgba(15, 23, 42, 0.65); 
-            backdrop-filter: blur(12px) saturate(160%); 
-            -webkit-backdrop-filter: blur(12px) saturate(160%);
+            backdrop-filter: blur(14px) saturate(170%); 
+            -webkit-backdrop-filter: blur(14px) saturate(170%);
             z-index: 100; 
             align-items: center; 
             justify-content: center; 
@@ -254,15 +254,88 @@
             animation: modalFadeIn 0.25s var(--spring-smooth) forwards;
         }
         .modal.active > .card {
-            animation: modalPopIn 0.3s var(--spring-bounce) forwards;
+            animation: modalPopIn 0.35s var(--spring-bounce) forwards;
         }
         @keyframes modalFadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
         @keyframes modalPopIn {
-            from { opacity: 0; transform: translateY(16px) scale(0.96); }
+            from { opacity: 0; transform: translateY(20px) scale(0.96); }
             to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Bottom Sheet en pantallas móviles (Estilo iOS / Emil Kowalski) */
+        @media (max-width: 640px) {
+            .modal {
+                align-items: flex-end !important;
+                padding: 0 !important;
+            }
+            .modal.active > .card {
+                animation: sheetSlideUp 0.35s var(--spring-smooth) forwards;
+                border-bottom-left-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+                border-top-left-radius: 1.75rem !important;
+                border-top-right-radius: 1.75rem !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                max-height: 90vh !important;
+                box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.3) !important;
+                border-left: none !important;
+                border-right: none !important;
+                border-bottom: none !important;
+            }
+        }
+        @keyframes sheetSlideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Barra de agarre de bottom-sheet */
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: #cbd5e1;
+            border-radius: 99px;
+            margin: 0 auto 10px;
+            opacity: 0.8;
+        }
+
+        /* Barra de navegación flotante tipo cápsula */
+        .navbar-capsule {
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            border-radius: 1.5rem;
+            padding: 6px;
+        }
+        .nav-btn {
+            position: relative;
+            transition: all 0.25s var(--spring-bounce);
+            border-radius: 1rem;
+        }
+        .nav-btn:active {
+            transform: scale(0.90);
+        }
+        .nav-btn.nav-active {
+            background: linear-gradient(180deg, #c19a6b 0%, #b88b58 100%);
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px var(--vespa-glow), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        .nav-btn.nav-active i {
+            transform: translateY(-1px) scale(1.15);
+            transition: transform 0.25s var(--spring-bounce);
+        }
+
+        /* Micropulso elegante (Breathing Pulse) para alertas de mantenimiento */
+        .pulse-breathing {
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.04); opacity: 0.85; filter: brightness(1.1); }
         }
 
         .maint-badge { 
@@ -983,59 +1056,78 @@
         <section id="tab-garage" class="tab-content active space-y-3.5">
             <!-- Quick Actions -->
             <div class="grid grid-cols-2 gap-3">
-                <div class="card p-4 border-b-4 border-vespa">
-                    <div class="flex items-center gap-2 mb-2 text-amber-700">
-                        <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                            <i class="fas fa-vial"></i>
+                <div class="card p-3.5 border-b-4 border-vespa flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5 text-amber-800">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-700 flex items-center justify-center text-xs shadow-xs">
+                                    <i class="fas fa-vial"></i>
+                                </div>
+                                <h2 class="text-xs font-black uppercase tracking-wider text-amber-900">Mezcla 2%</h2>
+                            </div>
+                            <span class="text-[8.5px] font-bold text-amber-700 bg-amber-100/70 px-1.5 py-0.5 rounded-md">1:50</span>
                         </div>
-                        <h2 class="text-xs font-black uppercase tracking-widest">Mezcla 2%</h2>
+                        <div class="flex items-baseline justify-between mb-1">
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="calcLitros" placeholder="0" step="0.5" min="0" max="10" class="text-xl font-black bg-slate-50 border border-slate-200/80 rounded-lg px-2 py-0.5 w-16 text-center font-mono-num" oninput="calcMix(this.value)">
+                                <span class="text-[10px] font-bold text-slate-400">L</span>
+                            </div>
+                            <p id="mixResult" class="text-xl font-black text-amber-800 font-mono-num">0<span class="text-[10px] ml-0.5 font-semibold text-slate-400">ml</span></p>
+                        </div>
                     </div>
-                    <div class="flex items-end gap-2">
-                        <input type="number" id="calcLitros" placeholder="L" class="text-xl font-black bg-slate-50 border-none" oninput="calcMix(this.value)">
-                        <p id="mixResult" class="text-2xl font-black text-amber-800 pb-2">0<span class="text-xs ml-1">ml</span></p>
+                    <!-- Quick Presets Táctiles -->
+                    <div class="grid grid-cols-4 gap-1 pt-1.5 border-t border-slate-100">
+                        <button type="button" onclick="setMixLitros(1)" class="py-1 bg-slate-50 hover:bg-amber-50 text-[9.5px] font-black text-slate-700 hover:text-amber-800 rounded-md border border-slate-200/60 transition-all active:scale-90 shadow-xs">1L</button>
+                        <button type="button" onclick="setMixLitros(2)" class="py-1 bg-slate-50 hover:bg-amber-50 text-[9.5px] font-black text-slate-700 hover:text-amber-800 rounded-md border border-slate-200/60 transition-all active:scale-90 shadow-xs">2L</button>
+                        <button type="button" onclick="setMixLitros(3)" class="py-1 bg-slate-50 hover:bg-amber-50 text-[9.5px] font-black text-slate-700 hover:text-amber-800 rounded-md border border-slate-200/60 transition-all active:scale-90 shadow-xs">3L</button>
+                        <button type="button" onclick="setMixLitros(5)" class="py-1 bg-amber-600 hover:bg-amber-700 text-[9.5px] font-black text-white rounded-md transition-all active:scale-90 shadow-xs" title="Depósito lleno 5.0L">5L ⛽</button>
                     </div>
                 </div>
-                <div onclick="openHomeStockModal()" class="card p-4 border-b-4 border-orange-400 cursor-pointer hover:shadow-md transition-all group active:scale-95">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2 text-orange-600">
-                            <div class="w-10 h-10 rounded-xl bg-orange-50 group-hover:bg-orange-100 flex items-center justify-center transition-colors">
+                <div onclick="openHomeStockModal()" class="card p-3.5 border-b-4 border-orange-400 cursor-pointer hover:shadow-md transition-all group active:scale-95 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-1.5 text-orange-600">
+                            <div class="w-7 h-7 rounded-lg bg-orange-50 group-hover:bg-orange-100 flex items-center justify-center text-xs transition-colors">
                                 <i class="fas fa-boxes-stacked"></i>
                             </div>
                             <div>
-                                <h2 class="text-xs font-black uppercase tracking-widest">Stock Casa</h2>
-                                <span class="text-[8px] font-bold text-orange-500 uppercase tracking-tighter">Taller / Repuestos</span>
+                                <h2 class="text-xs font-black uppercase tracking-wider">Stock Casa</h2>
+                                <span class="text-[7.5px] font-bold text-orange-500 uppercase tracking-tighter block">Garaje / Taller</span>
                             </div>
                         </div>
-                        <span class="text-[9px] bg-orange-50 text-orange-800 px-1.5 py-0.5 rounded font-black uppercase"><i class="fas fa-chevron-right text-[8px]"></i></span>
+                        <span class="text-[8.5px] bg-orange-50 text-orange-800 px-1.5 py-0.5 rounded font-black uppercase"><i class="fas fa-chevron-right text-[7px]"></i></span>
                     </div>
-                    <div class="flex items-baseline justify-between">
-                        <p id="homeFuelDisplay" class="text-3xl font-black text-slate-800">0<span class="text-sm ml-1 text-slate-400">L</span></p>
+                    <div class="flex items-baseline justify-between pt-1">
+                        <p id="homeFuelDisplay" class="text-2xl font-black text-slate-800 font-mono-num">0<span class="text-xs ml-1 text-slate-400 font-sans">L</span></p>
                         <span id="homeStockItemsCountBadge" class="text-[9px] font-bold text-slate-400">0 recambios</span>
                     </div>
                 </div>
             </div>
 
             <!-- Estimated Range Big Card -->
-            <div class="card p-4.5 p-4 relative overflow-hidden">
+            <div class="card p-4 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-5">
                     <i class="fas fa-route text-8xl"></i>
                 </div>
                 <div class="flex justify-between items-end mb-3 relative z-10">
                     <div>
-                        <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Autonomía Restante</h2>
-                        <p id="estRangeText" class="text-4xl font-black text-slate-800 tracking-tighter">- km</p>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Autonomía Estimada</h2>
+                        <p id="estRangeText" class="text-4xl font-black text-slate-800 tracking-tight font-mono-num">- km</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-[10px] font-black text-slate-300 uppercase mb-1">Último Repostaje</p>
-                        <p id="lastFuelDate" class="text-sm font-bold text-amber-800">-</p>
+                        <p class="text-[9px] font-black text-slate-300 uppercase mb-1">Último Repostaje</p>
+                        <p id="lastFuelDate" class="text-xs font-bold text-amber-800">-</p>
                     </div>
                 </div>
-                <div class="space-y-3 relative z-10">
-                    <div class="w-full bg-slate-100 h-4 rounded-full p-1 shadow-inner">
-                        <div id="estRangeBar" class="bg-gradient-to-r from-red-400 to-amber-600 h-full rounded-full transition-all duration-1000" style="width: 0%"></div>
+                <div class="space-y-2 relative z-10">
+                    <div class="relative w-full bg-slate-100 h-3.5 rounded-full p-0.5 shadow-inner overflow-hidden">
+                        <!-- Marcador de Reserva a 1.2L (24% del depósito) -->
+                        <div class="absolute top-0 bottom-0 left-[24%] w-[2px] bg-slate-300/80 z-10" title="Zona de Reserva 1.2L"></div>
+                        <div id="estRangeBar" class="bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500 h-full rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <p id="estRangeDetails" class="text-[10px] font-bold text-slate-400 italic">Cargando datos de telemetría...</p>
+                    <div class="flex justify-between items-center text-[9px] font-semibold text-slate-400">
+                        <span class="text-red-500 font-bold">🔴 Reserva (1.2L)</span>
+                        <p id="estRangeDetails" class="italic truncate max-w-[200px]">Calculando telemetría...</p>
+                        <span class="text-emerald-600 font-bold">Lleno (5.0L) 🟢</span>
                     </div>
                 </div>
             </div>
@@ -2040,7 +2132,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v66 • Diseño Artesanal Emil + Impeccable</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v67 • Floating Navbar, Bottom Sheets & 2T Táctil</span>
                     </div>
                 </div>
 
@@ -2057,25 +2149,25 @@
         </section>
     </main>
 
-    <!-- NAVBAR VINTAGE (5 PESTAÑAS OPERATIVAS) -->
-    <nav class="fixed bottom-3 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur-xl border border-white/10 p-1.5 flex gap-1 rounded-2xl shadow-2xl z-50 w-[96%] max-w-lg">
-        <button onclick="showTab('garage')" id="nav-garage" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all duration-300 nav-active">
+    <!-- NAVBAR VINTAGE FLOTANTE TIPO CÁPSULA (EMIL KOWALSKI DESIGN) -->
+    <nav class="navbar-capsule fixed bottom-3.5 left-1/2 -translate-x-1/2 flex gap-1 z-50 w-[96%] max-w-md">
+        <button onclick="showTab('garage')" id="nav-garage" class="nav-btn flex-1 py-2 flex flex-col items-center text-slate-400 hover:text-slate-200 nav-active">
             <i class="fas fa-motorcycle text-lg"></i>
             <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Garaje</span>
         </button>
-        <button onclick="showTab('diario')" id="nav-diario" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+        <button onclick="showTab('diario')" id="nav-diario" class="nav-btn flex-1 py-2 flex flex-col items-center text-slate-400 hover:text-slate-200">
             <i class="fas fa-book-open text-lg"></i>
             <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Diario</span>
         </button>
-        <button onclick="showTab('health')" id="nav-health" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+        <button onclick="showTab('health')" id="nav-health" class="nav-btn flex-1 py-2 flex flex-col items-center text-slate-400 hover:text-slate-200">
             <i class="fas fa-tools text-lg"></i>
             <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Taller</span>
         </button>
-        <button onclick="showTab('logs')" id="nav-logs" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+        <button onclick="showTab('logs')" id="nav-logs" class="nav-btn flex-1 py-2 flex flex-col items-center text-slate-400 hover:text-slate-200">
             <i class="fas fa-receipt text-lg"></i>
             <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Gastos</span>
         </button>
-        <button onclick="showTab('stats')" id="nav-stats" class="flex-1 py-2 rounded-xl flex flex-col items-center text-slate-500 transition-all">
+        <button onclick="showTab('stats')" id="nav-stats" class="nav-btn flex-1 py-2 flex flex-col items-center text-slate-400 hover:text-slate-200">
             <i class="fas fa-chart-pie text-lg"></i>
             <span class="text-[8.5px] font-black mt-1 uppercase tracking-wider">Stats</span>
         </button>
@@ -2085,7 +2177,7 @@
         // PWA Service Worker Registration con actualización inmediata
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=66')
+                navigator.serviceWorker.register('/sw.js?v=67')
                     .then(reg => {
                         reg.update();
                     })
@@ -2893,7 +2985,16 @@
 
         // --- CALCULADORA DE MEZCLA ---
         function calcMix(litros) {
-            document.getElementById('mixResult').innerHTML = `${Math.round(litros * 20)}<span class="text-xs ml-1">ml</span>`;
+            const l = parseFloat(litros) || 0;
+            document.getElementById('mixResult').innerHTML = `${Math.round(l * 20)}<span class="text-xs ml-1 font-semibold text-slate-400">ml</span>`;
+        }
+
+        function setMixLitros(l) {
+            const input = document.getElementById('calcLitros');
+            if (input) {
+                input.value = l;
+                calcMix(l);
+            }
         }
 
         function setMixRatio(ratio) {
