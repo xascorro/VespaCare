@@ -1,10 +1,9 @@
 # Resumen de Sesión - VespaCare
 Fecha: 2026-10-04
 
-- Forzado de refresco y solución definitiva PWA (v73):
-  1. En `sw.js`, configurado `fetch(event.request, { cache: 'no-store' })` para navegación, HTML y API para forzar al navegador a solicitar siempre el archivo vivo sin caché residual.
-  2. En `index.html`, llamada explícita a `showTab('garage')` tras `loadData()` para garantizar que la sección de Garaje y la barra de navegación se activen y pinten visiblemente al desbloquear con el PIN.
-  3. Comprobación de ciclo de vida completo verificada con JSDOM (desbloqueo, carga de API y renderizado del odómetro 984.3 km sin errores).
-- Versión PWA actualizada a v73 (sw.js e index.html).
-- Purgada la caché perimetral de Cloudflare para pedrodiaz.eu.
+- Resuelto el problema de pantalla en blanco (v74):
+  - **Causa raíz identificada**: Faltaba la etiqueta de cierre `</div>` en `<div id="editDocModal" class="modal">` (creado para editar títulos de documentos). Al quedar sin cerrar, todo el contenido posterior (`quickFuelModal`, `header`, `main`, `tab-garage` y `nav`) quedó anidado dentro de ese modal oculto (`display: none`), por lo que al desaparecer la pantalla del PIN la página quedaba completamente en blanco.
+  - **Corrección**: Añadida la etiqueta de cierre `</div>` correspondiente, validada la estructura HTML al 100% libre de etiquetas desparejadas, y verificado que el `<header>`, `<main>` y `<nav>` están en el nivel raíz del `<body>`.
+- Versión PWA actualizada a v74 (sw.js e index.html).
+- Purgada la caché de Cloudflare para pedrodiaz.eu.
 - Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
