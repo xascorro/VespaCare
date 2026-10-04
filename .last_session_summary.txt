@@ -1,0 +1,6 @@
+# Resumen de Sesión - VespaCare
+Fecha: 2026-10-04
+
+- Actualizadas directrices operativas en AGENTS.md (reglas de trabajo para AGY y auto-resumen de sesión).
+- Añadida skill vespa-data-guard (.agents/skills/vespa-data-guard/SKILL.md).
+- Commit y push al repositorio remoto en GitHub.

@@ -60,3 +60,15 @@ curl -IL https://vespa.pedrodiaz.eu
   * Intervalo de comprobación: cada 3 semanas (21 días).
 * **Aceite de cárter/caja:** 250 ml de SAE 30 Mineral.
 * **Mezcla 2T:** 2.0% (1:50) con aceite sintético JASO FD.
+
+---
+
+## 🤖 4. Reglas de Trabajo para AGY
+1. **Directorio Raíz**: Toda consulta, análisis o modificación debe tomar como referencia el directorio `/home/ubuntu/VespaCare`.
+2. **Seguridad y Persistencia de Datos**:
+   - `data.json` es la fuente principal de datos. Respeta siempre su estructura JSON y permisos `664`.
+   - `pin_config.json` contiene la clave de acceso Zero-Trust. Nunca exponer ni alterar credenciales sin orden explícita.
+3. **Control de Versiones y Despliegue**:
+   - Cada cambio en `index.html` o `sw.js` requiere actualizar el número de versión de caché para que los dispositivos móviles/PWA descarguen la última versión sin quedar bloqueados en caché.
+4. **Auto-resumen de sesión por desconexiones**:
+   - Al finalizar un trabajo o bloque importante en este directorio, crea/actualiza el archivo `.last_session_summary.txt` en la raíz del proyecto con un resumen muy breve de los cambios realizados, archivos modificados y estado del proyecto. Esto permitirá al usuario ver de un vistazo qué se hizo si se le corta la conexión SSH en el móvil.
