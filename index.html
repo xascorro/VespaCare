@@ -2322,7 +2322,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v71 • Modo Gasolinera HUD & Micro-hápticos</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v72 • Modo Gasolinera HUD & Micro-hápticos</span>
                     </div>
                 </div>
 
@@ -2364,10 +2364,11 @@
     </nav>
 
     <script>
-        // PWA Service Worker Registration con actualización inmediata
+        // PWA Service Worker Registration con actualización inmediata y protección anti-bucle
         if ('serviceWorker' in navigator) {
+            const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=71')
+                navigator.serviceWorker.register('/sw.js?v=72')
                     .then(reg => {
                         reg.update();
                     })
@@ -2376,8 +2377,11 @@
 
             let refreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
+                let lastReload = 0;
+                try { lastReload = parseInt(sessionStorage.getItem('vespa_sw_reload') || '0', 10); } catch(e) {}
+                if (hadController && !refreshing && (Date.now() - lastReload > 8000)) {
                     refreshing = true;
+                    try { sessionStorage.setItem('vespa_sw_reload', Date.now().toString()); } catch(e) {}
                     window.location.reload();
                 }
             });
@@ -2402,13 +2406,30 @@
             }, 500);
         }
 
-        let data = {};
+        let data = {
+            odometer: 0,
+            mantenimientos: [],
+            repostajes: [],
+            inventario: [],
+            bombillas: [],
+            documentos: [],
+            stockCasa: [],
+            diario: [],
+            homeFuelStock: 0,
+            documentacion: {},
+            tankCapacity: 5.0
+        };
         const COLORS = ['bg-amber-600', 'bg-blue-500', 'bg-orange-500', 'bg-purple-500', 'bg-pink-500'];
         let currentMixRatio = 2.0;
         let isPinProtectedOnServer = true;
 
         // --- MICRO-HÁPTICOS TÁCTILES NATIVOS ---
-        let hapticsEnabled = localStorage.getItem('vespa_haptics') !== 'false';
+        let hapticsEnabled = true;
+        try {
+            hapticsEnabled = localStorage.getItem('vespa_haptics') !== 'false';
+        } catch(e) {
+            hapticsEnabled = true;
+        }
 
         function triggerHaptic(type = 'light') {
             if (!hapticsEnabled || !navigator.vibrate) return;
@@ -2423,7 +2444,9 @@
 
         function toggleHaptics(checked) {
             hapticsEnabled = !!checked;
-            localStorage.setItem('vespa_haptics', hapticsEnabled ? 'true' : 'false');
+            try {
+                localStorage.setItem('vespa_haptics', hapticsEnabled ? 'true' : 'false');
+            } catch(e) {}
             if (hapticsEnabled) triggerHaptic('light');
             showToast(hapticsEnabled ? 'Vibración háptica activada' : 'Vibración háptica desactivada');
         }
@@ -2764,15 +2787,21 @@
         });
 
         function initSettingsUI() {
-            const strictLock = localStorage.getItem('vespa_strict_lock') === 'true';
-            const chk = document.getElementById('settingStrictLock');
-            if (chk) chk.checked = strictLock;
-            const hapticToggle = document.getElementById('settingHaptics');
-            if (hapticToggle) hapticToggle.checked = hapticsEnabled;
-            const tankInput = document.getElementById('settingTankCapacity');
-            if (tankInput) tankInput.value = data.tankCapacity || 5.0;
-            const specCap = document.getElementById('specTankCapacity');
-            if (specCap) specCap.innerText = (data.tankCapacity || 5.0).toFixed(1);
+            try {
+                let strictLock = false;
+                try { strictLock = localStorage.getItem('vespa_strict_lock') === 'true'; } catch(e) {}
+                const chk = document.getElementById('settingStrictLock');
+                if (chk) chk.checked = strictLock;
+                const hapticToggle = document.getElementById('settingHaptics');
+                if (hapticToggle) hapticToggle.checked = hapticsEnabled;
+                const tankCap = (data && typeof data.tankCapacity === 'number') ? data.tankCapacity : 5.0;
+                const tankInput = document.getElementById('settingTankCapacity');
+                if (tankInput) tankInput.value = tankCap;
+                const specCap = document.getElementById('specTankCapacity');
+                if (specCap) specCap.innerText = tankCap.toFixed(1);
+            } catch(e) {
+                console.error("initSettingsUI error:", e);
+            }
         }
 
         function updateTankCapacity(val) {
@@ -4449,14 +4478,31 @@
 
         // --- RENDER ALL ---
         function renderAll() {
-            document.getElementById('mainOdo').value = data.odometer;
-            document.getElementById('logKm').value = data.odometer;
-            document.getElementById('homeFuelDisplay').innerHTML = `${data.homeFuelStock.toFixed(1)}<span class="text-xs ml-1">L</span>`;
+            if (!data) data = {};
+            data.odometer = data.odometer || 0;
+            data.homeFuelStock = (typeof data.homeFuelStock === 'number') ? data.homeFuelStock : (parseFloat(data.homeFuelStock) || 0);
+            data.mantenimientos = Array.isArray(data.mantenimientos) ? data.mantenimientos : [];
+            data.repostajes = Array.isArray(data.repostajes) ? data.repostajes : [];
+            data.inventario = Array.isArray(data.inventario) ? data.inventario : [];
+            data.bombillas = Array.isArray(data.bombillas) ? data.bombillas : [];
+            data.documentos = Array.isArray(data.documentos) ? data.documentos : [];
+            data.stockCasa = Array.isArray(data.stockCasa) ? data.stockCasa : [];
+            data.diario = Array.isArray(data.diario) ? data.diario : [];
+            data.documentacion = (typeof data.documentacion === 'object' && data.documentacion !== null && !Array.isArray(data.documentacion)) ? data.documentacion : {};
+            data.tankCapacity = parseFloat(data.tankCapacity) || 5.0;
+
+            const mainOdoEl = document.getElementById('mainOdo');
+            if (mainOdoEl) mainOdoEl.value = data.odometer;
+            const logKmEl = document.getElementById('logKm');
+            if (logKmEl) logKmEl.value = data.odometer;
+            const homeFuelEl = document.getElementById('homeFuelDisplay');
+            if (homeFuelEl) homeFuelEl.innerHTML = `${data.homeFuelStock.toFixed(1)}<span class="text-xs ml-1">L</span>`;
             
-            if(!document.getElementById('logDate').value) {
+            const logDateEl = document.getElementById('logDate');
+            if(logDateEl && !logDateEl.value) {
                 const now = new Date();
                 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                document.getElementById('logDate').value = now.toISOString().slice(0, 16);
+                logDateEl.value = now.toISOString().slice(0, 16);
             }
 
             // 1. Render Bujía viva integrada en la tarjeta Motor
