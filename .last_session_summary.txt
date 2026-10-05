@@ -1,9 +1,17 @@
-# Resumen de Sesión - VespaCare
-Fecha: 2026-10-04
+# Resumen de Sesión — VespaCare (v77)
+Fecha: 2026-10-05 06:30 CEST
 
-- Ajustado el HUD de **Repostaje Rápido**:
-  - Eliminados los botones `-1` y `-10` del odómetro.
-  - Ampliado el campo numérico central del odómetro y agrandados los botones de incremento rápido (`+1` y `+10`) con tamaño XXL para facilitar la pulsación con guantes (v76).
-- Versión PWA actualizada a v76 (sw.js e index.html).
-- Purgada la caché de Cloudflare para pedrodiaz.eu.
-- Desplegado en vivo al servidor blue (/var/www/html/vespa/) y verificado en https://vespa.pedrodiaz.eu (HTTP 200).
+## Cambios Realizados y Resolución de Issues (100% Cerrados):
+1. **Issue #1 (Screen Wake Lock API)**: Botón "Modo Taller (Pantalla ON)" en cabecera de taller que impide que el móvil se apague/bloquee en el garaje con soporte para reconexión al cambiar de pestaña.
+2. **Issue #2 (Rueda de Repuesto 3.00-10")**: Añadida al panel de presiones (2.50 bar / 36 PSI • Cófano Izq), presets de ajuste y seguimiento de desgaste.
+3. **Issue #3 (Protocolo de Invernaje)**: Card interactivo con checklist de 5 pasos para paradas >3 semanas (cierre de grifo, drenaje cuba SHBC 19/19 E, desconexión borne batería 12V 9Ah, maderas bajo ruedas, sobrepresión preventiva) y persistencia.
+4. **Issue #4 (Modo Gasolinera Express)**: Modal HUD Repostaje Rápido XXL con dosificación 2T (2.0% JASO FD).
+5. **Issue #5 (Escaneo OCR con Cámara)**: Botón de captura con IA/OCR (Tesseract.js) para detectar litros e importe de tickets/facturas automáticamente.
+6. **Issue #6 (Libro de Mantenimiento Digital PDF)**: Generador y modal de dossier técnico oficial Homelands Labs con estilos @media print maquetados para certificación histórica / ITV / tasación.
+7. **Issue #7 (Alertas Proactivas Telegram)**: Motor proactivo en bot_daemon.py (v2.2) para ITV (30d/7d), Seguro (30d/7d), Presiones (21d) y comando /alertas.
+
+## Despliegue en Vivo:
+- PWA v77 sincronizada en nodo `blue` (/var/www/html/vespa/).
+- Servicio `vespacare-bot.service` reiniciado y activo 24/7 en `blue`.
+- Caché de Cloudflare purgada con éxito para `pedrodiaz.eu`.
+- 7 de 7 issues de GitHub cerrados con éxito.
