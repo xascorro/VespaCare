@@ -1345,6 +1345,40 @@
                 </div>
             </div>
 
+            <!-- WIDGET CLIMA DE RUTA (OPEN-METEO API) -->
+            <div id="weatherRouteWidget" class="card p-3.5 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl shadow-md border border-slate-800 space-y-2">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div id="weatherIconBox" class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm shadow-xs">
+                            <i id="weatherIcon" class="fas fa-sun"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black tracking-wide uppercase text-white flex items-center gap-1.5">
+                                Clima de Ruta <span id="weatherLocationName" class="text-[9px] text-amber-400 font-normal">(Madrid)</span>
+                            </p>
+                            <p id="weatherConditionText" class="text-[10px] text-slate-300 font-medium">Consultando estación meteorológica...</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span id="weatherTemp" class="text-xl font-black text-amber-400 font-mono-num">--°C</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5 pt-1.5 border-t border-slate-700/60 text-center text-[10px]">
+                    <div class="p-1.5 bg-slate-800/80 rounded-lg">
+                        <span class="text-slate-400 block text-[8px] uppercase font-bold">Viento</span>
+                        <span id="weatherWind" class="font-mono-num font-bold text-slate-200">-- km/h</span>
+                    </div>
+                    <div class="p-1.5 bg-slate-800/80 rounded-lg">
+                        <span class="text-slate-400 block text-[8px] uppercase font-bold">Lluvia</span>
+                        <span id="weatherRain" class="font-mono-num font-bold text-slate-200">-- %</span>
+                    </div>
+                    <div class="p-1.5 bg-slate-800/80 rounded-lg">
+                        <span class="text-slate-400 block text-[8px] uppercase font-bold">Estado Ruta</span>
+                        <span id="weatherRidingStatus" class="font-bold text-emerald-400">Calculando...</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- SALUD & ESTADO DE LA MOTO (EN GARAJE) -->
             <div class="card p-4 space-y-3.5 border-l-4 border-emerald-500">
                 <div class="flex justify-between items-center">
@@ -2221,6 +2255,43 @@
                 </div>
             </div>
 
+            <!-- DESGLOSE DETALLADO DE COSTE REAL POR KILÓMETRO (€/KM) -->
+            <div class="card p-4 border-l-4 border-amber-600 space-y-3">
+                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                    <div>
+                        <h3 class="text-sm font-black uppercase text-slate-800 tracking-wider">Desglose de Coste por Kilómetro</h3>
+                        <p class="text-[10px] text-slate-400 font-bold">Operación real y mantenimiento desglosado</p>
+                    </div>
+                    <span class="text-[9px] bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full font-black uppercase font-mono">€/km</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="p-2.5 bg-amber-50/60 rounded-xl border border-amber-200/80">
+                        <span class="text-[8px] font-black uppercase text-amber-800 block">Combustible + 2T</span>
+                        <span id="statBreakdownFuelPerKm" class="text-sm font-black text-slate-800 font-mono-num">- €/km</span>
+                        <span id="statBreakdownFuelPerc" class="text-[8px] text-slate-500 font-semibold block mt-0.5">- %</span>
+                    </div>
+                    <div class="p-2.5 bg-blue-50/60 rounded-xl border border-blue-200/80">
+                        <span class="text-[8px] font-black uppercase text-blue-800 block">Taller & Piezas</span>
+                        <span id="statBreakdownMaintPerKm" class="text-sm font-black text-slate-800 font-mono-num">- €/km</span>
+                        <span id="statBreakdownMaintPerc" class="text-[8px] text-slate-500 font-semibold block mt-0.5">- %</span>
+                    </div>
+                    <div class="p-2.5 bg-emerald-50/60 rounded-xl border border-emerald-200/80">
+                        <span class="text-[8px] font-black uppercase text-emerald-800 block">ITV & Seguro</span>
+                        <span id="statBreakdownLegalPerKm" class="text-sm font-black text-slate-800 font-mono-num">- €/km</span>
+                        <span id="statBreakdownLegalPerc" class="text-[8px] text-slate-500 font-semibold block mt-0.5">- %</span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-bold text-slate-800 text-xs">Coste Total Operativo (TCO)</span>
+                        <p class="text-[10px] text-slate-400 leading-tight">Gasto global acumulado por cada km recorrido</p>
+                    </div>
+                    <span id="statBreakdownTotalPerKm" class="text-base font-black text-emerald-700 font-mono-num">- € / km</span>
+                </div>
+            </div>
+
             <!-- 1. GRÁFICA DONUT: REPARTO DEL GASTO TOTAL -->
             <div class="card p-4">
                 <div class="flex justify-between items-center mb-3">
@@ -2477,7 +2548,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v77 • Modo Taller, Rueda Repuesto, Invernaje & OCR</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v78 • Atajos PWA, Clima de Ruta & Desglose €/km</span>
                     </div>
                 </div>
 
@@ -2523,7 +2594,7 @@
         if ('serviceWorker' in navigator) {
             const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=77')
+                navigator.serviceWorker.register('/sw.js?v=78')
                     .then(reg => {
                         reg.update();
                     })
@@ -3086,6 +3157,7 @@
                 showTab('garage');
                 toggleFuelFields('repostaje');
                 updatePinStatusUI(); initSettingsUI();
+                handleInitialUrlAction();
                 if (isManual) {
                     showToast('Datos actualizados de la moto');
                 }
@@ -4406,6 +4478,41 @@
                 statYearlySpentEl.innerText = `${curYearSpent.toFixed(2)} € invertidos en ${currentYear}`;
             }
 
+            // Desglose de Coste Real por Kilómetro (€/km)
+            const breakdownFuelPerKmEl = document.getElementById('statBreakdownFuelPerKm');
+            const breakdownFuelPercEl = document.getElementById('statBreakdownFuelPerc');
+            const breakdownMaintPerKmEl = document.getElementById('statBreakdownMaintPerKm');
+            const breakdownMaintPercEl = document.getElementById('statBreakdownMaintPerc');
+            const breakdownLegalPerKmEl = document.getElementById('statBreakdownLegalPerKm');
+            const breakdownLegalPercEl = document.getElementById('statBreakdownLegalPerc');
+            const breakdownTotalPerKmEl = document.getElementById('statBreakdownTotalPerKm');
+
+            const kmTotalRef = (data.odometer > 0) ? data.odometer : (totalKmDiff > 0 ? totalKmDiff : 1);
+            const kmRef = totalKmDiff > 0 ? totalKmDiff : kmTotalRef;
+
+            if (kmRef > 0 && totalGastosTodos > 0) {
+                const bFuelKm = totalFuelGlobal / kmRef;
+                const bMaintKm = totalMaintGlobal / kmRef;
+                const bLegalKm = totalLegalGlobal / kmRef;
+                const bTotalKm = totalGastosTodos / kmRef;
+
+                if (breakdownFuelPerKmEl) breakdownFuelPerKmEl.innerText = `${bFuelKm.toFixed(3)} €/km`;
+                if (breakdownFuelPercEl) breakdownFuelPercEl.innerText = totalGastosTodos > 0 ? `${((totalFuelGlobal / totalGastosTodos) * 100).toFixed(0)}% del gasto` : '-';
+
+                if (breakdownMaintPerKmEl) breakdownMaintPerKmEl.innerText = `${bMaintKm.toFixed(3)} €/km`;
+                if (breakdownMaintPercEl) breakdownMaintPercEl.innerText = totalGastosTodos > 0 ? `${((totalMaintGlobal / totalGastosTodos) * 100).toFixed(0)}% del gasto` : '-';
+
+                if (breakdownLegalPerKmEl) breakdownLegalPerKmEl.innerText = `${bLegalKm.toFixed(3)} €/km`;
+                if (breakdownLegalPercEl) breakdownLegalPercEl.innerText = totalGastosTodos > 0 ? `${((totalLegalGlobal / totalGastosTodos) * 100).toFixed(0)}% del gasto` : '-';
+
+                if (breakdownTotalPerKmEl) breakdownTotalPerKmEl.innerText = `${bTotalKm.toFixed(3)} € / km`;
+            } else {
+                if (breakdownFuelPerKmEl) breakdownFuelPerKmEl.innerText = '- €/km';
+                if (breakdownMaintPerKmEl) breakdownMaintPerKmEl.innerText = '- €/km';
+                if (breakdownLegalPerKmEl) breakdownLegalPerKmEl.innerText = '- €/km';
+                if (breakdownTotalPerKmEl) breakdownTotalPerKmEl.innerText = '- € / km';
+            }
+
             // 1. GRÁFICO DONUT (REPARTO GASTOS)
             if (ctxDonutEl) {
                 if (expenseDonutChartInstance) expenseDonutChartInstance.destroy();
@@ -4836,6 +4943,7 @@
             renderLegalDocs();
             renderHomeStock();
             renderDiario();
+            initWeatherWidget();
         }
 
         // --- DIARIO DE A BORDO & BITÁCORA DE TALLER ---
@@ -6878,6 +6986,149 @@
                     </div>
                 </div>
             `;
+        // =========================================================================
+        // SHORTCUTS DE INICIO PWA & DEEP LINKS (?action=...)
+        // =========================================================================
+        function handleInitialUrlAction() {
+            const params = new URLSearchParams(window.location.search);
+            const action = params.get('action');
+            if (!action) return;
+
+            // Limpiar el parámetro de la URL sin recargar
+            try {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch(e) {}
+
+            setTimeout(() => {
+                if (action === 'quick_fuel') {
+                    openQuickFuelModal();
+                } else if (action === 'presion') {
+                    showTab('health');
+                    openPressureModal('Revisión General de Presiones');
+                } else if (action === 'taller') {
+                    showTab('health');
+                    toggleWorkshopWakeLock();
+                } else if (action === 'diario') {
+                    showTab('diario');
+                    openDiarioModal();
+                }
+            }, 150);
+        }
+
+        // =========================================================================
+        // WIDGET METEOROLÓGICO PARA RUTAS EN VESPA (OPEN-METEO API)
+        // =========================================================================
+        const WMO_WEATHER_CODES = {
+            0: { text: 'Despejado', icon: 'fa-sun', color: 'text-amber-400', ideal: true },
+            1: { text: 'Mayormente despejado', icon: 'fa-sun', color: 'text-amber-300', ideal: true },
+            2: { text: 'Parcialmente nublado', icon: 'fa-cloud-sun', color: 'text-amber-200', ideal: true },
+            3: { text: 'Nublado', icon: 'fa-cloud', color: 'text-slate-300', ideal: true },
+            45: { text: 'Niebla', icon: 'fa-smog', color: 'text-slate-400', ideal: false },
+            48: { text: 'Niebla con escarcha', icon: 'fa-smog', color: 'text-slate-400', ideal: false },
+            51: { text: 'Llovizna ligera', icon: 'fa-cloud-rain', color: 'text-blue-300', ideal: false },
+            53: { text: 'Llovizna moderada', icon: 'fa-cloud-rain', color: 'text-blue-400', ideal: false },
+            55: { text: 'Llovizna densa', icon: 'fa-cloud-showers-heavy', color: 'text-blue-500', ideal: false },
+            61: { text: 'Lluvia ligera', icon: 'fa-cloud-rain', color: 'text-blue-400', ideal: false },
+            63: { text: 'Lluvia moderada', icon: 'fa-cloud-showers-heavy', color: 'text-blue-500', ideal: false },
+            65: { text: 'Lluvia fuerte', icon: 'fa-cloud-showers-heavy', color: 'text-blue-600', ideal: false },
+            71: { text: 'Nieve ligera', icon: 'fa-snowflake', color: 'text-cyan-200', ideal: false },
+            80: { text: 'Chubascos ligeros', icon: 'fa-cloud-sun-rain', color: 'text-blue-400', ideal: false },
+            81: { text: 'Chubascos moderados', icon: 'fa-cloud-showers-heavy', color: 'text-blue-500', ideal: false },
+            82: { text: 'Chubascos violentos', icon: 'fa-bolt', color: 'text-purple-400', ideal: false },
+            95: { text: 'Tormenta eléctrica', icon: 'fa-bolt', color: 'text-yellow-400', ideal: false }
+        };
+
+        async function initWeatherWidget() {
+            const tempEl = document.getElementById('weatherTemp');
+            if (!tempEl) return;
+
+            // Comprobar caché en sesión (20 min)
+            try {
+                const cachedWeather = sessionStorage.getItem('vespa_weather_cache');
+                const cachedTime = sessionStorage.getItem('vespa_weather_time');
+                if (cachedWeather && cachedTime && (Date.now() - parseInt(cachedTime, 10) < 20 * 60 * 1000)) {
+                    renderWeatherData(JSON.parse(cachedWeather));
+                    return;
+                }
+            } catch(e) {}
+
+            const fetchForecast = async (latitude, longitude, locationLabel) => {
+                try {
+                    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m,precipitation&hourly=precipitation_probability&forecast_days=1&timezone=auto`;
+                    const res = await fetch(url);
+                    const wData = await res.json();
+                    
+                    const current = wData.current || {};
+                    const hourly = wData.hourly || {};
+                    const rainProb = (hourly.precipitation_probability && hourly.precipitation_probability.length > 0) ? hourly.precipitation_probability[0] : (current.precipitation > 0 ? 80 : 0);
+
+                    const weatherObj = {
+                        temp: current.temperature_2m !== undefined ? Math.round(current.temperature_2m) : '--',
+                        weatherCode: current.weather_code || 0,
+                        windSpeed: current.wind_speed_10m !== undefined ? Math.round(current.wind_speed_10m) : '--',
+                        rainProb: rainProb,
+                        location: locationLabel
+                    };
+
+                    try {
+                        sessionStorage.setItem('vespa_weather_cache', JSON.stringify(weatherObj));
+                        sessionStorage.setItem('vespa_weather_time', Date.now().toString());
+                    } catch(e) {}
+
+                    renderWeatherData(weatherObj);
+                } catch(err) {
+                    console.error('Weather fetch error:', err);
+                    const condEl = document.getElementById('weatherConditionText');
+                    if (condEl) condEl.innerText = 'Previsión no disponible';
+                }
+            };
+
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        fetchForecast(pos.coords.latitude, pos.coords.longitude, 'Tu Zona');
+                    },
+                    () => {
+                        fetchForecast(40.4168, -3.7038, 'Madrid');
+                    },
+                    { timeout: 3000, maximumAge: 600000 }
+                );
+            } else {
+                fetchForecast(40.4168, -3.7038, 'Madrid');
+            }
+        }
+
+        function renderWeatherData(w) {
+            const tempEl = document.getElementById('weatherTemp');
+            const condEl = document.getElementById('weatherConditionText');
+            const windEl = document.getElementById('weatherWind');
+            const rainEl = document.getElementById('weatherRain');
+            const statusEl = document.getElementById('weatherRidingStatus');
+            const iconEl = document.getElementById('weatherIcon');
+            const locNameEl = document.getElementById('weatherLocationName');
+            if (!tempEl) return;
+
+            const codeInfo = WMO_WEATHER_CODES[w.weatherCode] || { text: 'Despejado', icon: 'fa-sun', color: 'text-amber-400', ideal: true };
+
+            tempEl.innerText = `${w.temp}°C`;
+            if (condEl) condEl.innerText = codeInfo.text;
+            if (windEl) windEl.innerText = `${w.windSpeed} km/h`;
+            if (rainEl) rainEl.innerText = `${w.rainProb}%`;
+            if (locNameEl) locNameEl.innerText = `(${w.location || 'Madrid'})`;
+            if (iconEl) iconEl.className = `fas ${codeInfo.icon} ${codeInfo.color}`;
+
+            if (statusEl) {
+                if (w.rainProb >= 60 || w.windSpeed >= 45 || !codeInfo.ideal) {
+                    statusEl.className = 'font-bold text-red-400';
+                    statusEl.innerText = 'Lluvia / Viento 🌧️';
+                } else if (w.rainProb >= 30 || w.windSpeed >= 30) {
+                    statusEl.className = 'font-bold text-amber-400';
+                    statusEl.innerText = 'Precaución ⚠️';
+                } else {
+                    statusEl.className = 'font-bold text-emerald-400';
+                    statusEl.innerText = 'Ideal Ruta 🛵';
+                }
+            }
         }
 
         checkAppLockState();

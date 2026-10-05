@@ -26,5 +26,35 @@
       "sizes": "any",
       "type": "image/svg+xml"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Repostaje Rápido",
+      "short_name": "Repostar",
+      "description": "Abrir HUD de repostaje rápido y dosificador 2T",
+      "url": "/?action=quick_fuel",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Revisar Presiones",
+      "short_name": "Presiones",
+      "description": "Comprobación de neumáticos y repuesto",
+      "url": "/?action=presion",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Modo Taller",
+      "short_name": "Taller",
+      "description": "Ir al taller con pantalla siempre activa",
+      "url": "/?action=taller",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Diario de Rutas",
+      "short_name": "Diario",
+      "description": "Añadir entrada de ruta o reparación",
+      "url": "/?action=diario",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
