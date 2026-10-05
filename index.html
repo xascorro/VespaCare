@@ -2548,7 +2548,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v80 • Clima de Ruta Alhama & Tarjeta Clara</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v81 • Clima Fijo Alhama de Murcia & Reset Caché</span>
                     </div>
                 </div>
 
@@ -2594,7 +2594,7 @@
         if ('serviceWorker' in navigator) {
             const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=80')
+                navigator.serviceWorker.register('/sw.js?v=81')
                     .then(reg => {
                         reg.update();
                     })
@@ -7052,13 +7052,18 @@
             const tempEl = document.getElementById('weatherTemp');
             if (!tempEl) return;
 
-            // Comprobar caché en sesión (20 min)
+            // Limpiar caché previa de versiones anteriores o que contengan Madrid
             try {
-                const cachedWeather = sessionStorage.getItem('vespa_weather_cache');
-                const cachedTime = sessionStorage.getItem('vespa_weather_time');
-                if (cachedWeather && cachedTime && (Date.now() - parseInt(cachedTime, 10) < 20 * 60 * 1000)) {
-                    renderWeatherData(JSON.parse(cachedWeather));
-                    return;
+                sessionStorage.removeItem('vespa_weather_cache');
+                sessionStorage.removeItem('vespa_weather_time');
+                const cachedWeather = sessionStorage.getItem('vespa_weather_cache_v81');
+                const cachedTime = sessionStorage.getItem('vespa_weather_time_v81');
+                if (cachedWeather && cachedTime && (Date.now() - parseInt(cachedTime, 10) < 15 * 60 * 1000)) {
+                    const parsed = JSON.parse(cachedWeather);
+                    if (parsed && parsed.location && !parsed.location.includes('Madrid')) {
+                        renderWeatherData(parsed);
+                        return;
+                    }
                 }
             } catch(e) {}
 
@@ -7081,8 +7086,8 @@
                     };
 
                     try {
-                        sessionStorage.setItem('vespa_weather_cache', JSON.stringify(weatherObj));
-                        sessionStorage.setItem('vespa_weather_time', Date.now().toString());
+                        sessionStorage.setItem('vespa_weather_cache_v81', JSON.stringify(weatherObj));
+                        sessionStorage.setItem('vespa_weather_time_v81', Date.now().toString());
                     } catch(e) {}
 
                     renderWeatherData(weatherObj);
@@ -7093,19 +7098,8 @@
                 }
             };
 
-            if ('geolocation' in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        fetchForecast(pos.coords.latitude, pos.coords.longitude, 'Tu Zona');
-                    },
-                    () => {
-                        fetchForecast(37.8510, -1.4253, 'Alhama de Murcia');
-                    },
-                    { timeout: 3000, maximumAge: 600000 }
-                );
-            } else {
-                fetchForecast(37.8510, -1.4253, 'Alhama de Murcia');
-            }
+            // Estación meteorológica fija: Alhama de Murcia (Base Vespa PK 125 S)
+            fetchForecast(37.8510, -1.4253, 'Alhama de Murcia');
         }
 
         function renderWeatherData(w) {
