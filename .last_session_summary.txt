@@ -1,14 +1,12 @@
 # VespaCare — Resumen de Última Sesión
-Fecha: 2026-10-05 07:07 CEST
-Versión: v80 (Desplegada en Producción `blue` y Cloudflare purgado)
+Fecha: 2026-10-05 07:09 CEST
+Versión: v81 (Desplegada en Producción `blue` y Cloudflare purgado)
 
-### Cambios Realizados:
-1. **Ubicación por Defecto Clima de Ruta**:
-   - Cambiado el fallback de Madrid a **Alhama de Murcia** (coordenadas `37.8510`, `-1.4253`).
-   - Badge indicador actualizado por defecto a `(Alhama de Murcia)` o `(Tu Zona)` según geolocalización.
-2. **Diseño de Tarjeta Clara (Light Theme)**:
-   - Eliminado el fondo oscuro `slate-900`.
-   - Adaptada la tarjeta al diseño limpio del sistema: `bg-white`, borde izquierdo ámbar `border-amber-500`, chips informativos `bg-slate-50` con borde sutil, textos en `slate-800` y estados con tipografía de alto contraste (`text-emerald-700`, `text-amber-600`, `text-red-600`).
-3. **Despliegue y Versión**:
-   - Versión de caché PWA incrementada a **`v80`** (`vespacare-v80`).
-   - Sincronizado en `blue`, reiniciado `vespacare-bot.service` y purgada la caché en Cloudflare.
+### Incidencia Resuelta:
+- **Causa**: El navegador guardaba en `sessionStorage` el objeto de clima anterior generado durante pruebas con la etiqueta `Madrid`. Al no haberse invalidado la clave de sesión, la app reutilizaba ese dato cacheado.
+- **Solución implementada (v81)**:
+  1. Forzado borrado automático de cualquier clave previa `vespa_weather_cache` y descarte explícito si contiene "Madrid".
+  2. Implementada clave versionada `vespa_weather_cache_v81`.
+  3. Fijada la estación meteorológica directa en **Alhama de Murcia** (`37.8510`, `-1.4253`).
+  4. Actualizado Service Worker y registro a **`v81`** (`vespacare-v81`).
+  5. Desplegado a `blue` y purgada la caché de Cloudflare.
