@@ -1,17 +1,22 @@
-# Resumen de Sesión — VespaCare (v77)
-Fecha: 2026-10-05 06:30 CEST
+# Resumen de Sesión — VespaCare (v78)
+Fecha: 2026-10-05 06:50 CEST
 
-## Cambios Realizados y Resolución de Issues (100% Cerrados):
-1. **Issue #1 (Screen Wake Lock API)**: Botón "Modo Taller (Pantalla ON)" en cabecera de taller que impide que el móvil se apague/bloquee en el garaje con soporte para reconexión al cambiar de pestaña.
-2. **Issue #2 (Rueda de Repuesto 3.00-10")**: Añadida al panel de presiones (2.50 bar / 36 PSI • Cófano Izq), presets de ajuste y seguimiento de desgaste.
-3. **Issue #3 (Protocolo de Invernaje)**: Card interactivo con checklist de 5 pasos para paradas >3 semanas (cierre de grifo, drenaje cuba SHBC 19/19 E, desconexión borne batería 12V 9Ah, maderas bajo ruedas, sobrepresión preventiva) y persistencia.
-4. **Issue #4 (Modo Gasolinera Express)**: Modal HUD Repostaje Rápido XXL con dosificación 2T (2.0% JASO FD).
-5. **Issue #5 (Escaneo OCR con Cámara)**: Botón de captura con IA/OCR (Tesseract.js) para detectar litros e importe de tickets/facturas automáticamente.
-6. **Issue #6 (Libro de Mantenimiento Digital PDF)**: Generador y modal de dossier técnico oficial Homelands Labs con estilos @media print maquetados para certificación histórica / ITV / tasación.
-7. **Issue #7 (Alertas Proactivas Telegram)**: Motor proactivo en bot_daemon.py (v2.2) para ITV (30d/7d), Seguro (30d/7d), Presiones (21d) y comando /alertas.
+## Cambios Realizados en v78:
+1. **Merge a Rama `main`**: Fusión limpia y sincronizada de `feature/design-system` a `main` y push a GitHub en ambas ramas.
+2. **Atajos Rápidos de Pantalla de Inicio (PWA Shortcuts en manifest.json)**:
+   - ⛽ *Repostaje Rápido* (`/?action=quick_fuel`)
+   - 🛞 *Revisar Presiones* (`/?action=presion`)
+   - 🛠️ *Modo Taller* (`/?action=taller`)
+   - 📖 *Diario de Rutas* (`/?action=diario`)
+   - Manejador deep-link reactivo en `index.html` con auto-limpieza de query string.
+3. **Desglose de Coste Real por Kilómetro (€/km y TCO Global)**:
+   - Tarjeta interactiva en la pestaña de Stats con cálculo desglosado de €/km (Combustible + 2T, Taller & Piezas, ITV & Seguro) y porcentaje de peso financiero sobre el total.
+4. **Widget Climatológico para Rutas (Open-Meteo API)**:
+   - Mini-widget dinámico en Garaje con temperatura actual, viento (km/h), probabilidad de lluvia (%) y dictamen inteligente de ruta ("Ideal Ruta 🛵", "Precaución ⚠️", "Lluvia / Viento 🌧️").
+5. **Comprobación de Backups en Servidor**:
+   - Verificado el sistema de copias de seguridad automáticas en `/var/www/html/vespa/backups/` en el nodo `blue`.
 
 ## Despliegue en Vivo:
-- PWA v77 sincronizada en nodo `blue` (/var/www/html/vespa/).
-- Servicio `vespacare-bot.service` reiniciado y activo 24/7 en `blue`.
-- Caché de Cloudflare purgada con éxito para `pedrodiaz.eu`.
-- 7 de 7 issues de GitHub cerrados con éxito.
+- PWA `v78` desplegada en `blue:/var/www/html/vespa/`.
+- `vespacare-bot.service` activo 24/7.
+- Caché Cloudflare de `pedrodiaz.eu` purgada con éxito.
