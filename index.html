@@ -2548,7 +2548,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v78 • Atajos PWA, Clima de Ruta & Desglose €/km</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v79 • Fix PIN Lock & Estabilidad UI</span>
                     </div>
                 </div>
 
@@ -2594,7 +2594,7 @@
         if ('serviceWorker' in navigator) {
             const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=78')
+                navigator.serviceWorker.register('/sw.js?v=79')
                     .then(reg => {
                         reg.update();
                     })
@@ -6986,33 +6986,43 @@
                     </div>
                 </div>
             `;
+        }
+
         // =========================================================================
         // SHORTCUTS DE INICIO PWA & DEEP LINKS (?action=...)
         // =========================================================================
         function handleInitialUrlAction() {
-            const params = new URLSearchParams(window.location.search);
-            const action = params.get('action');
-            if (!action) return;
-
-            // Limpiar el parámetro de la URL sin recargar
             try {
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch(e) {}
+                const params = new URLSearchParams(window.location.search);
+                const action = params.get('action');
+                if (!action) return;
 
-            setTimeout(() => {
-                if (action === 'quick_fuel') {
-                    openQuickFuelModal();
-                } else if (action === 'presion') {
-                    showTab('health');
-                    openPressureModal('Revisión General de Presiones');
-                } else if (action === 'taller') {
-                    showTab('health');
-                    toggleWorkshopWakeLock();
-                } else if (action === 'diario') {
-                    showTab('diario');
-                    openDiarioModal();
-                }
-            }, 150);
+                // Limpiar el parámetro de la URL sin recargar
+                try {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch(e) {}
+
+                setTimeout(() => {
+                    try {
+                        if (action === 'quick_fuel') {
+                            openQuickFuelModal();
+                        } else if (action === 'presion') {
+                            showTab('health');
+                            openPressureModal('Revisión General de Presiones');
+                        } else if (action === 'taller') {
+                            showTab('health');
+                            toggleWorkshopWakeLock();
+                        } else if (action === 'diario') {
+                            showTab('diario');
+                            openDiarioModal();
+                        }
+                    } catch(err) {
+                        console.warn('UrlAction execution error:', err);
+                    }
+                }, 150);
+            } catch(e) {
+                console.warn('handleInitialUrlAction error:', e);
+            }
         }
 
         // =========================================================================
