@@ -408,6 +408,37 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: var(--cream); }
         ::-webkit-scrollbar-thumb { background: var(--vespa-light); border-radius: 10px; }
+
+        /* Estilos de impresión y maquetación PDF (Libro de Mantenimiento Homelands Labs) */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+            }
+            header, nav, #quickActionsFloating, .no-print, .modal:not(#maintenanceBookModal), #toast, #appLockScreen {
+                display: none !important;
+            }
+            #maintenanceBookModal {
+                position: static !important;
+                display: block !important;
+                background: transparent !important;
+                padding: 0 !important;
+                max-height: none !important;
+                overflow: visible !important;
+                backdrop-filter: none !important;
+            }
+            #maintenanceBookModal .card {
+                box-shadow: none !important;
+                border: none !important;
+                max-height: none !important;
+                overflow: visible !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                background: #ffffff !important;
+            }
+        }
     </style>
 </head>
 <body class="pb-24">
@@ -831,6 +862,14 @@
                         <span class="text-sm font-bold text-slate-400">€</span>
                     </div>
                 </div>
+
+                <!-- 5. Escaneo Inteligente OCR de Ticket con Cámara -->
+                <div class="pt-1">
+                    <button type="button" onclick="triggerTicketOCR('quick')" class="w-full py-3 bg-slate-900 hover:bg-slate-800 active:bg-amber-600 text-amber-300 rounded-2xl font-black text-xs uppercase tracking-wider border border-amber-500/40 flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm">
+                        <i class="fas fa-camera text-sm text-amber-400"></i>📸 Escanear Ticket con Cámara (OCR)
+                    </button>
+                    <input type="file" id="ocrTicketInput" accept="image/*" capture="environment" class="hidden" onchange="handleTicketOCR(event)">
+                </div>
             </div>
 
             <!-- Botón Guardar XXL -->
@@ -1158,6 +1197,39 @@
         </div>
     </div>
 
+    <!-- MODAL LIBRO DE MANTENIMIENTO DIGITAL (PDF MAQUETADO / IMPRIMIBLE) -->
+    <div id="maintenanceBookModal" class="modal">
+        <div class="card p-5 w-full max-w-2xl space-y-4 max-h-[92vh] flex flex-col bg-white text-slate-900 border border-slate-200 rounded-3xl shadow-2xl overflow-hidden">
+            <div class="sheet-handle sm:hidden"></div>
+            
+            <!-- Cabecera no imprimible -->
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200 no-print shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center text-lg font-black shadow-md">
+                        <i class="fas fa-book-bookmark"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900 tracking-wide uppercase">Libro de Mantenimiento Digital</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Certificación Histórica • Homelands Labs</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-1.5 active:scale-95 transition-all">
+                        <i class="fas fa-print text-xs"></i>Imprimir / PDF
+                    </button>
+                    <button onclick="closeMaintenanceBookModal()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100">
+                        <i class="fas fa-times text-base"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenido Maquetado para Pantalla e Impresión -->
+            <div id="printableMaintenanceBook" class="flex-1 overflow-y-auto space-y-4 pr-1">
+                <!-- Se rellena dinámicamente con renderMaintenanceBook() -->
+            </div>
+        </div>
+    </div>
+
     <!-- HEADER VINTAGE -->
     <header id="mainHeader" class="header-bg text-slate-800 pt-3 pb-3 px-4 rounded-b-3xl shadow-lg mb-3 relative overflow-hidden transition-all duration-300">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20"></div>
@@ -1383,10 +1455,13 @@
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Mecánica en la Moto, Estantería de Recambios & Guantera</p>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button onclick="openModal()" class="text-[10px] bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1" title="Añadir pieza a la moto">
-                        <i class="fas fa-motorcycle text-amber-400 text-[9px]"></i>+ Pieza Moto
+                    <button id="wakeLockBtn" onclick="toggleWorkshopWakeLock()" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2.5 py-2 rounded-xl font-black uppercase tracking-wider shadow-xs active:scale-95 transition-all flex items-center gap-1" title="Mantener pantalla encendida en taller">
+                        <i id="wakeLockIcon" class="fas fa-lock text-slate-400 text-[9px]"></i><span id="wakeLockText">Pantalla ON</span>
                     </button>
-                    <button onclick="openHomeStockModal()" class="text-[10px] bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1" title="Añadir recambio a la estantería">
+                    <button onclick="openModal()" class="text-[10px] bg-slate-900 hover:bg-slate-800 text-white px-2.5 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1" title="Añadir pieza a la moto">
+                        <i class="fas fa-motorcycle text-amber-400 text-[9px]"></i>+ Pieza
+                    </button>
+                    <button onclick="openHomeStockModal()" class="text-[10px] bg-orange-600 hover:bg-orange-700 text-white px-2.5 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1" title="Añadir recambio a la estantería">
                         <i class="fas fa-boxes-stacked text-amber-200 text-[9px]"></i>+ Stock
                     </button>
                 </div>
@@ -1690,7 +1765,7 @@
                             <div id="pressureProgressBar" class="bg-blue-600 h-full transition-all duration-1000" style="width: 100%"></div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-3 gap-2.5 text-center text-xs">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
                         <div onclick="openPressureModal('Ajuste Rueda Delantera (1.25 bar)')" class="p-2.5 bg-slate-50 hover:bg-blue-50/60 rounded-xl border border-slate-100 hover:border-blue-200 cursor-pointer active:scale-95 transition-all shadow-sm group">
                             <i class="fas fa-circle-notch text-blue-500 group-hover:scale-110 text-sm mb-1 transition-transform"></i>
                             <span class="text-slate-400 block text-[8px] uppercase font-black tracking-wider">Delantera</span>
@@ -1705,9 +1780,15 @@
                         </div>
                         <div onclick="openPressureModal('Ajuste Con Pasajero (2.50 bar)')" class="p-2.5 bg-slate-50 hover:bg-emerald-50/60 rounded-xl border border-slate-100 hover:border-emerald-200 cursor-pointer active:scale-95 transition-all shadow-sm group">
                             <i class="fas fa-user-friends text-emerald-600 group-hover:scale-110 text-sm mb-1 transition-transform"></i>
-                            <span class="text-slate-400 block text-[8px] uppercase font-black tracking-wider">Con Pasajero</span>
+                            <span class="text-slate-400 block text-[8px] uppercase font-black tracking-wider">Pasajero</span>
                             <p class="font-black text-slate-800 text-base font-mono-num mt-1">2.50 <span class="text-[9px] text-slate-400">bar</span></p>
                             <span class="text-[8px] text-slate-400 font-semibold">36 PSI</span>
+                        </div>
+                        <div onclick="openPressureModal('Ajuste Rueda Repuesto (2.50 bar - Cófano Izq)')" class="p-2.5 bg-slate-50 hover:bg-indigo-50/60 rounded-xl border border-slate-100 hover:border-indigo-200 cursor-pointer active:scale-95 transition-all shadow-sm group">
+                            <i class="fas fa-life-ring text-indigo-500 group-hover:scale-110 text-sm mb-1 transition-transform"></i>
+                            <span class="text-slate-400 block text-[8px] uppercase font-black tracking-wider">Repuesto</span>
+                            <p class="font-black text-slate-800 text-base font-mono-num mt-1">2.50 <span class="text-[9px] text-slate-400">bar</span></p>
+                            <span class="text-[8px] text-indigo-600 font-semibold">Cófano Izq</span>
                         </div>
                     </div>
                 </div>
@@ -1750,6 +1831,73 @@
                     </button>
                 </div>
                 <div id="customPartsList" class="space-y-3"></div>
+            </div>
+
+            <!-- PROTOCOLO DE INVERNAJE Y PARADA PROLONGADA -->
+            <div class="card p-4 border-l-4 border-cyan-500 space-y-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-xs shadow-xs">
+                            <i class="fas fa-snowflake"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg text-slate-800">Protocolo de Invernaje</h3>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Parada Prolongada (> 3 Semanas)</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleWinterChecklist()" class="text-[9px] bg-cyan-50 text-cyan-800 hover:bg-cyan-100 border border-cyan-200 px-2.5 py-1 rounded-lg font-black uppercase tracking-wider flex items-center gap-1 active:scale-95 transition-all">
+                        <i id="winterChecklistIcon" class="fas fa-chevron-down text-[9px] text-cyan-600"></i><span id="winterChecklistBtnText">Checklist (0/5)</span>
+                    </button>
+                </div>
+
+                <div id="winterChecklistContent" class="space-y-2 text-xs pt-1">
+                    <div class="p-2.5 bg-cyan-50/40 rounded-xl border border-cyan-100/80 flex items-start gap-2.5 cursor-pointer hover:bg-cyan-50/70 transition-all" onclick="toggleWinterStep(0)">
+                        <input type="checkbox" id="winterStep0" class="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer pointer-events-none">
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 text-xs">1. Grifo en OFF y Agotar Cuba al Ralentí</p>
+                            <p class="text-[10px] text-slate-500 leading-tight mt-0.5">Cierra el grifo bajo el asiento y deja el motor al ralentí hasta que se apague solo para evitar residuo de mezcla 2T estancada.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 bg-cyan-50/40 rounded-xl border border-cyan-100/80 flex items-start gap-2.5 cursor-pointer hover:bg-cyan-50/70 transition-all" onclick="toggleWinterStep(1)">
+                        <input type="checkbox" id="winterStep1" class="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer pointer-events-none">
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 text-xs">2. Drenaje Cuba Carburador (SHBC 19/19 E)</p>
+                            <p class="text-[10px] text-slate-500 leading-tight mt-0.5">Afloja el tornillo inferior de la cuba para purgar restos y evitar obstrucción en chiclé de bajas (42) o altas (76-78).</p>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 bg-cyan-50/40 rounded-xl border border-cyan-100/80 flex items-start gap-2.5 cursor-pointer hover:bg-cyan-50/70 transition-all" onclick="toggleWinterStep(2)">
+                        <input type="checkbox" id="winterStep2" class="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer pointer-events-none">
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 text-xs">3. Batería 12V 9Ah: Borne (-) Desconectado</p>
+                            <p class="text-[10px] text-slate-500 leading-tight mt-0.5">Desconecta el borne negativo de la batería (cófano izquierdo) o conecta un mantenedor inteligente de carga.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 bg-cyan-50/40 rounded-xl border border-cyan-100/80 flex items-start gap-2.5 cursor-pointer hover:bg-cyan-50/70 transition-all" onclick="toggleWinterStep(3)">
+                        <input type="checkbox" id="winterStep3" class="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer pointer-events-none">
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 text-xs">4. Caballete Central & Maderas bajo Ruedas</p>
+                            <p class="text-[10px] text-slate-500 leading-tight mt-0.5">Aparcar en caballete central y poner maderas/cartón bajo neumáticos 3.00-10" para aislarlos del suelo frío y evitar deformaciones.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 bg-cyan-50/40 rounded-xl border border-cyan-100/80 flex items-start gap-2.5 cursor-pointer hover:bg-cyan-50/70 transition-all" onclick="toggleWinterStep(4)">
+                        <input type="checkbox" id="winterStep4" class="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer pointer-events-none">
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 text-xs">5. Sobrepresión Preventiva (+0.5 bar) & Cables</p>
+                            <p class="text-[10px] text-slate-500 leading-tight mt-0.5">Inflar Delantera 1.75 bar, Trasera 2.30 bar y Repuesto 3.00 bar. Lubricar cables con spray anticorrosión/WD-40.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-1 px-1 text-[10px]">
+                        <span id="winterProgressSummary" class="font-bold text-cyan-900">0 de 5 pasos completados</span>
+                        <button onclick="resetWinterChecklist()" class="text-slate-400 hover:text-red-600 font-bold uppercase tracking-wider text-[9px] active:scale-95 transition-all">
+                            <i class="fas fa-rotate-left mr-1"></i>Reiniciar
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- 5. ESTANTERÍA & STOCK EN CASA / TALLER -->
@@ -2248,6 +2396,23 @@
                 </div>
             </div>
 
+            <!-- LIBRO DE MANTENIMIENTO DIGITAL (CERTIFICACIÓN HISTÓRICA) -->
+            <div class="card p-4 border-l-4 border-blue-600">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="text-lg text-slate-800">Libro de Mantenimiento Digital</h3>
+                        <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Certificación oficial para ITV, tasación y venta clásica</p>
+                    </div>
+                    <span class="text-[9px] bg-blue-50 text-blue-900 border border-blue-200/60 px-2.5 py-1 rounded-full font-black uppercase">Homelands</span>
+                </div>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                    Genera e imprime un dossier técnico completo y maquetado con la ficha de la Vespa PK 125 S, histórico de reparaciones, piezas instaladas, ITV y consumos.
+                </p>
+                <button onclick="openMaintenanceBookModal()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95">
+                    <i class="fas fa-book-bookmark text-amber-400"></i> Ver & Generar Libro de Mantenimiento (PDF)
+                </button>
+            </div>
+
             <!-- BACKUPS & COPIAS DE SEGURIDAD -->
             <div class="card p-4 border-l-4 border-slate-800">
                 <div class="flex justify-between items-center mb-4">
@@ -2312,7 +2477,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v76 • Repostaje Rápido & Micro-hápticos</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v77 • Modo Taller, Rueda Repuesto, Invernaje & OCR</span>
                     </div>
                 </div>
 
@@ -2358,7 +2523,7 @@
         if ('serviceWorker' in navigator) {
             const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=76')
+                navigator.serviceWorker.register('/sw.js?v=77')
                     .then(reg => {
                         reg.update();
                     })
@@ -3773,6 +3938,7 @@
                 <optgroup label="🛞 Revisiones & Servicios (Sin Pieza)">
                     <option value="service:presion_solo|Presión Normal Solo (1.25 Del / 1.80 Tras) 🛞 Neumáticos">🛞 Revisión Presión Solo — 1.25 bar Del / 1.80 bar Tras</option>
                     <option value="service:presion_pax|Presión Con Pasajero (1.25 Del / 2.50 Tras) 🛞 Neumáticos">👥 Revisión Presión Pasajero — 1.25 bar Del / 2.50 bar Tras</option>
+                    <option value="service:presion_repuesto|Presión Rueda Repuesto 2.50 bar (Cófano Izq) 🛞 Neumáticos">🛞 Revisión Rueda de Repuesto — 2.50 bar (Cófano Izq)</option>
                     <option value="service:revision_general|Revisión General / Inspección 🛠️ Taller">🛠️ Revisión General / Mantenimiento Sin Pieza</option>
                 </optgroup>
                 <optgroup label="🔧 Otras / Compra Directa">
@@ -3792,6 +3958,8 @@
                     const match = Array.from(select.options).find(opt => opt.value.startsWith(`stock:${targetId}|`) && !opt.disabled);
                     if (match) select.value = match.value;
                     else select.value = select.querySelector('option:not([disabled])')?.value || 'personalizado';
+                } else if (preselectedVal.includes('Repuesto')) {
+                    select.value = "service:presion_repuesto|Presión Rueda Repuesto 2.50 bar (Cófano Izq) 🛞 Neumáticos";
                 } else if (preselectedVal.includes('Presión')) {
                     select.value = preselectedVal.includes('Pasajero') ? "service:presion_pax|Presión Con Pasajero (1.25 Del / 2.50 Tras) 🛞 Neumáticos" : "service:presion_solo|Presión Normal Solo (1.25 Del / 1.80 Tras) 🛞 Neumáticos";
                 } else {
@@ -3831,7 +3999,9 @@
                 if (val.startsWith('service:')) {
                     if (priceInput) priceInput.value = '0.00';
                     if (expenseCheckbox) expenseCheckbox.checked = false;
-                    if (val.includes('presion_pax')) {
+                    if (val.includes('presion_repuesto')) {
+                        if (notesInput) notesInput.value = 'Revisión y Ajuste Rueda de Repuesto (2.50 bar - Cófano Izquierdo)';
+                    } else if (val.includes('presion_pax')) {
                         if (notesInput) notesInput.value = 'Revisión y Ajuste Presión (Con Pasajero/Carga)';
                     } else if (val.includes('presion_solo')) {
                         if (notesInput) notesInput.value = 'Revisión y Ajuste Presión (Solo)';
@@ -3903,7 +4073,9 @@
             document.getElementById('bulbAddExpense').checked = false;
             
             const sel = document.getElementById('bulbPresetSelect');
-            if (presionTipo.toLowerCase().includes('pasajero')) {
+            if (presionTipo.toLowerCase().includes('repuesto')) {
+                sel.value = "service:presion_repuesto|Presión Rueda Repuesto 2.50 bar (Cófano Izq) 🛞 Neumáticos";
+            } else if (presionTipo.toLowerCase().includes('pasajero')) {
                 sel.value = "service:presion_pax|Presión Con Pasajero (1.25 Del / 2.50 Tras) 🛞 Neumáticos";
             } else {
                 sel.value = "service:presion_solo|Presión Normal Solo (1.25 Del / 1.80 Tras) 🛞 Neumáticos";
@@ -4658,8 +4830,9 @@
             // 3. Render Tracker de Presión de Neumáticos (Intervalo 21 días / 3 semanas)
             renderPressureTracker();
 
-            // 4. Render Checklist / Alertas Críticas en Garaje
+            // 4. Render Checklist / Alertas Críticas en Garaje & Invernaje
             renderGarageCriticalAlerts();
+            renderWinterChecklist();
             renderLegalDocs();
             renderHomeStock();
             renderDiario();
@@ -6331,6 +6504,380 @@
             }
 
             grid.innerHTML = html;
+        }
+
+        // =========================================================================
+        // ISSUE #1: SCREEN WAKE LOCK API (MODO TALLER)
+        // =========================================================================
+        let workshopWakeLock = null;
+
+        async function toggleWorkshopWakeLock() {
+            triggerHaptic('heavy');
+            if (!('wakeLock' in navigator)) {
+                showToast('⚠️ Tu navegador no soporta Screen Wake Lock');
+                return;
+            }
+
+            try {
+                if (workshopWakeLock !== null) {
+                    await workshopWakeLock.release();
+                    workshopWakeLock = null;
+                    updateWakeLockUI(false);
+                    showToast('Modo Taller desactivado (Bloqueo normal)');
+                } else {
+                    workshopWakeLock = await navigator.wakeLock.request('screen');
+                    workshopWakeLock.addEventListener('release', () => {
+                        workshopWakeLock = null;
+                        updateWakeLockUI(false);
+                    });
+                    updateWakeLockUI(true);
+                    showToast('🛠️ Modo Taller activo: Pantalla siempre encendida');
+                }
+            } catch (err) {
+                console.error('WakeLock Error:', err);
+                showToast(`Error WakeLock: ${err.message || 'No disponible'}`);
+            }
+        }
+
+        function updateWakeLockUI(isActive) {
+            const btn = document.getElementById('wakeLockBtn');
+            const icon = document.getElementById('wakeLockIcon');
+            const text = document.getElementById('wakeLockText');
+            if (!btn) return;
+
+            if (isActive) {
+                btn.className = 'text-[10px] bg-amber-500 text-white hover:bg-amber-600 border border-amber-400 px-2.5 py-2 rounded-xl font-black uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1.5 animate-pulse';
+                if (icon) icon.className = 'fas fa-sun text-amber-100 text-[9px]';
+                if (text) text.innerText = 'Pantalla ON';
+            } else {
+                btn.className = 'text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2.5 py-2 rounded-xl font-black uppercase tracking-wider shadow-xs active:scale-95 transition-all flex items-center gap-1.5';
+                if (icon) icon.className = 'fas fa-lock text-slate-400 text-[9px]';
+                if (text) text.innerText = 'Pantalla ON';
+            }
+        }
+
+        document.addEventListener('visibilitychange', async () => {
+            if (workshopWakeLock !== null && document.visibilityState === 'visible') {
+                try {
+                    workshopWakeLock = await navigator.wakeLock.request('screen');
+                    updateWakeLockUI(true);
+                } catch (e) {
+                    console.error('Re-acquire wake lock failed', e);
+                }
+            }
+        });
+
+        // =========================================================================
+        // ISSUE #3: PROTOCOLO DE INVERNAJE Y PARADA PROLONGADA
+        // =========================================================================
+        let winterChecklistState = [false, false, false, false, false];
+        try {
+            const savedWinter = localStorage.getItem('vespa_winter_checklist');
+            if (savedWinter) winterChecklistState = JSON.parse(savedWinter);
+        } catch(e) {}
+
+        function toggleWinterChecklist() {
+            triggerHaptic('light');
+            const content = document.getElementById('winterChecklistContent');
+            const icon = document.getElementById('winterChecklistIcon');
+            if (!content) return;
+            const isHidden = content.classList.contains('hidden');
+            if (isHidden) {
+                content.classList.remove('hidden');
+                if (icon) icon.className = 'fas fa-chevron-up text-[9px] text-cyan-600';
+            } else {
+                content.classList.add('hidden');
+                if (icon) icon.className = 'fas fa-chevron-down text-[9px] text-cyan-600';
+            }
+        }
+
+        function toggleWinterStep(index) {
+            triggerHaptic('medium');
+            winterChecklistState[index] = !winterChecklistState[index];
+            try {
+                localStorage.setItem('vespa_winter_checklist', JSON.stringify(winterChecklistState));
+            } catch(e) {}
+            renderWinterChecklist();
+            if (winterChecklistState[index]) {
+                showToast(`✅ Paso ${index + 1} de invernaje completado`);
+            }
+        }
+
+        function resetWinterChecklist() {
+            triggerHaptic('heavy');
+            if (!confirm('¿Deseas reiniciar el checklist del protocolo de invernaje?')) return;
+            winterChecklistState = [false, false, false, false, false];
+            try {
+                localStorage.setItem('vespa_winter_checklist', JSON.stringify(winterChecklistState));
+            } catch(e) {}
+            renderWinterChecklist();
+            showToast('Checklist de invernaje reiniciado');
+        }
+
+        function renderWinterChecklist() {
+            let completedCount = 0;
+            winterChecklistState.forEach((val, idx) => {
+                const checkbox = document.getElementById(`winterStep${idx}`);
+                if (checkbox) checkbox.checked = Boolean(val);
+                if (val) completedCount++;
+            });
+
+            const btnText = document.getElementById('winterChecklistBtnText');
+            if (btnText) btnText.innerText = `Checklist (${completedCount}/5)`;
+
+            const summary = document.getElementById('winterProgressSummary');
+            if (summary) {
+                if (completedCount === 5) {
+                    summary.innerHTML = `<span class="text-emerald-700 font-black"><i class="fas fa-check-circle mr-1"></i>¡Protocolo de Invernaje 100% Completado!</span>`;
+                } else {
+                    summary.innerText = `${completedCount} de 5 pasos completados`;
+                }
+            }
+        }
+
+        // =========================================================================
+        // ISSUE #5: ESCANEO OCR DE TICKETS CON CÁMARA (TESSERACT.JS)
+        // =========================================================================
+        let ocrMode = 'quick';
+
+        function triggerTicketOCR(mode = 'quick') {
+            triggerHaptic('medium');
+            ocrMode = mode;
+            const input = document.getElementById('ocrTicketInput');
+            if (input) {
+                input.value = '';
+                input.click();
+            }
+        }
+
+        async function handleTicketOCR(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            showToast('🔍 Analizando ticket con IA / OCR...');
+
+            // Cargar Tesseract.js bajo demanda si no está presente
+            if (typeof Tesseract === 'undefined') {
+                try {
+                    await new Promise((resolve, reject) => {
+                        const s = document.createElement('script');
+                        s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+                        s.onload = resolve;
+                        s.onerror = reject;
+                        document.head.appendChild(s);
+                    });
+                } catch (e) {
+                    console.error('Error cargando motor OCR:', e);
+                    showToast('⚠️ No se pudo cargar el motor OCR');
+                    return;
+                }
+            }
+
+            try {
+                const worker = await Tesseract.createWorker('spa+eng');
+                const ret = await worker.recognize(file);
+                await worker.terminate();
+
+                const text = ret.data.text || '';
+                console.log('OCR Result:', text);
+
+                // 1. Extraer Litros
+                let litros = null;
+                const lMatch = text.match(/(?:volumen|litros|lts|lit|cant|vol)[\s\:\.\=]*([\d]+[\,\.][\d]{1,3})/i) ||
+                               text.match(/\b([\d]+[\,\.][\d]{1,2})\s*(?:l|litros|lts)\b/i) ||
+                               text.match(/\b([1-8][\,\.][\d]{1,2})\b/);
+                if (lMatch) {
+                    litros = parseFloat(lMatch[1].replace(',', '.'));
+                }
+
+                // 2. Extraer Precio / Coste Total (€)
+                let euros = null;
+                const eMatch = text.match(/(?:total|importe|pagar|eur|€|precio)[\s\:\.\=]*([\d]+[\,\.][\d]{2})/i) ||
+                               text.match(/\b([\d]+[\,\.][\d]{2})\s*(?:€|eur)\b/i);
+                if (eMatch) {
+                    euros = parseFloat(eMatch[1].replace(',', '.'));
+                }
+
+                // 3. Aplicar valores según modo
+                if (ocrMode === 'quick') {
+                    if (litros && litros > 0 && litros <= 10) {
+                        setQuickLitros(Math.min(5.0, Math.round(litros * 10) / 10));
+                    }
+                    if (euros && euros > 0) {
+                        const priceEl = document.getElementById('quickFuelPrice');
+                        if (priceEl) priceEl.value = euros.toFixed(2);
+                    }
+                }
+
+                if (litros || euros) {
+                    triggerHaptic('heavy');
+                    showToast(`✅ Ticket detectado: ${litros ? litros + ' L' : ''} ${euros ? euros + ' €' : ''}`);
+                } else {
+                    showToast('⚠️ No se detectaron importes claros en la imagen');
+                }
+            } catch (err) {
+                console.error('Error en procesado OCR:', err);
+                showToast('Error al analizar la imagen del ticket');
+            }
+        }
+
+        // =========================================================================
+        // ISSUE #6: GENERADOR DE LIBRO DE MANTENIMIENTO DIGITAL (PDF MAQUETADO)
+        // =========================================================================
+        function openMaintenanceBookModal() {
+            triggerHaptic('light');
+            renderMaintenanceBook();
+            document.getElementById('maintenanceBookModal').classList.add('active');
+        }
+
+        function closeMaintenanceBookModal() {
+            document.getElementById('maintenanceBookModal').classList.remove('active');
+        }
+
+        function renderMaintenanceBook() {
+            const container = document.getElementById('printableMaintenanceBook');
+            if (!container) return;
+
+            const odo = data.odometer || 0;
+            const docs = data.documentacion || {};
+            const itv = (docs.itv && docs.itv.expiry) ? docs.itv.expiry : 'No configurada';
+            const seguro = (docs.seguro && docs.seguro.expiry) ? `${docs.seguro.expiry} (${docs.seguro.entity || 'Póliza en vigor'})` : 'No configurado';
+            
+            // Recopilación cronológica unificada
+            const logs = [];
+
+            (data.repostajes || []).forEach(r => {
+                logs.push({
+                    date: r.date,
+                    km: r.km,
+                    cat: 'Combustible',
+                    title: `Repostaje ${r.litros} L (${r.oilMl || Math.round(r.litros*20)} ml Aceite 2T)`,
+                    cost: r.cost ? `${parseFloat(r.cost).toFixed(2)} €` : (r.price ? `${parseFloat(r.price).toFixed(2)} €` : '-'),
+                    notes: r.notes || ''
+                });
+            });
+
+            (data.bombillas || []).forEach(b => {
+                logs.push({
+                    date: b.date,
+                    km: b.km,
+                    cat: 'Taller / Presión / Luz',
+                    title: b.type || 'Intervención',
+                    cost: b.price && b.price > 0 ? `${parseFloat(b.price).toFixed(2)} €` : '-',
+                    notes: b.notes || ''
+                });
+            });
+
+            (data.diario || []).forEach(d => {
+                logs.push({
+                    date: d.date,
+                    km: d.km,
+                    cat: d.category || 'Bitácora',
+                    title: d.title || 'Registro',
+                    cost: d.cost && d.cost > 0 ? `${parseFloat(d.cost).toFixed(2)} €` : '-',
+                    notes: d.notes || ''
+                });
+            });
+
+            // Ordenar desc por fecha
+            logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const rowsHtml = logs.map(l => `
+                <tr class="border-b border-slate-200/80 text-left text-xs">
+                    <td class="py-2 px-2.5 font-mono-num font-medium text-slate-600">${(l.date || '').split('T')[0]}</td>
+                    <td class="py-2 px-2.5 font-mono-num font-black text-slate-800">${l.km ? l.km + ' km' : '-'}</td>
+                    <td class="py-2 px-2.5 font-semibold text-amber-800">${l.cat}</td>
+                    <td class="py-2 px-2.5 text-slate-800 font-medium">${l.title} ${l.notes ? '<span class="text-slate-400 block text-[10px]">' + l.notes + '</span>' : ''}</td>
+                    <td class="py-2 px-2.5 text-right font-mono-num font-bold text-slate-700">${l.cost}</td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="p-6 bg-white rounded-2xl border border-slate-200 space-y-6 text-slate-900 print:border-none print:p-0">
+                    <!-- CABECERA OFICIAL HOMELANDS LABS -->
+                    <div class="flex justify-between items-start border-b-2 border-amber-600 pb-4">
+                        <div>
+                            <h1 class="text-2xl font-black tracking-tight text-slate-900">VESPACARE</h1>
+                            <p class="text-xs font-bold text-amber-700 uppercase tracking-widest mt-0.5">Libro Oficial de Mantenimiento & Certificación Histórica</p>
+                            <p class="text-[10px] text-slate-400 font-mono mt-1">Homelands Labs • Pedro Díaz (Fables Infrastructure)</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-black bg-slate-900 text-amber-400 px-3 py-1.5 rounded-xl uppercase tracking-wider font-mono">PK 125 S</span>
+                            <p class="text-[10px] text-slate-500 font-mono mt-1">Emisión: ${new Date().toLocaleDateString('es-ES')}</p>
+                        </div>
+                    </div>
+
+                    <!-- FICHA TÉCNICA DEL VEHÍCULO -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-amber-50/40 p-4 rounded-2xl border border-amber-200/60 text-xs">
+                        <div>
+                            <span class="text-[9px] font-black uppercase text-slate-400 block">Vehículo / Modelo</span>
+                            <span class="font-black text-slate-800">Vespa PK 125 S Elestart</span>
+                            <span class="text-[10px] text-slate-500 block">Año 1984 (Smallframe)</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black uppercase text-slate-400 block">Motor & Cilindrada</span>
+                            <span class="font-black text-slate-800">VMX5M • 121 cc (2T)</span>
+                            <span class="text-[10px] text-slate-500 block">Mezcla 2.0% Sintético</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black uppercase text-slate-400 block">Odómetro Certificado</span>
+                            <span class="font-black text-slate-800 font-mono-num text-sm">${odo} km</span>
+                            <span class="text-[10px] text-emerald-700 font-semibold block">Verificado en vivo</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black uppercase text-slate-400 block">Control Legal</span>
+                            <span class="font-bold text-slate-800 text-[11px]">ITV: ${itv}</span>
+                            <span class="text-[10px] text-slate-500 block">Seguro: ${seguro}</span>
+                        </div>
+                    </div>
+
+                    <!-- ESPECIFICACIONES DE TALLER & DINAMOMÉTRICA -->
+                    <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-center text-xs">
+                        <div>
+                            <span class="text-slate-400 text-[9px] uppercase font-bold block">Tuercas Rueda</span>
+                            <span class="font-black text-slate-800 font-mono-num">20 - 25 Nm</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 text-[9px] uppercase font-bold block">Tuerca Eje Trasero</span>
+                            <span class="font-black text-slate-800 font-mono-num">75 - 90 Nm</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 text-[9px] uppercase font-bold block">Bujía / Aceite Caja</span>
+                            <span class="font-black text-slate-800">NGK B7HS / 250ml SAE 30</span>
+                        </div>
+                    </div>
+
+                    <!-- TABLA DE HISTORIAL DE MANTENIMIENTO -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center justify-between">
+                            <span>Historial de Revisiones & Intervenciones (${logs.length} registros)</span>
+                            <span class="text-[10px] text-slate-400 font-mono font-normal">Página 1</span>
+                        </h4>
+                        <div class="overflow-x-auto rounded-xl border border-slate-200">
+                            <table class="w-full text-xs">
+                                <thead class="bg-slate-100 text-slate-500 font-black uppercase text-[9px] border-b border-slate-200">
+                                    <tr>
+                                        <th class="py-2 px-2.5 text-left">Fecha</th>
+                                        <th class="py-2 px-2.5 text-left">Km</th>
+                                        <th class="py-2 px-2.5 text-left">Categoría</th>
+                                        <th class="py-2 px-2.5 text-left">Intervención / Recambio</th>
+                                        <th class="py-2 px-2.5 text-right">Coste</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rowsHtml || '<tr><td colspan="5" class="py-4 text-center text-slate-400">Sin intervenciones registradas</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PIE DE CERTIFICACIÓN -->
+                    <div class="pt-4 border-t border-slate-200 text-center text-[10px] text-slate-400 flex justify-between items-center">
+                        <span>VespaCare • Servidor blue (10.0.0.104) • Nginx + PHP 8.3</span>
+                        <span class="font-mono font-bold text-slate-600">Certificación Digital Válida</span>
+                    </div>
+                </div>
+            `;
         }
 
         checkAppLockState();

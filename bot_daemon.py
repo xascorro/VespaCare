@@ -404,6 +404,9 @@ def get_pressure_text():
 • Delante: <code>1.25 bar (18 PSI)</code>
 • Detrás: <code>2.50 bar (36 PSI)</code>
 
+🛞 <b>Rueda de Repuesto (Cófano Izquierdo):</b>
+• Repuesto: <code>2.50 bar (36 PSI)</code>
+
 ⏱️ <i>Revisión periódica recomendada cada 3 semanas (21 días).</i>"""
 
 def get_help_text():
@@ -411,6 +414,7 @@ def get_help_text():
 
 📊 <b>Consultas Rápidas:</b>
 • /estado — Telemetría actual, cuentakilómetros y legal
+• /alertas — Verificación de alertas proactivas (ITV, Seguro, Presiones)
 • /seguro — Póliza, vencimiento y teléfono de asistencia 24h
 • /stock — Recambios y gasolina en garaje
 • /presion — Presiones recomendadas en frío
@@ -1069,6 +1073,10 @@ Puedes usar los botones táctiles inferiores o escribir directamente tus reposta
         send_message(get_status_text(), chat_id, reply_markup=get_status_inline_keyboard())
         return
 
+    if text in ["/alertas", "alertas", "🔔 alertas", "/notificaciones", "notificaciones", "alertas proactivas"]:
+        check_proactive_alerts(force=True, chat_id=chat_id)
+        return
+
     if text in ["/seguro", "seguro", "/asistencia", "asistencia", "emergencia", "asistencia 24h", "telefono seguro", "teléfono seguro", "asistencia carretera"]:
         send_message(get_insurance_text(), chat_id, reply_markup=get_status_inline_keyboard())
         return
@@ -1114,6 +1122,116 @@ Puedes usar los botones táctiles inferiores o escribir directamente tus reposta
         reply_markup=get_persistent_reply_keyboard()
     )
 
+# ---------------------------------------------------------
+# PROACTIVE ALERTS ENGINE (ISSUE #7)
+# ---------------------------------------------------------
+LAST_ALERT_DISPATCH = {}
+
+def check_proactive_alerts(force=False, chat_id=None):
+    target_chat = chat_id or ADMIN_CHAT_ID
+    if not target_chat:
+        return
+
+    data = load_data()
+    now = datetime.now()
+    today_str = now.strftime("%Y-%m-%d")
+    alerts = []
+    odo = data.get("odometer", 0)
+
+    # 1. Control Legal (ITV)
+    docs = data.get("documentacion", {})
+    if not isinstance(docs, dict):
+        docs = {}
+    itv = docs.get("itv", {})
+    if itv.get("expiry"):
+        try:
+            exp = datetime.strptime(itv["expiry"], "%Y-%m-%d")
+            diff = (exp - now).days
+            if diff < 0:
+                alerts.append(f"🚨 <b>ITV Caducada</b>: Venció el {itv['expiry']} (hace {abs(diff)} días).")
+            elif diff <= 30:
+                alerts.append(f"⚠️ <b>ITV Próxima</b>: Vence el {itv['expiry']} (quedan {diff} días).")
+        except Exception:
+            pass
+
+    # 2. Control Legal (Seguro)
+    seguro = docs.get("seguro", {})
+    if seguro.get("expiry"):
+        try:
+            exp = datetime.strptime(seguro["expiry"], "%Y-%m-%d")
+            diff = (exp - now).days
+            if diff < 0:
+                alerts.append(f"🚨 <b>Seguro Caducado</b>: Venció el {seguro['expiry']} (hace {abs(diff)} días).")
+            elif diff <= 30:
+                alerts.append(f"⚠️ <b>Seguro Próximo</b>: Vence el {seguro['expiry']} (quedan {diff} días).")
+        except Exception:
+            pass
+
+    # 3. Revisión de Presión de Neumáticos (Cada 21 días / 3 semanas)
+    INTERVAL_PRESSURE_DAYS = 21
+    pressure_records = [
+        b for b in data.get("bombillas", [])
+        if ("presión" in (b.get("type", "") + b.get("notes", "")).lower() or "presion" in (b.get("type", "") + b.get("notes", "")).lower())
+    ]
+    last_p_date = None
+    if pressure_records:
+        pressure_records.sort(key=lambda x: x.get("date", ""), reverse=True)
+        try:
+            last_p_date = datetime.strptime(pressure_records[0]["date"].split("T")[0], "%Y-%m-%d")
+        except Exception:
+            pass
+    elif data.get("repostajes"):
+        try:
+            last_p_date = datetime.strptime(data["repostajes"][-1]["date"].split("T")[0], "%Y-%m-%d")
+        except Exception:
+            pass
+
+    if last_p_date:
+        diff_p = (now - last_p_date).days
+        if diff_p >= INTERVAL_PRESSURE_DAYS:
+            alerts.append(
+                f"🛞 <b>Revisión de Presiones ({diff_p}d sin revisar):</b>\n"
+                f"• Delantera: <b>1.25 bar</b> (18 PSI)\n"
+                f"• Trasera: <b>1.80 / 2.50 bar</b>\n"
+                f"• Repuesto (Cófano Izq): <b>2.50 bar</b>"
+            )
+
+    # 4. Mantenimientos Vencidos o Próximos
+    for m in data.get("mantenimientos", []):
+        inter = m.get("intervalo", 0)
+        ultimo = m.get("ultimo", 0)
+        if inter > 0:
+            rest = inter - (odo - ultimo)
+            if rest <= 0:
+                alerts.append(f"🔧 <b>Mantenimiento Vencido</b>: {m.get('nombre', 'Pieza')} excedido por {abs(rest)} km.")
+            elif rest <= 150:
+                alerts.append(f"⚠️ <b>Mantenimiento Próximo</b>: {m.get('nombre', 'Pieza')} toca en {rest} km.")
+
+    if not alerts:
+        if force:
+            send_message(
+                "✅ <b>VespaCare — Sin alertas pendientes</b>\n\nTodos los mantenimientos, presiones de neumáticos (incluida rueda de repuesto) e ITV/Seguro están al día.",
+                target_chat,
+                reply_markup=get_status_inline_keyboard()
+            )
+        return
+
+    # Evitar repetición en el mismo día si no es forzado
+    alert_key = f"{today_str}_{len(alerts)}"
+    if not force and LAST_ALERT_DISPATCH.get(target_chat) == alert_key:
+        return
+
+    LAST_ALERT_DISPATCH[target_chat] = alert_key
+
+    msg = f"""🔔 <b>VespaCare — Alertas Proactivas ({len(alerts)})</b>
+🏛️ <i>Homelands Labs by Pedro Díaz</i>
+━━━━━━━━━━━━━━━━━━
+""" + "\n\n".join(alerts) + """
+━━━━━━━━━━━━━━━━━━
+🔗 <a href="https://vespa.pedrodiaz.eu">Abrir VespaCare PWA</a>"""
+
+    send_message(msg, target_chat, reply_markup=get_status_inline_keyboard())
+
 def handle_update(update):
     if "callback_query" in update:
         handle_callback_query(update["callback_query"])
@@ -1121,14 +1239,29 @@ def handle_update(update):
         handle_message(update["message"])
 
 def main():
-    print("=== VespaCare Telegram Intelligent Daemon (v2.1) Starting ===", flush=True)
+    print("=== VespaCare Telegram Intelligent Daemon (v2.2) Starting ===", flush=True)
     offset = None
+    last_alert_check_time = 0
+
+    # Chequeo proactivo inicial al arrancar
+    try:
+        check_proactive_alerts(force=False)
+        last_alert_check_time = time.time()
+    except Exception as e:
+        print(f"Error checking initial alerts: {e}", flush=True)
+
     while True:
         try:
+            # Comprobación proactiva cada 6 horas
+            now_ts = time.time()
+            if now_ts - last_alert_check_time >= 21600:
+                last_alert_check_time = now_ts
+                check_proactive_alerts(force=False)
+
             url = f"{BASE_URL}/getUpdates?timeout=15"
             if offset:
                 url += f"&offset={offset}"
-            req = urllib.request.Request(url, headers={"User-Agent": "HomelandsLabs-VespaCareBot/2.1"})
+            req = urllib.request.Request(url, headers={"User-Agent": "HomelandsLabs-VespaCareBot/2.2"})
             with urllib.request.urlopen(req, timeout=20) as resp:
                 res = json.loads(resp.read().decode())
                 if res.get("ok"):
