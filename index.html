@@ -1346,35 +1346,35 @@
             </div>
 
             <!-- WIDGET CLIMA DE RUTA (OPEN-METEO API) -->
-            <div id="weatherRouteWidget" class="card p-3.5 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl shadow-md border border-slate-800 space-y-2">
+            <div id="weatherRouteWidget" class="card p-4 space-y-3 border-l-4 border-amber-500 bg-white shadow-xs">
                 <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-2">
-                        <div id="weatherIconBox" class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm shadow-xs">
+                    <div class="flex items-center gap-2.5">
+                        <div id="weatherIconBox" class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm shadow-xs border border-amber-200/60">
                             <i id="weatherIcon" class="fas fa-sun"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-black tracking-wide uppercase text-white flex items-center gap-1.5">
-                                Clima de Ruta <span id="weatherLocationName" class="text-[9px] text-amber-400 font-normal">(Madrid)</span>
+                            <p class="text-xs font-black tracking-wide uppercase text-slate-800 flex items-center gap-1.5">
+                                Clima de Ruta <span id="weatherLocationName" class="text-[9px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200/60">(Alhama de Murcia)</span>
                             </p>
-                            <p id="weatherConditionText" class="text-[10px] text-slate-300 font-medium">Consultando estación meteorológica...</p>
+                            <p id="weatherConditionText" class="text-[10px] text-slate-500 font-medium">Consultando estación meteorológica...</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <span id="weatherTemp" class="text-xl font-black text-amber-400 font-mono-num">--°C</span>
+                        <span id="weatherTemp" class="text-xl font-black text-slate-900 font-mono-num">--°C</span>
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-1.5 pt-1.5 border-t border-slate-700/60 text-center text-[10px]">
-                    <div class="p-1.5 bg-slate-800/80 rounded-lg">
-                        <span class="text-slate-400 block text-[8px] uppercase font-bold">Viento</span>
-                        <span id="weatherWind" class="font-mono-num font-bold text-slate-200">-- km/h</span>
+                <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center text-[10px]">
+                    <div class="p-2 bg-slate-50 rounded-xl border border-slate-200/60">
+                        <span class="text-slate-400 block text-[8px] uppercase font-bold tracking-wider">Viento</span>
+                        <span id="weatherWind" class="font-mono-num font-bold text-slate-800">-- km/h</span>
                     </div>
-                    <div class="p-1.5 bg-slate-800/80 rounded-lg">
-                        <span class="text-slate-400 block text-[8px] uppercase font-bold">Lluvia</span>
-                        <span id="weatherRain" class="font-mono-num font-bold text-slate-200">-- %</span>
+                    <div class="p-2 bg-slate-50 rounded-xl border border-slate-200/60">
+                        <span class="text-slate-400 block text-[8px] uppercase font-bold tracking-wider">Lluvia</span>
+                        <span id="weatherRain" class="font-mono-num font-bold text-slate-800">-- %</span>
                     </div>
-                    <div class="p-1.5 bg-slate-800/80 rounded-lg">
-                        <span class="text-slate-400 block text-[8px] uppercase font-bold">Estado Ruta</span>
-                        <span id="weatherRidingStatus" class="font-bold text-emerald-400">Calculando...</span>
+                    <div class="p-2 bg-slate-50 rounded-xl border border-slate-200/60">
+                        <span class="text-slate-400 block text-[8px] uppercase font-bold tracking-wider">Estado Ruta</span>
+                        <span id="weatherRidingStatus" class="font-bold text-emerald-700">Calculando...</span>
                     </div>
                 </div>
             </div>
@@ -2548,7 +2548,7 @@
                     <!-- VERSIÓN Y SEGURIDAD -->
                     <div class="p-2 bg-white rounded-xl border border-slate-200/60 flex flex-col justify-between">
                         <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider">PWA Cache / SSL</span>
-                        <span class="font-bold text-slate-700 mt-0.5">v79 • Fix PIN Lock & Estabilidad UI</span>
+                        <span class="font-bold text-slate-700 mt-0.5">v80 • Clima de Ruta Alhama & Tarjeta Clara</span>
                     </div>
                 </div>
 
@@ -2594,7 +2594,7 @@
         if ('serviceWorker' in navigator) {
             const hadController = Boolean(navigator.serviceWorker.controller);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=79')
+                navigator.serviceWorker.register('/sw.js?v=80')
                     .then(reg => {
                         reg.update();
                     })
@@ -7029,23 +7029,23 @@
         // WIDGET METEOROLÓGICO PARA RUTAS EN VESPA (OPEN-METEO API)
         // =========================================================================
         const WMO_WEATHER_CODES = {
-            0: { text: 'Despejado', icon: 'fa-sun', color: 'text-amber-400', ideal: true },
-            1: { text: 'Mayormente despejado', icon: 'fa-sun', color: 'text-amber-300', ideal: true },
-            2: { text: 'Parcialmente nublado', icon: 'fa-cloud-sun', color: 'text-amber-200', ideal: true },
-            3: { text: 'Nublado', icon: 'fa-cloud', color: 'text-slate-300', ideal: true },
-            45: { text: 'Niebla', icon: 'fa-smog', color: 'text-slate-400', ideal: false },
-            48: { text: 'Niebla con escarcha', icon: 'fa-smog', color: 'text-slate-400', ideal: false },
-            51: { text: 'Llovizna ligera', icon: 'fa-cloud-rain', color: 'text-blue-300', ideal: false },
-            53: { text: 'Llovizna moderada', icon: 'fa-cloud-rain', color: 'text-blue-400', ideal: false },
-            55: { text: 'Llovizna densa', icon: 'fa-cloud-showers-heavy', color: 'text-blue-500', ideal: false },
-            61: { text: 'Lluvia ligera', icon: 'fa-cloud-rain', color: 'text-blue-400', ideal: false },
-            63: { text: 'Lluvia moderada', icon: 'fa-cloud-showers-heavy', color: 'text-blue-500', ideal: false },
-            65: { text: 'Lluvia fuerte', icon: 'fa-cloud-showers-heavy', color: 'text-blue-600', ideal: false },
-            71: { text: 'Nieve ligera', icon: 'fa-snowflake', color: 'text-cyan-200', ideal: false },
-            80: { text: 'Chubascos ligeros', icon: 'fa-cloud-sun-rain', color: 'text-blue-400', ideal: false },
-            81: { text: 'Chubascos moderados', icon: 'fa-cloud-showers-heavy', color: 'text-blue-500', ideal: false },
-            82: { text: 'Chubascos violentos', icon: 'fa-bolt', color: 'text-purple-400', ideal: false },
-            95: { text: 'Tormenta eléctrica', icon: 'fa-bolt', color: 'text-yellow-400', ideal: false }
+            0: { text: 'Despejado', icon: 'fa-sun', color: 'text-amber-500', ideal: true },
+            1: { text: 'Mayormente despejado', icon: 'fa-sun', color: 'text-amber-500', ideal: true },
+            2: { text: 'Parcialmente nublado', icon: 'fa-cloud-sun', color: 'text-amber-600', ideal: true },
+            3: { text: 'Nublado', icon: 'fa-cloud', color: 'text-slate-500', ideal: true },
+            45: { text: 'Niebla', icon: 'fa-smog', color: 'text-slate-500', ideal: false },
+            48: { text: 'Niebla con escarcha', icon: 'fa-smog', color: 'text-slate-500', ideal: false },
+            51: { text: 'Llovizna ligera', icon: 'fa-cloud-rain', color: 'text-blue-500', ideal: false },
+            53: { text: 'Llovizna moderada', icon: 'fa-cloud-rain', color: 'text-blue-600', ideal: false },
+            55: { text: 'Llovizna densa', icon: 'fa-cloud-showers-heavy', color: 'text-blue-700', ideal: false },
+            61: { text: 'Lluvia ligera', icon: 'fa-cloud-rain', color: 'text-blue-600', ideal: false },
+            63: { text: 'Lluvia moderada', icon: 'fa-cloud-showers-heavy', color: 'text-blue-700', ideal: false },
+            65: { text: 'Lluvia fuerte', icon: 'fa-cloud-showers-heavy', color: 'text-blue-800', ideal: false },
+            71: { text: 'Nieve ligera', icon: 'fa-snowflake', color: 'text-cyan-600', ideal: false },
+            80: { text: 'Chubascos ligeros', icon: 'fa-cloud-sun-rain', color: 'text-blue-600', ideal: false },
+            81: { text: 'Chubascos moderados', icon: 'fa-cloud-showers-heavy', color: 'text-blue-700', ideal: false },
+            82: { text: 'Chubascos violentos', icon: 'fa-bolt', color: 'text-purple-600', ideal: false },
+            95: { text: 'Tormenta eléctrica', icon: 'fa-bolt', color: 'text-amber-600', ideal: false }
         };
 
         async function initWeatherWidget() {
@@ -7099,12 +7099,12 @@
                         fetchForecast(pos.coords.latitude, pos.coords.longitude, 'Tu Zona');
                     },
                     () => {
-                        fetchForecast(40.4168, -3.7038, 'Madrid');
+                        fetchForecast(37.8510, -1.4253, 'Alhama de Murcia');
                     },
                     { timeout: 3000, maximumAge: 600000 }
                 );
             } else {
-                fetchForecast(40.4168, -3.7038, 'Madrid');
+                fetchForecast(37.8510, -1.4253, 'Alhama de Murcia');
             }
         }
 
@@ -7118,24 +7118,24 @@
             const locNameEl = document.getElementById('weatherLocationName');
             if (!tempEl) return;
 
-            const codeInfo = WMO_WEATHER_CODES[w.weatherCode] || { text: 'Despejado', icon: 'fa-sun', color: 'text-amber-400', ideal: true };
+            const codeInfo = WMO_WEATHER_CODES[w.weatherCode] || { text: 'Despejado', icon: 'fa-sun', color: 'text-amber-500', ideal: true };
 
             tempEl.innerText = `${w.temp}°C`;
             if (condEl) condEl.innerText = codeInfo.text;
             if (windEl) windEl.innerText = `${w.windSpeed} km/h`;
             if (rainEl) rainEl.innerText = `${w.rainProb}%`;
-            if (locNameEl) locNameEl.innerText = `(${w.location || 'Madrid'})`;
+            if (locNameEl) locNameEl.innerText = `(${w.location || 'Alhama de Murcia'})`;
             if (iconEl) iconEl.className = `fas ${codeInfo.icon} ${codeInfo.color}`;
 
             if (statusEl) {
                 if (w.rainProb >= 60 || w.windSpeed >= 45 || !codeInfo.ideal) {
-                    statusEl.className = 'font-bold text-red-400';
+                    statusEl.className = 'font-bold text-red-600';
                     statusEl.innerText = 'Lluvia / Viento 🌧️';
                 } else if (w.rainProb >= 30 || w.windSpeed >= 30) {
-                    statusEl.className = 'font-bold text-amber-400';
+                    statusEl.className = 'font-bold text-amber-600';
                     statusEl.innerText = 'Precaución ⚠️';
                 } else {
-                    statusEl.className = 'font-bold text-emerald-400';
+                    statusEl.className = 'font-bold text-emerald-700';
                     statusEl.innerText = 'Ideal Ruta 🛵';
                 }
             }
