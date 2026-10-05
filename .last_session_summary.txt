@@ -1,13 +1,14 @@
 # VespaCare — Resumen de Última Sesión
-Fecha: 2026-10-05 07:04 CEST
-Versión: v79 (Desplegada en Producción `blue` y Cloudflare purgado)
+Fecha: 2026-10-05 07:07 CEST
+Versión: v80 (Desplegada en Producción `blue` y Cloudflare purgado)
 
-### Incidencia Resuelta:
-- **Diagnóstico**: Se identificó un `SyntaxError: Unexpected end of input` en el script principal de `index.html` debido a que a la función `renderMaintenanceBook()` le faltaba su llave de cierre `}` justo antes del bloque de `handleInitialUrlAction()`.
-- **Impacto**: El motor JS del navegador detenía el parseo antes de registrar los event handlers del teclado del PIN y la función `checkAppLockState()`, dejando la pantalla de PIN bloqueada/sin respuesta.
-- **Solución implementada**:
-  1. Corregido el cierre de llave `}` en `renderMaintenanceBook()`.
-  2. Añadido bloque `try/catch` de aislamiento en `handleInitialUrlAction()` y `initWeatherWidget()` para evitar que errores no críticos interrumpan la carga del garaje.
-  3. Incrementada la versión de caché a `vespacare-v79` en `sw.js` y `index.html`.
-  4. Desplegado a `blue` (`/var/www/html/vespa/`), reiniciado servicio `vespacare-bot.service` y purgada la caché en Cloudflare.
-  5. Sincronizadas las ramas `feature/design-system` y `main` con GitHub.
+### Cambios Realizados:
+1. **Ubicación por Defecto Clima de Ruta**:
+   - Cambiado el fallback de Madrid a **Alhama de Murcia** (coordenadas `37.8510`, `-1.4253`).
+   - Badge indicador actualizado por defecto a `(Alhama de Murcia)` o `(Tu Zona)` según geolocalización.
+2. **Diseño de Tarjeta Clara (Light Theme)**:
+   - Eliminado el fondo oscuro `slate-900`.
+   - Adaptada la tarjeta al diseño limpio del sistema: `bg-white`, borde izquierdo ámbar `border-amber-500`, chips informativos `bg-slate-50` con borde sutil, textos en `slate-800` y estados con tipografía de alto contraste (`text-emerald-700`, `text-amber-600`, `text-red-600`).
+3. **Despliegue y Versión**:
+   - Versión de caché PWA incrementada a **`v80`** (`vespacare-v80`).
+   - Sincronizado en `blue`, reiniciado `vespacare-bot.service` y purgada la caché en Cloudflare.
