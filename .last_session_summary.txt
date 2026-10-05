@@ -1,22 +1,13 @@
-# Resumen de Sesión — VespaCare (v78)
-Fecha: 2026-10-05 06:50 CEST
+# VespaCare — Resumen de Última Sesión
+Fecha: 2026-10-05 07:04 CEST
+Versión: v79 (Desplegada en Producción `blue` y Cloudflare purgado)
 
-## Cambios Realizados en v78:
-1. **Merge a Rama `main`**: Fusión limpia y sincronizada de `feature/design-system` a `main` y push a GitHub en ambas ramas.
-2. **Atajos Rápidos de Pantalla de Inicio (PWA Shortcuts en manifest.json)**:
-   - ⛽ *Repostaje Rápido* (`/?action=quick_fuel`)
-   - 🛞 *Revisar Presiones* (`/?action=presion`)
-   - 🛠️ *Modo Taller* (`/?action=taller`)
-   - 📖 *Diario de Rutas* (`/?action=diario`)
-   - Manejador deep-link reactivo en `index.html` con auto-limpieza de query string.
-3. **Desglose de Coste Real por Kilómetro (€/km y TCO Global)**:
-   - Tarjeta interactiva en la pestaña de Stats con cálculo desglosado de €/km (Combustible + 2T, Taller & Piezas, ITV & Seguro) y porcentaje de peso financiero sobre el total.
-4. **Widget Climatológico para Rutas (Open-Meteo API)**:
-   - Mini-widget dinámico en Garaje con temperatura actual, viento (km/h), probabilidad de lluvia (%) y dictamen inteligente de ruta ("Ideal Ruta 🛵", "Precaución ⚠️", "Lluvia / Viento 🌧️").
-5. **Comprobación de Backups en Servidor**:
-   - Verificado el sistema de copias de seguridad automáticas en `/var/www/html/vespa/backups/` en el nodo `blue`.
-
-## Despliegue en Vivo:
-- PWA `v78` desplegada en `blue:/var/www/html/vespa/`.
-- `vespacare-bot.service` activo 24/7.
-- Caché Cloudflare de `pedrodiaz.eu` purgada con éxito.
+### Incidencia Resuelta:
+- **Diagnóstico**: Se identificó un `SyntaxError: Unexpected end of input` en el script principal de `index.html` debido a que a la función `renderMaintenanceBook()` le faltaba su llave de cierre `}` justo antes del bloque de `handleInitialUrlAction()`.
+- **Impacto**: El motor JS del navegador detenía el parseo antes de registrar los event handlers del teclado del PIN y la función `checkAppLockState()`, dejando la pantalla de PIN bloqueada/sin respuesta.
+- **Solución implementada**:
+  1. Corregido el cierre de llave `}` en `renderMaintenanceBook()`.
+  2. Añadido bloque `try/catch` de aislamiento en `handleInitialUrlAction()` y `initWeatherWidget()` para evitar que errores no críticos interrumpan la carga del garaje.
+  3. Incrementada la versión de caché a `vespacare-v79` en `sw.js` y `index.html`.
+  4. Desplegado a `blue` (`/var/www/html/vespa/`), reiniciado servicio `vespacare-bot.service` y purgada la caché en Cloudflare.
+  5. Sincronizadas las ramas `feature/design-system` y `main` con GitHub.
