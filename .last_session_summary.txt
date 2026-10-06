@@ -1,12 +1,28 @@
 # VespaCare — Resumen de Última Sesión
-Fecha: 2026-10-05 07:09 CEST
-Versión: v81 (Desplegada en Producción `blue` y Cloudflare purgado)
+Fecha: 2026-10-06 23:07 CEST
+Versión: v82 (Desplegada en Producción `blue` y Cloudflare purgado)
 
-### Incidencia Resuelta:
-- **Causa**: El navegador guardaba en `sessionStorage` el objeto de clima anterior generado durante pruebas con la etiqueta `Madrid`. Al no haberse invalidado la clave de sesión, la app reutilizaba ese dato cacheado.
-- **Solución implementada (v81)**:
-  1. Forzado borrado automático de cualquier clave previa `vespa_weather_cache` y descarte explícito si contiene "Madrid".
-  2. Implementada clave versionada `vespa_weather_cache_v81`.
-  3. Fijada la estación meteorológica directa en **Alhama de Murcia** (`37.8510`, `-1.4253`).
-  4. Actualizado Service Worker y registro a **`v81`** (`vespacare-v81`).
-  5. Desplegado a `blue` y purgada la caché de Cloudflare.
+### Implementación del Sistema de Diseño (Emil Kowalski + Impeccable + Rauno Freiberg):
+1. **Físicas de Muelles (Spring Physics)**:
+   - Configurada `--spring-smooth: cubic-bezier(0.16, 1, 0.3, 1)` y `--spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1)`.
+   - Incorporada clase `.tap-press` con micro-escalado elástico reactivo (`scale(0.965)`) en todos los botones de acción rápida, filtros y presets.
+   - Incorporada clase `.card-hover` con micro-elevación elástica (`translateY(-2px)`) en tarjetas clave.
+
+2. **Tipografía y Estabilidad Numérica Obligatoria (`tabular-nums`)**:
+   - Incorporada clase `.tabular-nums` y `font-variant-numeric: tabular-nums` / `tnum 1` forzado en todos los inputs, métricas, odómetros, calculadoras de mezcla y tablas de telemetría para eliminar cualquier salto o vibración de ancho numérico.
+
+3. **Zero-Gray Controls y Controles Táctiles Segmentados**:
+   - Eliminados inputs o selectores nativos grises apagados.
+   - Inputs y selectores con fondo blanco puro `#ffffff`, bordes nítidos `#e2e8f0` y flecha chevron SVG en camel/ámbar artesanal.
+   - Sustituido el `<select>` nativo de tipo de gasto en el formulario por una botonera segmentada táctil reactiva (`#logTypeSegmented`) con micro-muelle `.tap-press` y sincronización bidireccional limpia.
+
+4. **Componentes Móviles y Bottom-Sheets**:
+   - Añadido el tirador táctil `sheet-handle` a todos los modales de la aplicación (14 modales en total) para experiencia nativa Bottom-Sheet en móvil.
+   - Ajustadas las animaciones de elevación por muelles.
+
+5. **Despliegue y Ciclo de Versión**:
+   - Versión incrementada a **v82** (`vespacare-v82` en `sw.js` e `index.html`).
+   - Cambios sincronizados y pusheados en GitHub (`main` y `feature/design-system`).
+   - Sincronizado a servidor oficial `blue` (`10.0.0.104`).
+   - Permisos `www-data` restablecidos y servicio `vespacare-bot.service` reiniciado.
+   - Purgada la caché completa de Cloudflare para `pedrodiaz.eu`.
